@@ -1,0 +1,98 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="row g-3">
+    <!-- Видео плеер - компактный -->
+    <div class="col-lg-4 col-md-6">
+        <div class="card h-100">
+            <div class="card-header d-flex justify-content-between align-items-center py-2">
+                <h6 class="mb-0">
+                    {% if current_video.is_live %}
+                    <span class="badge live-badge me-2">LIVE</span>
+                    {% endif %}
+                    {{ current_video.title|default:"Видео уроки" }}
+                </h6>
+            </div>
+            <div class="card-body p-2">
+                {% if current_video %}
+                <div class="video-container-sm">
+                    {{ current_video.get_embed_html|safe }}
+                </div>
+                {% else %}
+                <div class="text-center p-3">
+                    <p class="mb-0">Видео будет доступно скоро</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Времена намазов - полная таблица на месяц -->
+    <div class="col-lg-5 col-md-6">
+        <div class="card h-100">
+            <div class="card-header py-2">
+                <h6 class="mb-0">Времена намазов на месяц</h6>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive prayer-scroll-container">
+                    <table class="table table-sm prayer-table mb-0">
+                        <thead class="table-light sticky-top">
+                            <tr>
+                                <th>Дата</th>
+                                <th>Фаджр</th>
+                                <th>Восход</th>
+                                <th>Зухр</th>
+                                <th>Аср</th>
+                                <th>Магриб</th>
+                                <th>Иша</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for time in prayer_times %}
+                            <tr {% if time.date == today %}class="table-primary"{% endif %}>
+                                <td>{{ time.date|date:"d.m.Y" }}</td>
+                                <td>{{ time.fajr|time:"H:i" }}</td>
+                                <td>{{ time.sunrise|time:"H:i" }}</td>
+                                <td>{{ time.dhuhr|time:"H:i" }}</td>
+                                <td>{{ time.asr|time:"H:i" }}</td>
+                                <td>{{ time.maghrib|time:"H:i" }}</td>
+                                <td>{{ time.isha|time:"H:i" }}</td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="7" class="text-center py-3">Данные загружаются</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Последние новости - нормальный размер -->
+    <div class="col-lg-3 col-md-12">
+        <div class="card h-100">
+            <div class="card-header py-2">
+                <h6 class="mb-0">Последние новости</h6>
+            </div>
+            <div class="card-body p-0">
+                <div class="news-list">
+                    {% for post in recent_posts %}
+                    <div class="news-item p-3 border-bottom">
+                        <h6 class="mb-1 fw-bold">{{ post.title }}</h6>
+                        <p class="small text-muted mb-2">{{ post.created_at|date:"d.m.Y H:i" }}</p>
+                        <p class="small mb-2">{{ post.content|truncatewords:15 }}</p>
+                        <span class="badge bg-light text-dark small">{{ post.get_post_type_display }}</span>
+                    </div>
+                    {% empty %}
+                    <div class="text-center p-4">
+                        <p class="text-muted mb-0">Новостей пока нет</p>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
