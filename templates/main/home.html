@@ -10,13 +10,22 @@
                     {% if current_video.is_live %}
                     <span class="badge live-badge me-2">LIVE</span>
                     {% endif %}
-                    {{ current_video.title|default:"Видео уроки" }}
+                    {{ current_video.title }}
                 </h6>
+                {% if current_video.author %}
+                <small class="text-muted">by {{ current_video.author.user.get_full_name }}</small>
+                {% endif %}
             </div>
             <div class="card-body p-2">
                 {% if current_video %}
                 <div class="video-container-sm">
                     {{ current_video.get_embed_html|safe }}
+                </div>
+                <div class="mt-2">
+                    <p class="small text-muted mb-1">{{ current_video.description|truncatewords:20 }}</p>
+                    {% if current_video.duration %}
+                    <small class="text-muted">Длительность: {{ current_video.duration|time:"H:i" }}</small>
+                    {% endif %}
                 </div>
                 {% else %}
                 <div class="text-center p-3">

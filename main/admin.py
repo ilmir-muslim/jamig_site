@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import PrayerTime, Post, VideoContent
+from .models import PrayerTime, Post
 
 @admin.register(PrayerTime)
 class PrayerTimeAdmin(admin.ModelAdmin):
@@ -13,8 +13,3 @@ class PostAdmin(admin.ModelAdmin):
     list_filter = ['post_type', 'is_published', 'created_at']
     search_fields = ['title', 'content']
 
-@admin.register(VideoContent)
-class VideoContentAdmin(admin.ModelAdmin):
-    list_display = ['title', 'is_live', 'is_active', 'created_at']
-    list_filter = ['is_live', 'is_active']
-    search_fields = ['title']
