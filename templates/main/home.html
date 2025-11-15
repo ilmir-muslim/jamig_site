@@ -1,75 +1,81 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<div class="row g-3">
-    <!-- Видео плеер - компактный -->
-    <div class="col-lg-4 col-md-6">
-        <div class="card h-100">
-            <div class="card-header d-flex justify-content-between align-items-center py-2">
-                <h6 class="mb-0">
-                    {% if current_video.is_live %}
-                    <span class="badge live-badge me-2">LIVE</span>
+<div class="row g-2">  <!-- Уменьшили отступы между колонками -->
+    <!-- Видео плеер - более компактный -->
+    <div class="col-xl-4 col-lg-5 col-md-6">
+        <div class="card h-100 border-0 shadow-sm">
+            <div class="card-header bg-white py-1 px-2 border-bottom">
+                <div class="d-flex justify-content-between align-items-center">
+                    <h6 class="mb-0 fw-bold small">
+                        {% if current_video and current_video.is_live %}
+                        <span class="badge bg-danger me-1">LIVE</span>
+                        {% endif %}
+                        {% if current_video %}
+                            {{ current_video.title|truncatechars:40 }}
+                        {% else %}
+                            Видео контент
+                        {% endif %}
+                    </h6>
+                    {% if current_video and current_video.author %}
+                    <small class="text-muted d-none d-sm-block">by {{ current_video.author.user.get_full_name }}</small>
                     {% endif %}
-                    {{ current_video.title }}
-                </h6>
-                {% if current_video.author %}
-                <small class="text-muted">by {{ current_video.author.user.get_full_name }}</small>
-                {% endif %}
+                </div>
             </div>
-            <div class="card-body p-2">
+            <div class="card-body p-1">
                 {% if current_video %}
                 <div class="video-container-sm">
                     {{ current_video.get_embed_html|safe }}
                 </div>
-                <div class="mt-2">
-                    <p class="small text-muted mb-1">{{ current_video.description|truncatewords:20 }}</p>
+                <div class="px-1 pt-1">
+                    <p class="small text-muted mb-1">{{ current_video.description|truncatewords:15 }}</p>
                     {% if current_video.duration %}
                     <small class="text-muted">Длительность: {{ current_video.duration|time:"H:i" }}</small>
                     {% endif %}
                 </div>
                 {% else %}
-                <div class="text-center p-3">
-                    <p class="mb-0">Видео будет доступно скоро</p>
+                <div class="text-center p-2">
+                    <p class="mb-0 text-muted small">Видео будет доступно скоро</p>
                 </div>
                 {% endif %}
             </div>
         </div>
     </div>
 
-    <!-- Времена намазов - полная таблица на месяц -->
-    <div class="col-lg-5 col-md-6">
-        <div class="card h-100">
-            <div class="card-header py-2">
-                <h6 class="mb-0">Времена намазов на месяц</h6>
+    <!-- Времена намазов - более компактная таблица -->
+    <div class="col-xl-5 col-lg-7 col-md-6">
+        <div class="card h-100 border-0 shadow-sm">
+            <div class="card-header bg-white py-1 px-2 border-bottom">
+                <h6 class="mb-0 fw-bold small">Времена намазов на месяц</h6>
             </div>
             <div class="card-body p-0">
-                <div class="table-responsive prayer-scroll-container">
+                <div class="table-responsive prayer-scroll-container" style="max-height: 500px;">
                     <table class="table table-sm prayer-table mb-0">
                         <thead class="table-light sticky-top">
                             <tr>
-                                <th>Дата</th>
-                                <th>Фаджр</th>
-                                <th>Восход</th>
-                                <th>Зухр</th>
-                                <th>Аср</th>
-                                <th>Магриб</th>
-                                <th>Иша</th>
+                                <th class="px-2 py-1">Дата</th>
+                                <th class="px-1 py-1">Фаджр</th>
+                                <th class="px-1 py-1">Восход</th>
+                                <th class="px-1 py-1">Зухр</th>
+                                <th class="px-1 py-1">Аср</th>
+                                <th class="px-1 py-1">Магриб</th>
+                                <th class="px-1 py-1">Иша</th>
                             </tr>
                         </thead>
                         <tbody>
                             {% for time in prayer_times %}
                             <tr {% if time.date == today %}class="table-primary"{% endif %}>
-                                <td>{{ time.date|date:"d.m.Y" }}</td>
-                                <td>{{ time.fajr|time:"H:i" }}</td>
-                                <td>{{ time.sunrise|time:"H:i" }}</td>
-                                <td>{{ time.dhuhr|time:"H:i" }}</td>
-                                <td>{{ time.asr|time:"H:i" }}</td>
-                                <td>{{ time.maghrib|time:"H:i" }}</td>
-                                <td>{{ time.isha|time:"H:i" }}</td>
+                                <td class="px-2 py-1"><small>{{ time.date|date:"d.m" }}</small></td>
+                                <td class="px-1 py-1"><small>{{ time.fajr|time:"H:i" }}</small></td>
+                                <td class="px-1 py-1"><small>{{ time.sunrise|time:"H:i" }}</small></td>
+                                <td class="px-1 py-1"><small>{{ time.dhuhr|time:"H:i" }}</small></td>
+                                <td class="px-1 py-1"><small>{{ time.asr|time:"H:i" }}</small></td>
+                                <td class="px-1 py-1"><small>{{ time.maghrib|time:"H:i" }}</small></td>
+                                <td class="px-1 py-1"><small>{{ time.isha|time:"H:i" }}</small></td>
                             </tr>
                             {% empty %}
                             <tr>
-                                <td colspan="7" class="text-center py-3">Данные загружаются</td>
+                                <td colspan="7" class="text-center py-2"><small class="text-muted">Данные загружаются</small></td>
                             </tr>
                             {% endfor %}
                         </tbody>
@@ -79,24 +85,24 @@
         </div>
     </div>
 
-    <!-- Последние новости - нормальный размер -->
-    <div class="col-lg-3 col-md-12">
-        <div class="card h-100">
-            <div class="card-header py-2">
-                <h6 class="mb-0">Последние новости</h6>
+    <!-- Последние новости - более компактные -->
+    <div class="col-xl-3 col-lg-12">
+        <div class="card h-100 border-0 shadow-sm">
+            <div class="card-header bg-white py-1 px-2 border-bottom">
+                <h6 class="mb-0 fw-bold small">Последние новости</h6>
             </div>
             <div class="card-body p-0">
-                <div class="news-list">
+                <div class="news-list" style="max-height: 500px;">
                     {% for post in recent_posts %}
-                    <div class="news-item p-3 border-bottom">
-                        <h6 class="mb-1 fw-bold">{{ post.title }}</h6>
-                        <p class="small text-muted mb-2">{{ post.created_at|date:"d.m.Y H:i" }}</p>
-                        <p class="small mb-2">{{ post.content|truncatewords:15 }}</p>
+                    <div class="news-item p-2 border-bottom">
+                        <h6 class="mb-1 fw-bold small">{{ post.title|truncatechars:50 }}</h6>
+                        <p class="small text-muted mb-1">{{ post.created_at|date:"d.m H:i" }}</p>
+                        <p class="small mb-1">{{ post.content|truncatewords:10 }}</p>
                         <span class="badge bg-light text-dark small">{{ post.get_post_type_display }}</span>
                     </div>
                     {% empty %}
-                    <div class="text-center p-4">
-                        <p class="text-muted mb-0">Новостей пока нет</p>
+                    <div class="text-center p-3">
+                        <p class="text-muted mb-0 small">Новостей пока нет</p>
                     </div>
                     {% endfor %}
                 </div>

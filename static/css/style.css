@@ -2,10 +2,9 @@
 .video-container-sm {
     position: relative;
     padding-bottom: 75%;
-    /* Немного выше для экономии места */
     height: 0;
     overflow: hidden;
-    border-radius: 4px;
+    border-radius: 3px;
 }
 
 .video-container-sm iframe {
@@ -19,10 +18,8 @@
 
 /* Контейнер для прокрутки таблицы намазов */
 .prayer-scroll-container {
-    max-height: 600px;
-    /* Ограничиваем высоту */
+    max-height: 500px;
     overflow-y: auto;
-    /* Добавляем вертикальную прокрутку */
 }
 
 /* Фиксируем заголовок таблицы при прокрутке */
@@ -34,20 +31,19 @@
 }
 
 .prayer-table {
-    font-size: 0.85rem;
+    font-size: 0.8rem;
     margin-bottom: 0;
 }
 
 .prayer-table th,
 .prayer-table td {
-    padding: 0.4rem 0.5rem;
+    padding: 0.3rem 0.4rem;
     white-space: nowrap;
 }
 
 /* Стили для списка новостей */
 .news-list {
-    max-height: 600px;
-    /* Такая же высота как у таблицы намазов */
+    max-height: 500px;
     overflow-y: auto;
 }
 
@@ -62,7 +58,7 @@
 .live-badge {
     background-color: #dc3545;
     animation: pulse 2s infinite;
-    font-size: 0.7rem;
+    font-size: 0.65rem;
 }
 
 @keyframes pulse {
@@ -82,30 +78,50 @@
 /* Адаптивность для мобильных */
 @media (max-width: 768px) {
     .prayer-scroll-container {
-        max-height: 400px;
+        max-height: 300px;
     }
 
     .news-list {
-        max-height: 400px;
+        max-height: 300px;
     }
 
     .video-container-sm {
         padding-bottom: 56.25%;
-        /* Возвращаем стандартное соотношение на мобильных */
+    }
+
+    .container-fluid {
+        padding-left: 8px;
+        padding-right: 8px;
     }
 }
 
-/* Дополнительные улучшения */
+/* Компактные карточки */
 .card {
-    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
-    border: 1px solid rgba(0, 0, 0, 0.125);
+    box-shadow: 0 0.1rem 0.2rem rgba(0, 0, 0, 0.05);
+    border: 1px solid rgba(0, 0, 0, 0.08);
 }
 
 .card-header {
     background-color: #f8f9fa;
-    border-bottom: 1px solid rgba(0, 0, 0, 0.125);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.08);
 }
 
 .table-primary {
     background-color: #e7f1ff;
+}
+
+/* Убираем лишние отступы */
+body {
+    margin: 0;
+    padding: 0;
+}
+
+/* Компактные заголовки */
+h6 {
+    line-height: 1.2;
+}
+
+/* Уменьшаем отступы в строках таблицы */
+.table-sm> :not(caption)>*>* {
+    padding: 0.25rem 0.3rem;
 }
