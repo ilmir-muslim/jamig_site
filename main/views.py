@@ -1,13 +1,13 @@
-### BEGIN: main/views.py
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.utils import timezone
-from .models import PrayerTime, Post
-from materials.models import VideoContent  # Импортируем из приложения materials
+from django.contrib import messages
+from .models import PrayerTime, Post, PrayerTimeFile
+from materials.models import VideoContent
 from datetime import date
-
+from .utils.prayer_times_parser import get_available_cities_from_file, update_city_prayer_times
 
 def home(request):
-    # Получаем последнее опубликованное видео из приложения materials
+    # Получаем последнее опубликованное видео
     try:
         current_video = (
             VideoContent.objects.filter(status="published")
@@ -17,13 +17,49 @@ def home(request):
     except VideoContent.DoesNotExist:
         current_video = None
 
-    # Получаем времена намазов на текущий месяц
+    # Получаем активный город из сессии или используем Муслюмово по умолчанию
+    active_city = request.session.get('active_city', 'Муслюмово')
+    current_year = date.today().year
+    
+    # Проверяем, есть ли актуальные данные для выбранного города
+    has_current_data = PrayerTime.objects.filter(
+        city=active_city,
+        date__year=current_year
+    ).exists()
+    
+    # Если данных нет или они устарели, загружаем из файла
+    if not has_current_data:
+        try:
+            count = update_city_prayer_times(active_city)
+            if count > 0:
+                messages.info(request, f"Загружены данные для города {active_city}")
+            else:
+                # Если не удалось загрузить для выбранного города, пробуем Муслюмово
+                if active_city != 'Муслюмово':
+                    count_default = update_city_prayer_times('Муслюмово')
+                    if count_default > 0:
+                        active_city = 'Муслюмово'
+                        request.session['active_city'] = active_city
+                        messages.info(request, f"Данные для выбранного города недоступны. Показаны данные для Муслюмово")
+        except Exception as e:
+            messages.error(request, f"Ошибка загрузки данных: {e}")
+
+    # Получаем времена намазов на текущий месяц для активного города
     today = date.today()
     prayer_times = PrayerTime.objects.filter(
-        date__year=today.year, date__month=today.month
-    ).order_by("date")[
-        :30
-    ]  # на 30 дней
+        city=active_city,
+        date__year=today.year, 
+        date__month=today.month
+    ).order_by('date')[:30]
+
+    # Получаем список доступных городов
+    available_cities = []
+    current_file = PrayerTimeFile.objects.filter(file_type='current').first()
+    if current_file:
+        try:
+            available_cities = get_available_cities_from_file(current_file.file.path)
+        except:
+            available_cities = []
 
     # Получаем последние посты
     recent_posts = Post.objects.filter(is_published=True)[:5]
@@ -33,9 +69,27 @@ def home(request):
         "prayer_times": prayer_times,
         "recent_posts": recent_posts,
         "today": today,
+        "active_city": active_city,
+        "available_cities": available_cities,
+        "has_prayer_data": prayer_times.exists(),
     }
 
     return render(request, "main/home.html", context)
 
-
-### END: main/views.py
+def set_city(request):
+    """Установка активного города"""
+    if request.method == 'POST':
+        city = request.POST.get('city')
+        if city:
+            request.session['active_city'] = city
+            messages.success(request, f"Город изменен на {city}")
+            
+            # Пытаемся загрузить данные для нового города
+            try:
+                count = update_city_prayer_times(city)
+                if count == 0:
+                    messages.warning(request, f"Данные для города {city} недоступны")
+            except Exception as e:
+                messages.error(request, f"Ошибка загрузки данных для города {city}")
+    
+    return redirect('home')

@@ -42,50 +42,72 @@
         </div>
     </div>
 
-    <!-- Времена намазов - более компактная таблица -->
-    <div class="col-xl-5 col-lg-7 col-md-6">
-        <div class="card h-100 border-0 shadow-sm">
-            <div class="card-header bg-white py-1 px-2 border-bottom">
-                <h6 class="mb-0 fw-bold small">Времена намазов на месяц</h6>
-            </div>
-            <div class="card-body p-0">
-                <div class="table-responsive prayer-scroll-container" style="max-height: 500px;">
-                    <table class="table table-sm prayer-table mb-0">
-                        <thead class="table-light sticky-top">
-                            <tr>
-                                <th class="px-2 py-1">Дата</th>
-                                <th class="px-1 py-1">Фаджр</th>
-                                <th class="px-1 py-1">Восход</th>
-                                <th class="px-1 py-1">Зухр</th>
-                                <th class="px-1 py-1">Аср</th>
-                                <th class="px-1 py-1">Магриб</th>
-                                <th class="px-1 py-1">Иша</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for time in prayer_times %}
-                            <tr {% if time.date == today %}class="table-primary"{% endif %}>
-                                <td class="px-2 py-1"><small>{{ time.date|date:"d.m" }}</small></td>
-                                <td class="px-1 py-1"><small>{{ time.fajr|time:"H:i" }}</small></td>
-                                <td class="px-1 py-1"><small>{{ time.sunrise|time:"H:i" }}</small></td>
-                                <td class="px-1 py-1"><small>{{ time.dhuhr|time:"H:i" }}</small></td>
-                                <td class="px-1 py-1"><small>{{ time.asr|time:"H:i" }}</small></td>
-                                <td class="px-1 py-1"><small>{{ time.maghrib|time:"H:i" }}</small></td>
-                                <td class="px-1 py-1"><small>{{ time.isha|time:"H:i" }}</small></td>
-                            </tr>
-                            {% empty %}
-                            <tr>
-                                <td colspan="7" class="text-center py-2"><small class="text-muted">Данные загружаются</small></td>
-                            </tr>
+    <!-- Времена намазов -->
+<div class="col-xl-5 col-lg-7 col-md-6">
+    <div class="card h-100 border-0 shadow-sm">
+        <div class="card-header bg-white py-1 px-2 border-bottom">
+            <div class="d-flex justify-content-between align-items-center">
+                <h6 class="mb-0 fw-bold small">Времена намазов на месяц - {{ active_city }}</h6>
+                {% if available_cities %}
+                <div>
+                    <form method="post" action="{% url 'set_city' %}" class="d-inline">
+                        {% csrf_token %}
+                        <select name="city" onchange="this.form.submit()" class="form-select form-select-sm">
+                            {% for city in available_cities %}
+                                <option value="{{ city }}" {% if city == active_city %}selected{% endif %}>{{ city }}</option>
                             {% endfor %}
-                        </tbody>
-                    </table>
+                        </select>
+                    </form>
                 </div>
+                {% endif %}
+            </div>
+        </div>
+        <div class="card-body p-0">
+            <div class="table-responsive prayer-scroll-container" style="max-height: 500px;">
+                <table class="table table-sm prayer-table mb-0">
+                    <thead class="table-light sticky-top">
+                        <tr>
+                            <th class="px-2 py-1">Дата</th>
+                            <th class="px-1 py-1">Фаджр</th>
+                            <th class="px-1 py-1">Восход</th>
+                            <th class="px-1 py-1">Зухр</th>
+                            <th class="px-1 py-1">Аср</th>
+                            <th class="px-1 py-1">Магриб</th>
+                            <th class="px-1 py-1">Иша</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for time in prayer_times %}
+                        <tr {% if time.date == today %}class="table-primary"{% endif %}>
+                            <td class="px-2 py-1"><small>{{ time.date|date:"d.m" }}</small></td>
+                            <td class="px-1 py-1"><small>{{ time.fajr|time:"H:i" }}</small></td>
+                            <td class="px-1 py-1"><small>{{ time.sunrise|time:"H:i" }}</small></td>
+                            <td class="px-1 py-1"><small>{{ time.dhuhr|time:"H:i" }}</small></td>
+                            <td class="px-1 py-1"><small>{{ time.asr|time:"H:i" }}</small></td>
+                            <td class="px-1 py-1"><small>{{ time.maghrib|time:"H:i" }}</small></td>
+                            <td class="px-1 py-1"><small>{{ time.isha|time:"H:i" }}</small></td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="7" class="text-center py-3">
+                                <small class="text-muted">
+                                    {% if available_cities %}
+                                        Данные для города {{ active_city }} загружаются...
+                                    {% else %}
+                                        Загрузите файл расписания в админке
+                                    {% endif %}
+                                </small>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
             </div>
         </div>
     </div>
+</div>
 
-    <!-- Последние новости - более компактные -->
+    <!-- Последние новости  -->
     <div class="col-xl-3 col-lg-12">
         <div class="card h-100 border-0 shadow-sm">
             <div class="card-header bg-white py-1 px-2 border-bottom">
