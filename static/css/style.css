@@ -125,3 +125,171 @@ h6 {
 .table-sm> :not(caption)>*>* {
     padding: 0.25rem 0.3rem;
 }
+
+/* Компактный видео контейнер */
+.video-container-sm {
+    position: relative;
+    padding-bottom: 75%;
+    height: 0;
+    overflow: hidden;
+    border-radius: 3px;
+}
+
+.video-container-sm iframe {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    border: none;
+}
+
+/* Контейнер для прокрутки таблицы намазов */
+.prayer-scroll-container {
+    max-height: 500px;
+    overflow-y: auto;
+}
+
+/* Фиксируем заголовок таблицы при прокрутке */
+.prayer-scroll-container thead.sticky-top {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    background: white;
+}
+
+.prayer-table {
+    font-size: 0.8rem;
+    margin-bottom: 0;
+}
+
+.prayer-table th,
+.prayer-table td {
+    padding: 0.3rem 0.4rem;
+    white-space: nowrap;
+}
+
+/* Стили для списка новостей */
+.news-list {
+    max-height: 500px;
+    overflow-y: auto;
+}
+
+.news-item {
+    transition: background-color 0.2s;
+}
+
+.news-item:hover {
+    background-color: #f8f9fa;
+}
+
+.live-badge {
+    background-color: #dc3545;
+    animation: pulse 2s infinite;
+    font-size: 0.65rem;
+}
+
+@keyframes pulse {
+    0% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: 0.5;
+    }
+
+    100% {
+        opacity: 1;
+    }
+}
+
+/* Стили для выбора города */
+.city-selector-container {
+    display: inline-flex;
+    align-items: center;
+    margin-left: 0.5rem;
+}
+
+.city-search-input {
+    border: 1px solid #ced4da;
+    border-radius: 0.25rem;
+    padding: 0.25rem 0.5rem;
+    font-size: 0.875rem;
+    min-width: 150px;
+    background: white;
+    transition: all 0.15s ease-in-out;
+}
+
+.city-search-input:focus {
+    outline: none;
+    border-color: #86b7fe;
+    box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+}
+
+.city-search-input:hover {
+    border-color: #adb5bd;
+}
+
+/* Адаптивность для мобильных */
+@media (max-width: 768px) {
+    .prayer-scroll-container {
+        max-height: 300px;
+    }
+
+    .news-list {
+        max-height: 300px;
+    }
+
+    .video-container-sm {
+        padding-bottom: 56.25%;
+    }
+
+    .container-fluid {
+        padding-left: 8px;
+        padding-right: 8px;
+    }
+    
+    .city-selector-container {
+        display: flex;
+        flex-direction: column;
+        align-items: stretch;
+        margin-left: 0;
+        margin-top: 0.5rem;
+    }
+    
+    .city-search-input {
+        min-width: auto;
+        margin-bottom: 0.25rem;
+    }
+}
+
+/* Компактные карточки */
+.card {
+    box-shadow: 0 0.1rem 0.2rem rgba(0, 0, 0, 0.05);
+    border: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+.card-header {
+    background-color: #f8f9fa;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+.table-primary {
+    background-color: #e7f1ff;
+}
+
+/* Убираем лишние отступы */
+body {
+    margin: 0;
+    padding: 0;
+}
+
+/* Компактные заголовки */
+h6 {
+    line-height: 1.2;
+}
+
+/* Уменьшаем отступы в строках таблицы */
+.table-sm> :not(caption)>*>* {
+    padding: 0.25rem 0.3rem;
+}

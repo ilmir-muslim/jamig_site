@@ -1,10 +1,13 @@
+### BEGIN: main/views.py
 from django.shortcuts import render, redirect
 from django.utils import timezone
 from django.contrib import messages
+from django.http import JsonResponse
 from .models import PrayerTime, Post, PrayerTimeFile
 from materials.models import VideoContent
 from datetime import date
-from .utils.prayer_times_parser import get_available_cities_from_file, update_city_prayer_times
+from .utils.prayer_times_parser import update_city_prayer_times
+from .utils.cities_manager import get_available_cities, search_cities
 
 def home(request):
     # Получаем последнее опубликованное видео
@@ -52,14 +55,8 @@ def home(request):
         date__month=today.month
     ).order_by('date')[:30]
 
-    # Получаем список доступных городов
-    available_cities = []
-    current_file = PrayerTimeFile.objects.filter(file_type='current').first()
-    if current_file:
-        try:
-            available_cities = get_available_cities_from_file(current_file.file.path)
-        except:
-            available_cities = []
+    # Получаем список доступных городов из КЭША (JSON файла)
+    available_cities = get_available_cities()
 
     # Получаем последние посты
     recent_posts = Post.objects.filter(is_published=True)[:5]
@@ -81,15 +78,27 @@ def set_city(request):
     if request.method == 'POST':
         city = request.POST.get('city')
         if city:
-            request.session['active_city'] = city
-            messages.success(request, f"Город изменен на {city}")
-            
-            # Пытаемся загрузить данные для нового города
-            try:
-                count = update_city_prayer_times(city)
-                if count == 0:
-                    messages.warning(request, f"Данные для города {city} недоступны")
-            except Exception as e:
-                messages.error(request, f"Ошибка загрузки данных для города {city}")
+            # Проверяем, есть ли такой город в доступных
+            available_cities = get_available_cities()
+            if city not in available_cities:
+                messages.warning(request, f"Город '{city}' не найден в расписании")
+            else:
+                request.session['active_city'] = city
+                messages.success(request, f"Город изменен на {city}")
+                
+                # Пытаемся загрузить данные для нового города
+                try:
+                    count = update_city_prayer_times(city)
+                    if count == 0:
+                        messages.warning(request, f"Данные для города {city} недоступны")
+                except Exception as e:
+                    messages.error(request, f"Ошибка загрузки данных для города {city}")
     
     return redirect('home')
+
+def search_cities_ajax(request):
+    """AJAX endpoint для поиска городов"""
+    query = request.GET.get('q', '')
+    cities = search_cities(query)
+    return JsonResponse({'cities': cities})
+### END: main/views.py

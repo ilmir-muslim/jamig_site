@@ -1,6 +1,6 @@
+### BEGIN: main/middleware.py
 from datetime import date
 from django.utils.deprecation import MiddlewareMixin
-from .models import PrayerTimeFile
 from .utils.prayer_times_parser import check_and_update_all_cities
 
 class PrayerTimeAutoUpdateMiddleware(MiddlewareMixin):
@@ -11,7 +11,7 @@ class PrayerTimeAutoUpdateMiddleware(MiddlewareMixin):
         
         if last_check != today:
             try:
-                # Проверяем и обновляем все города
+                # Проверяем и обновляем только те города, которые уже есть в базе
                 updated_count = check_and_update_all_cities()
                 if updated_count > 0:
                     print(f"Автообновление: обновлено {updated_count} записей")
@@ -20,3 +20,4 @@ class PrayerTimeAutoUpdateMiddleware(MiddlewareMixin):
                 print(f"Ошибка автообновления: {e}")
         
         return None
+### END: main/middleware.py

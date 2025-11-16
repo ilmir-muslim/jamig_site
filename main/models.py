@@ -1,3 +1,4 @@
+### BEGIN: main/models.py
 from datetime import date
 import os
 from django.db import models
@@ -73,27 +74,47 @@ class PrayerTimeFile(models.Model):
         super().delete(*args, **kwargs)
     
     def is_data_outdated(self):
-        """Проверяет, устарели ли данные в файле"""
+        """Проверяет, устарели ли данные в файле - TRUE если нет данных за текущий год"""
         try:
             import pandas as pd
             from datetime import datetime
             
-            df = pd.read_excel(self.file.path)
+            # Читаем файл, пропуская первые 2 строки (заголовки)
+            df = pd.read_excel(self.file.path, skiprows=2, header=None)
+            
             current_year = date.today().year
+            has_current_year_data = False
+            
+            print(f"Проверка актуальности файла, текущий год: {current_year}")
             
             for index, row in df.iterrows():
-                if pd.isna(row.get('День')) or row.get('Город') == 'Город':
+                # Проверяем, что строка не пустая
+                if pd.isna(row[0]) or pd.isna(row[1]):
                     continue
                 
-                date_str = str(row['День']).split()[0]
-                row_date = datetime.strptime(date_str, '%Y-%m-%d').date()
-                
-                # Если находим дату текущего года - данные актуальны
-                if row_date.year == current_year:
-                    return False
+                try:
+                    # Колонка B (индекс 1) - дата
+                    date_value = row[1]
+                    date_str = str(date_value).split()[0]  # Берем только дату без времени
+                    row_date = datetime.strptime(date_str, '%Y-%m-%d').date()
+                    
+                    print(f"Строка {index}: дата {row_date}, год: {row_date.year}")
+                    
+                    # Если находим дату текущего года - файл актуален
+                    if row_date.year == current_year:
+                        has_current_year_data = True
+                        print(f"Найдены актуальные данные за {current_year} год!")
+                        break
+                        
+                except Exception as e:
+                    print(f"Ошибка обработки строки {index}: {e}")
+                    continue
             
-            # Если не нашли дат текущего года - данные устарели
-            return True
+            print(f"Результат проверки актуальности: {'АКТУАЛЕН' if has_current_year_data else 'УСТАРЕЛ'}")
+            # Файл устарел только если нет данных за текущий год
+            return not has_current_year_data
             
-        except Exception:
+        except Exception as e:
+            print(f"Ошибка проверки актуальности файла: {e}")
             return True
+### END: main/models.py

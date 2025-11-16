@@ -1,8 +1,9 @@
 {% extends 'base.html' %}
+{% load static %}
 
 {% block content %}
-<div class="row g-2">  <!-- Уменьшили отступы между колонками -->
-    <!-- Видео плеер - более компактный -->
+<div class="row g-2">
+    <!-- Видео плеер -->
     <div class="col-xl-4 col-lg-5 col-md-6">
         <div class="card h-100 border-0 shadow-sm">
             <div class="card-header bg-white py-1 px-2 border-bottom">
@@ -43,71 +44,78 @@
     </div>
 
     <!-- Времена намазов -->
-<div class="col-xl-5 col-lg-7 col-md-6">
-    <div class="card h-100 border-0 shadow-sm">
-        <div class="card-header bg-white py-1 px-2 border-bottom">
-            <div class="d-flex justify-content-between align-items-center">
-                <h6 class="mb-0 fw-bold small">Времена намазов на месяц - {{ active_city }}</h6>
-                {% if available_cities %}
-                <div>
-                    <form method="post" action="{% url 'set_city' %}" class="d-inline">
-                        {% csrf_token %}
-                        <select name="city" onchange="this.form.submit()" class="form-select form-select-sm">
-                            {% for city in available_cities %}
-                                <option value="{{ city }}" {% if city == active_city %}selected{% endif %}>{{ city }}</option>
-                            {% endfor %}
-                        </select>
-                    </form>
+    <div class="col-xl-5 col-lg-7 col-md-6">
+        <div class="card h-100 border-0 shadow-sm">
+            <div class="card-header bg-white py-1 px-2 border-bottom">
+                <div class="d-flex justify-content-between align-items-center">
+                    <h6 class="mb-0 fw-bold small">
+                        Времена намазов на месяц - 
+                        <span class="city-selector-container">
+                            <input type="text" 
+                                   id="citySearch" 
+                                   class="city-search-input" 
+                                   value="{{ active_city }}" 
+                                   placeholder="Выберите город..."
+                                   list="citiesList"
+                                   autocomplete="off">
+                            <datalist id="citiesList">
+                                {% for city in available_cities %}
+                                    <option value="{{ city }}">{{ city }}</option>
+                                {% endfor %}
+                            </datalist>
+                            <button type="button" id="citySelectBtn" class="btn btn-sm btn-outline-primary ms-1">
+                                Выбрать
+                            </button>
+                        </span>
+                    </h6>
                 </div>
-                {% endif %}
             </div>
-        </div>
-        <div class="card-body p-0">
-            <div class="table-responsive prayer-scroll-container" style="max-height: 500px;">
-                <table class="table table-sm prayer-table mb-0">
-                    <thead class="table-light sticky-top">
-                        <tr>
-                            <th class="px-2 py-1">Дата</th>
-                            <th class="px-1 py-1">Фаджр</th>
-                            <th class="px-1 py-1">Восход</th>
-                            <th class="px-1 py-1">Зухр</th>
-                            <th class="px-1 py-1">Аср</th>
-                            <th class="px-1 py-1">Магриб</th>
-                            <th class="px-1 py-1">Иша</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for time in prayer_times %}
-                        <tr {% if time.date == today %}class="table-primary"{% endif %}>
-                            <td class="px-2 py-1"><small>{{ time.date|date:"d.m" }}</small></td>
-                            <td class="px-1 py-1"><small>{{ time.fajr|time:"H:i" }}</small></td>
-                            <td class="px-1 py-1"><small>{{ time.sunrise|time:"H:i" }}</small></td>
-                            <td class="px-1 py-1"><small>{{ time.dhuhr|time:"H:i" }}</small></td>
-                            <td class="px-1 py-1"><small>{{ time.asr|time:"H:i" }}</small></td>
-                            <td class="px-1 py-1"><small>{{ time.maghrib|time:"H:i" }}</small></td>
-                            <td class="px-1 py-1"><small>{{ time.isha|time:"H:i" }}</small></td>
-                        </tr>
-                        {% empty %}
-                        <tr>
-                            <td colspan="7" class="text-center py-3">
-                                <small class="text-muted">
-                                    {% if available_cities %}
-                                        Данные для города {{ active_city }} загружаются...
-                                    {% else %}
-                                        Загрузите файл расписания в админке
-                                    {% endif %}
-                                </small>
-                            </td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
+            <div class="card-body p-0">
+                <div class="table-responsive prayer-scroll-container" style="max-height: 500px;">
+                    <table class="table table-sm prayer-table mb-0">
+                        <thead class="table-light sticky-top">
+                            <tr>
+                                <th class="px-2 py-1">Дата</th>
+                                <th class="px-1 py-1">Фаджр</th>
+                                <th class="px-1 py-1">Восход</th>
+                                <th class="px-1 py-1">Зухр</th>
+                                <th class="px-1 py-1">Аср</th>
+                                <th class="px-1 py-1">Магриб</th>
+                                <th class="px-1 py-1">Иша</th>
+                            </tr>
+                        </thead>
+                        <tbody id="prayerTimesBody">
+                            {% for time in prayer_times %}
+                            <tr {% if time.date == today %}class="table-primary"{% endif %}>
+                                <td class="px-2 py-1"><small>{{ time.date|date:"d.m" }}</small></td>
+                                <td class="px-1 py-1"><small>{{ time.fajr|time:"H:i" }}</small></td>
+                                <td class="px-1 py-1"><small>{{ time.sunrise|time:"H:i" }}</small></td>
+                                <td class="px-1 py-1"><small>{{ time.dhuhr|time:"H:i" }}</small></td>
+                                <td class="px-1 py-1"><small>{{ time.asr|time:"H:i" }}</small></td>
+                                <td class="px-1 py-1"><small>{{ time.maghrib|time:"H:i" }}</small></td>
+                                <td class="px-1 py-1"><small>{{ time.isha|time:"H:i" }}</small></td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="7" class="text-center py-3">
+                                    <small class="text-muted">
+                                        {% if available_cities %}
+                                            Данные для города {{ active_city }} загружаются...
+                                        {% else %}
+                                            Загрузите файл расписания в админке
+                                        {% endif %}
+                                    </small>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
     </div>
-</div>
 
-    <!-- Последние новости  -->
+    <!-- Последние новости -->
     <div class="col-xl-3 col-lg-12">
         <div class="card h-100 border-0 shadow-sm">
             <div class="card-header bg-white py-1 px-2 border-bottom">
@@ -132,4 +140,76 @@
         </div>
     </div>
 </div>
+
+<!-- Скрытая форма для смены города -->
+<form id="cityForm" method="post" action="{% url 'set_city' %}" style="display: none;">
+    {% csrf_token %}
+    <input type="hidden" name="city" id="hiddenCityInput">
+</form>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const citySearch = document.getElementById('citySearch');
+    const citySelectBtn = document.getElementById('citySelectBtn');
+    const cityForm = document.getElementById('cityForm');
+    const hiddenCityInput = document.getElementById('hiddenCityInput');
+    
+    // Функция для выбора города
+    function selectCity() {
+        const selectedCity = citySearch.value.trim();
+        if (selectedCity) {
+            hiddenCityInput.value = selectedCity;
+            cityForm.submit();
+        }
+    }
+    
+    // Обработчик кнопки выбора
+    citySelectBtn.addEventListener('click', selectCity);
+    
+    // Обработчик Enter в поле ввода
+    citySearch.addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+            selectCity();
+        }
+    });
+    
+    // Автодополнение при вводе
+    citySearch.addEventListener('input', function() {
+        const searchTerm = this.value.toLowerCase();
+        const datalist = document.getElementById('citiesList');
+        const options = datalist.getElementsByTagName('option');
+        
+        // Показываем/скрываем варианты на основе ввода
+        for (let option of options) {
+            if (option.value.toLowerCase().includes(searchTerm)) {
+                option.style.display = '';
+            } else {
+                option.style.display = 'none';
+            }
+        }
+    });
+});
+</script>
+
+<style>
+.city-selector-container {
+    display: inline-flex;
+    align-items: center;
+}
+
+.city-search-input {
+    border: 1px solid #ced4da;
+    border-radius: 0.25rem;
+    padding: 0.25rem 0.5rem;
+    font-size: 0.875rem;
+    min-width: 150px;
+    background: white;
+}
+
+.city-search-input:focus {
+    outline: none;
+    border-color: #86b7fe;
+    box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+}
+</style>
 {% endblock %}
