@@ -2,7 +2,9 @@
 from django.shortcuts import render, redirect
 from django.utils import timezone
 from django.contrib import messages
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponse
+from django.template.loader import render_to_string
+from weasyprint import HTML
 from .models import PrayerTime, Post, PrayerTimeFile
 from materials.models import VideoContent
 from datetime import date
@@ -101,4 +103,44 @@ def search_cities_ajax(request):
     query = request.GET.get('q', '')
     cities = search_cities(query)
     return JsonResponse({'cities': cities})
+
+def download_prayer_times_pdf(request):
+    """Скачать PDF с временами намазов на текущий месяц"""
+    # Получаем активный город из сессии
+    active_city = request.session.get('active_city', 'Муслюмово')
+    today = date.today()
+    
+    # Получаем времена намазов на текущий месяц
+    prayer_times = PrayerTime.objects.filter(
+        city=active_city,
+        date__year=today.year, 
+        date__month=today.month
+    ).order_by('date')
+    
+    if not prayer_times.exists():
+        messages.warning(request, "Нет данных для скачивания")
+        return redirect('home')
+    
+    # Контекст для PDF
+    context = {
+        'prayer_times': prayer_times,
+        'active_city': active_city,
+        'today': today,
+        'current_date': timezone.now().strftime("%d.%m.%Y %H:%M"),
+    }
+    
+    # Рендерим HTML шаблон
+    html_string = render_to_string('main/prayer_times_pdf.html', context)
+    
+    # Создаем PDF
+    html = HTML(string=html_string, base_url=request.build_absolute_uri())
+    result = html.write_pdf()
+    
+    # Создаем HTTP ответ
+    response = HttpResponse(result, content_type='application/pdf')
+    filename = f"namaz_times_{active_city}_{today.strftime('%Y_%m')}.pdf"
+    response['Content-Disposition'] = f'attachment; filename="{filename}"'
+    
+    return response
+
 ### END: main/views.py

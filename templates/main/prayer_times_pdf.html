@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Времена намазов - {{ active_city }}</title>
+    <style>
+        @page {
+            size: A4;
+            margin: 1cm;
+            @bottom-right {
+                content: "Страница " counter(page) " из " counter(pages);
+                font-size: 10px;
+                color: #666;
+            }
+        }
+        body {
+            font-family: Arial, sans-serif;
+            font-size: 12px;
+            line-height: 1.4;
+            color: #333;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #333;
+            padding-bottom: 10px;
+        }
+        .header h1 {
+            font-size: 18px;
+            margin: 0;
+            color: #2c3e50;
+        }
+        .header .subtitle {
+            font-size: 14px;
+            color: #666;
+            margin: 5px 0;
+        }
+        .info {
+            margin-bottom: 15px;
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 5px;
+        }
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 5px;
+        }
+        .table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+        .table th {
+            background-color: #2c3e50;
+            color: white;
+            font-weight: bold;
+            padding: 8px 5px;
+            text-align: center;
+            border: 1px solid #ddd;
+            font-size: 14px;
+        }
+        .table td {
+            padding: 6px 4px;
+            font-weight: bold;
+            border: 1px solid #ddd;
+            text-align: center;
+            font-size: 12px;
+        }
+        .table tr:nth-child(even) {
+            background-color: #f8f9fa;
+        }
+        .table tr.today {
+            background-color: #e3f2fd;
+            font-weight: bold;
+        }
+        .month-year {
+            font-size: 16px;
+            font-weight: bold;
+            color: #2c3e50;
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>ВРЕМЕНА НАМАЗОВ ЗА {{ today|date:"F Y" }} год</h1>
+    </div>
+
+    <table class="table">
+        <thead>
+            <tr>
+                <th style="width: 15%">Дата</th>
+                <th style="width: 12%">Фаджр</th>
+                <th style="width: 12%">Восход</th>
+                <th style="width: 12%">Зухр</th>
+                <th style="width: 12%">Аср</th>
+                <th style="width: 12%">Магриб</th>
+                <th style="width: 12%">Иша</th>
+                <th style="width: 13%">День недели</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for time in prayer_times %}
+            <tr {% if time.date == today %}class="today"{% endif %}>
+                <td>{{ time.date|date:"d.m.Y" }}</td>
+                <td>{{ time.fajr|time:"H:i" }}</td>
+                <td>{{ time.sunrise|time:"H:i" }}</td>
+                <td>{{ time.dhuhr|time:"H:i" }}</td>
+                <td>{{ time.asr|time:"H:i" }}</td>
+                <td>{{ time.maghrib|time:"H:i" }}</td>
+                <td>{{ time.isha|time:"H:i" }}</td>
+                <td>
+                    {% with time.date|date:"l" as weekday %}
+                        {% if weekday == "Monday" %}Понедельник
+                        {% elif weekday == "Tuesday" %}Вторник
+                        {% elif weekday == "Wednesday" %}Среда
+                        {% elif weekday == "Thursday" %}Четверг
+                        {% elif weekday == "Friday" %}Пятница
+                        {% elif weekday == "Saturday" %}Суббота
+                        {% elif weekday == "Sunday" %}Воскресенье
+                        {% endif %}
+                    {% endwith %}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</body>
+</html>

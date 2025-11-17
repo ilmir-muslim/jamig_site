@@ -52,12 +52,12 @@
                         Времена намазов на месяц - 
                         <span class="city-selector-container">
                             <input type="text" 
-                                   id="citySearch" 
-                                   class="city-search-input" 
-                                   value="{{ active_city }}" 
-                                   placeholder="Выберите город..."
-                                   list="citiesList"
-                                   autocomplete="off">
+                                id="citySearch" 
+                                class="city-search-input" 
+                                value="{{ active_city }}" 
+                                placeholder="Выберите город..."
+                                list="citiesList"
+                                autocomplete="off">
                             <datalist id="citiesList">
                                 {% for city in available_cities %}
                                     <option value="{{ city }}">{{ city }}</option>
@@ -68,6 +68,11 @@
                             </button>
                         </span>
                     </h6>
+                    {% if has_prayer_data %}
+                    <a href="{% url 'download_prayer_times' %}" class="btn btn-sm btn-success" title="Скачать PDF">
+                        <small>📥 Скачать PDF</small>
+                    </a>
+                    {% endif %}
                 </div>
             </div>
             <div class="card-body p-0">
