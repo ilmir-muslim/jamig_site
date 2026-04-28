@@ -1,0 +1,12 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container">
+    <h1>{% if action == 'create' %}Новое видео{% else %}Редактировать видео{% endif %}</h1>
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit" class="btn btn-success">Сохранить</button>
+        <a href="{% url 'studio_dashboard' %}" class="btn btn-secondary">Отмена</a>
+    </form>
+</div>
+{% endblock %}

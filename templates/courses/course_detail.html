@@ -1,0 +1,33 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container">
+    <h1>{{ course.title }}</h1>
+    <p>{{ course.description }}</p>
+    <p><strong>Автор:</strong> 
+        {% if course.author %}
+            <a href="{% url 'author_detail' course.author.id %}">{{ course.author.user.get_full_name }}</a>
+        {% else %}
+            Не указан
+        {% endif %}
+    </p>
+    <hr>
+    <h3>Уроки</h3>
+    <div class="list-group">
+        {% for lesson in lessons %}
+        <div class="list-group-item">
+            <h5>{{ lesson.order }}. {{ lesson.title }}</h5>
+            <p>{{ lesson.description }}</p>
+            {% if lesson.video %}
+                <a href="#" class="btn btn-sm btn-outline-secondary">Смотреть видео</a>
+            {% endif %}
+            {% if lesson.audio %}
+                <a href="#" class="btn btn-sm btn-outline-secondary">Слушать аудио</a>
+            {% endif %}
+            {% if lesson.text %}
+                <a href="#" class="btn btn-sm btn-outline-secondary">Читать статью</a>
+            {% endif %}
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

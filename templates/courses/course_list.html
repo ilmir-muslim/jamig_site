@@ -1,0 +1,24 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container">
+    <h1>Учебные программы</h1>
+    <div class="row">
+        {% for course in courses %}
+        <div class="col-md-4 mb-3">
+            <div class="card h-100 shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title">{{ course.title }}</h5>
+                    <p class="card-text">{{ course.description|truncatewords:20 }}</p>
+                    <a href="{% url 'course_detail' course.slug %}" class="btn btn-sm btn-outline-primary">Подробнее</a>
+                </div>
+                <div class="card-footer text-muted">
+                    {{ course.lessons.count }} уроков
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <p>Пока нет доступных курсов.</p>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

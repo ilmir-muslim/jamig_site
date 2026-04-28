@@ -1,0 +1,42 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container">
+    <h1>{{ author.user.get_full_name }}</h1>
+    <p>{{ author.specialization }}</p>
+    <p>{{ author.qualifications|linebreaks }}</p>
+
+    <h3>Видео</h3>
+    <div class="row">
+        {% for video in videos %}
+        <div class="col-md-4 mb-3">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <h5>{{ video.title }}</h5>
+                    <p>{{ video.description|truncatewords:10 }}</p>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <p>Нет видео.</p>
+        {% endfor %}
+    </div>
+
+    <h3>Аудио</h3>
+    <ul>
+        {% for audio in audios %}
+        <li>{{ audio.title }}</li>
+        {% empty %}
+        <li>Нет аудио.</li>
+        {% endfor %}
+    </ul>
+
+    <h3>Статьи</h3>
+    <ul>
+        {% for text in texts %}
+        <li>{{ text.title }}</li>
+        {% empty %}
+        <li>Нет статей.</li>
+        {% endfor %}
+    </ul>
+</div>
+{% endblock %}

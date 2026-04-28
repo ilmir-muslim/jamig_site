@@ -1,220 +1,150 @@
+<!-- templates/main/home.html -->
 {% extends 'base.html' %}
 {% load static %}
 
 {% block content %}
-<div class="row g-2">
-    <!-- Видео плеер -->
-    <div class="col-xl-4 col-lg-5 col-md-6">
-        <div class="card h-100 border-0 shadow-sm">
-            <div class="card-header bg-white py-1 px-2 border-bottom">
-                <div class="d-flex justify-content-between align-items-center">
-                    <h6 class="mb-0 fw-bold small">
+<div class="container">
+    <!-- Приветственный баннер -->
+    <div class="hero-section p-4 p-md-5 mb-4 rounded-3 text-white">
+        <div class="row align-items-center">
+            <div class="col-lg-8">
+                <h1 class="display-5 fw-bold">Добро пожаловать на сайт мечети «Джамиг»</h1>
+                <p class="fs-5">Место духовного просвещения, единства и добра. Присоединяйтесь к нашим урокам, слушайте проповеди и следите за новостями.</p>
+            </div>
+            <div class="col-lg-4 text-center d-none d-lg-block">
+                <i class="fas fa-mosque fa-6x opacity-75"></i>
+            </div>
+        </div>
+    </div>
+
+    <!-- Основной контент: видео, времена намазов (заглушка), новости -->
+    <div class="row g-4">
+        <!-- Видео плеер -->
+        <div class="col-md-7 col-lg-5">
+            <div class="card h-100 border-0 shadow-sm">
+                <div class="card-header bg-white border-0 pt-3 px-3">
+                    <h5 class="mb-0 fw-bold">
                         {% if current_video and current_video.is_live %}
-                        <span class="badge bg-danger me-1">LIVE</span>
+                            <span class="live-badge me-2">LIVE</span>
                         {% endif %}
                         {% if current_video %}
-                            {{ current_video.title|truncatechars:40 }}
+                            {{ current_video.title }}
                         {% else %}
-                            Видео контент
+                            Последнее видео
                         {% endif %}
-                    </h6>
-                    {% if current_video and current_video.author %}
-                    <small class="text-muted d-none d-sm-block">by {{ current_video.author.user.get_full_name }}</small>
+                    </h5>
+                </div>
+                <div class="card-body p-3">
+                    {% if current_video %}
+                        <div class="video-wrapper mb-3">
+                            {{ current_video.get_embed_html|safe }}
+                        </div>
+                        <div class="video-info">
+                            <p class="text-muted small mb-2">
+                                <i class="fas fa-user me-1"></i> {{ current_video.author.user.get_full_name|default:"Автор" }}
+                                {% if current_video.duration %}
+                                    · <i class="fas fa-clock me-1"></i> {{ current_video.duration|time:"H:i" }}
+                                {% endif %}
+                            </p>
+                            <p class="mb-0">{{ current_video.description|truncatechars:120 }}</p>
+                        </div>
+                    {% else %}
+                        <div class="text-center py-5">
+                            <i class="fas fa-video fa-3x text-muted mb-3"></i>
+                            <p class="text-muted">Видео скоро появится</p>
+                        </div>
                     {% endif %}
-                </div>
-            </div>
-            <div class="card-body p-1">
-                {% if current_video %}
-                <div class="video-container-sm">
-                    {{ current_video.get_embed_html|safe }}
-                </div>
-                <div class="px-1 pt-1">
-                    <p class="small text-muted mb-1">{{ current_video.description|truncatewords:15 }}</p>
-                    {% if current_video.duration %}
-                    <small class="text-muted">Длительность: {{ current_video.duration|time:"H:i" }}</small>
-                    {% endif %}
-                </div>
-                {% else %}
-                <div class="text-center p-2">
-                    <p class="mb-0 text-muted small">Видео будет доступно скоро</p>
-                </div>
-                {% endif %}
-            </div>
-        </div>
-    </div>
-
-    <!-- Времена намазов -->
-    <div class="col-xl-5 col-lg-7 col-md-6">
-        <div class="card h-100 border-0 shadow-sm">
-            <div class="card-header bg-white py-1 px-2 border-bottom">
-                <div class="d-flex justify-content-between align-items-center">
-                    <h6 class="mb-0 fw-bold small">
-                        Времена намазов на месяц - 
-                        <span class="city-selector-container">
-                            <input type="text" 
-                                id="citySearch" 
-                                class="city-search-input" 
-                                value="{{ active_city }}" 
-                                placeholder="Выберите город..."
-                                list="citiesList"
-                                autocomplete="off">
-                            <datalist id="citiesList">
-                                {% for city in available_cities %}
-                                    <option value="{{ city }}">{{ city }}</option>
-                                {% endfor %}
-                            </datalist>
-                            <button type="button" id="citySelectBtn" class="btn btn-sm btn-outline-primary ms-1">
-                                Выбрать
-                            </button>
-                        </span>
-                    </h6>
-                    {% if has_prayer_data %}
-                    <a href="{% url 'download_prayer_times' %}" class="btn btn-sm btn-success" title="Скачать PDF">
-                        <small>📥 Скачать PDF</small>
-                    </a>
-                    {% endif %}
-                </div>
-            </div>
-            <div class="card-body p-0">
-                <div class="table-responsive prayer-scroll-container" style="max-height: 500px;">
-                    <table class="table table-sm prayer-table mb-0">
-                        <thead class="table-light sticky-top">
-                            <tr>
-                                <th class="px-2 py-1">Дата</th>
-                                <th class="px-1 py-1">Фаджр</th>
-                                <th class="px-1 py-1">Восход</th>
-                                <th class="px-1 py-1">Зухр</th>
-                                <th class="px-1 py-1">Аср</th>
-                                <th class="px-1 py-1">Магриб</th>
-                                <th class="px-1 py-1">Иша</th>
-                            </tr>
-                        </thead>
-                        <tbody id="prayerTimesBody">
-                            {% for time in prayer_times %}
-                            <tr {% if time.date == today %}class="table-primary"{% endif %}>
-                                <td class="px-2 py-1"><small>{{ time.date|date:"d.m" }}</small></td>
-                                <td class="px-1 py-1"><small>{{ time.fajr|time:"H:i" }}</small></td>
-                                <td class="px-1 py-1"><small>{{ time.sunrise|time:"H:i" }}</small></td>
-                                <td class="px-1 py-1"><small>{{ time.dhuhr|time:"H:i" }}</small></td>
-                                <td class="px-1 py-1"><small>{{ time.asr|time:"H:i" }}</small></td>
-                                <td class="px-1 py-1"><small>{{ time.maghrib|time:"H:i" }}</small></td>
-                                <td class="px-1 py-1"><small>{{ time.isha|time:"H:i" }}</small></td>
-                            </tr>
-                            {% empty %}
-                            <tr>
-                                <td colspan="7" class="text-center py-3">
-                                    <small class="text-muted">
-                                        {% if available_cities %}
-                                            Данные для города {{ active_city }} загружаются...
-                                        {% else %}
-                                            Загрузите файл расписания в админке
-                                        {% endif %}
-                                    </small>
-                                </td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
                 </div>
             </div>
         </div>
-    </div>
 
-    <!-- Последние новости -->
-    <div class="col-xl-3 col-lg-12">
-        <div class="card h-100 border-0 shadow-sm">
-            <div class="card-header bg-white py-1 px-2 border-bottom">
-                <h6 class="mb-0 fw-bold small">Последние новости</h6>
+        <!-- Времена намазов (заглушка) -->
+        <div class="col-md-5 col-lg-3">
+            <div class="card h-100 border-0 shadow-sm">
+                <div class="card-header bg-white border-0 pt-3 px-3">
+                    <h5 class="mb-0 fw-bold"><i class="fas fa-mosque me-2"></i>Времена намазов</h5>
+                </div>
+                <div class="card-body p-3 text-center d-flex flex-column justify-content-center">
+                    <i class="fas fa-clock fa-4x text-muted mb-3"></i>
+                    <p class="text-muted mb-2">Точное расписание скоро появится</p>
+                    <p class="small text-muted">Мы работаем над интеграцией с API</p>
+                </div>
             </div>
-            <div class="card-body p-0">
-                <div class="news-list" style="max-height: 500px;">
-                    {% for post in recent_posts %}
-                    <div class="news-item p-2 border-bottom">
-                        <h6 class="mb-1 fw-bold small">{{ post.title|truncatechars:50 }}</h6>
-                        <p class="small text-muted mb-1">{{ post.created_at|date:"d.m H:i" }}</p>
-                        <p class="small mb-1">{{ post.content|truncatewords:10 }}</p>
-                        <span class="badge bg-light text-dark small">{{ post.get_post_type_display }}</span>
+        </div>
+
+        <!-- Последние новости -->
+        <div class="col-md-12 col-lg-4">
+            <div class="card h-100 border-0 shadow-sm">
+                <div class="card-header bg-white border-0 pt-3 px-3">
+                    <h5 class="mb-0 fw-bold"><i class="fas fa-newspaper me-2"></i>Последние новости</h5>
+                </div>
+                <div class="card-body p-3">
+                    <div class="news-list">
+                        {% for post in recent_posts %}
+                            <div class="news-item mb-3 pb-3 border-bottom">
+                                <h6 class="fw-bold mb-1">{{ post.title }}</h6>
+                                <p class="small text-muted mb-2">
+                                    <i class="far fa-calendar-alt me-1"></i> {{ post.created_at|date:"d.m.Y H:i" }}
+                                    <span class="badge bg-light text-dark ms-2">{{ post.get_post_type_display }}</span>
+                                </p>
+                                <p class="small mb-0">{{ post.content|truncatewords:15 }}</p>
+                            </div>
+                        {% empty %}
+                            <p class="text-muted text-center py-4">Новостей пока нет</p>
+                        {% endfor %}
                     </div>
-                    {% empty %}
-                    <div class="text-center p-3">
-                        <p class="text-muted mb-0 small">Новостей пока нет</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Дополнительные блоки: Авторы и Курсы -->
+    <div class="row mt-4">
+        <!-- Популярные авторы -->
+        {% if authors %}
+        <div class="col-md-6 mb-3">
+            <div class="card h-100 border-0 shadow-sm">
+                <div class="card-header bg-white border-0 pt-3 px-3">
+                    <h5 class="mb-0 fw-bold"><i class="fas fa-users me-2"></i>Наши авторы</h5>
+                </div>
+                <div class="card-body p-3">
+                    <div class="row">
+                        {% for author in authors %}
+                        <div class="col-6 col-md-3 mb-2">
+                            <a href="{% url 'author_detail' author.id %}" class="text-decoration-none">
+                                <div class="text-center">
+                                    <div class="fw-bold small">{{ author.user.get_full_name }}</div>
+                                    <small class="text-muted">{{ author.specialization|truncatechars:30 }}</small>
+                                </div>
+                            </a>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    <a href="{% url 'author_list' %}" class="btn btn-sm btn-outline-primary mt-2">Все авторы</a>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Активные курсы -->
+        {% if active_courses %}
+        <div class="col-md-6 mb-3">
+            <div class="card h-100 border-0 shadow-sm">
+                <div class="card-header bg-white border-0 pt-3 px-3">
+                    <h5 class="mb-0 fw-bold"><i class="fas fa-graduation-cap me-2"></i>Учебные программы</h5>
+                </div>
+                <div class="card-body p-3">
+                    {% for course in active_courses %}
+                    <div class="mb-2">
+                        <a href="{% url 'course_detail' course.slug %}" class="fw-bold small">{{ course.title }}</a>
+                        <p class="small text-muted mb-0">{{ course.description|truncatewords:10 }}</p>
                     </div>
                     {% endfor %}
+                    <a href="{% url 'course_list' %}" class="btn btn-sm btn-outline-primary mt-2">Все курсы</a>
                 </div>
             </div>
         </div>
+        {% endif %}
     </div>
 </div>
-
-<!-- Скрытая форма для смены города -->
-<form id="cityForm" method="post" action="{% url 'set_city' %}" style="display: none;">
-    {% csrf_token %}
-    <input type="hidden" name="city" id="hiddenCityInput">
-</form>
-
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    const citySearch = document.getElementById('citySearch');
-    const citySelectBtn = document.getElementById('citySelectBtn');
-    const cityForm = document.getElementById('cityForm');
-    const hiddenCityInput = document.getElementById('hiddenCityInput');
-    
-    // Функция для выбора города
-    function selectCity() {
-        const selectedCity = citySearch.value.trim();
-        if (selectedCity) {
-            hiddenCityInput.value = selectedCity;
-            cityForm.submit();
-        }
-    }
-    
-    // Обработчик кнопки выбора
-    citySelectBtn.addEventListener('click', selectCity);
-    
-    // Обработчик Enter в поле ввода
-    citySearch.addEventListener('keypress', function(e) {
-        if (e.key === 'Enter') {
-            selectCity();
-        }
-    });
-    
-    // Автодополнение при вводе
-    citySearch.addEventListener('input', function() {
-        const searchTerm = this.value.toLowerCase();
-        const datalist = document.getElementById('citiesList');
-        const options = datalist.getElementsByTagName('option');
-        
-        // Показываем/скрываем варианты на основе ввода
-        for (let option of options) {
-            if (option.value.toLowerCase().includes(searchTerm)) {
-                option.style.display = '';
-            } else {
-                option.style.display = 'none';
-            }
-        }
-    });
-});
-</script>
-
-<style>
-.city-selector-container {
-    display: inline-flex;
-    align-items: center;
-}
-
-.city-search-input {
-    border: 1px solid #ced4da;
-    border-radius: 0.25rem;
-    padding: 0.25rem 0.5rem;
-    font-size: 0.875rem;
-    min-width: 150px;
-    background: white;
-}
-
-.city-search-input:focus {
-    outline: none;
-    border-color: #86b7fe;
-    box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
-}
-</style>
 {% endblock %}

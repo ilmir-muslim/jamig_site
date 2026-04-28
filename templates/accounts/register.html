@@ -1,0 +1,122 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="register-page">
+  <div class="container h-100">
+    <div class="row h-100 align-items-center justify-content-center">
+      <div class="col-md-10 col-lg-8 col-xl-6">
+        <div class="card shadow-lg border-0 register-card">
+          <div class="row g-0">
+            <!-- Левая панель с изображением-заглушкой -->
+            <div class="col-md-5 d-none d-md-flex align-items-center justify-content-center register-left p-0">
+              <!-- ЗАГЛУШКА: позже замените src на свой путь -->
+              <img src="https://via.placeholder.com/600x800/2a5298/ffffff?text=Ваше+изображение" 
+                   alt="Декоративное изображение" 
+                   class="register-left-image">
+            </div>
+            <!-- Правая панель с формой -->
+            <div class="col-md-7">
+              <div class="card-body p-4 p-md-5">
+                <h3 class="text-center mb-4 fw-bold" style="color: var(--primary-dark);">Регистрация</h3>
+                <form method="post" novalidate>
+                  {% csrf_token %}
+                  
+                  <div class="form-floating mb-3">
+                    {{ form.email }}
+                    <label for="{{ form.email.id_for_label }}">Email</label>
+                    {% if form.email.errors %}
+                      <div class="text-danger small">{{ form.email.errors }}</div>
+                    {% endif %}
+                  </div>
+
+                  <div class="row g-2 mb-3">
+                    <div class="col-sm-6 form-floating">
+                      {{ form.first_name }}
+                      <label for="{{ form.first_name.id_for_label }}">Имя</label>
+                    </div>
+                    <div class="col-sm-6 form-floating">
+                      {{ form.last_name }}
+                      <label for="{{ form.last_name.id_for_label }}">Фамилия</label>
+                    </div>
+                    {% if form.first_name.errors or form.last_name.errors %}
+                      <div class="col-12">
+                        <div class="text-danger small">{{ form.first_name.errors }}</div>
+                        <div class="text-danger small">{{ form.last_name.errors }}</div>
+                      </div>
+                    {% endif %}
+                  </div>
+
+                  <div class="form-floating mb-3">
+                    {{ form.phone_number }}
+                    <label for="{{ form.phone_number.id_for_label }}">Номер телефона (необязательно)</label>
+                  </div>
+
+                  <div class="form-floating mb-3">
+                    {{ form.password1 }}
+                    <label for="{{ form.password1.id_for_label }}">Пароль</label>
+                    {% if form.password1.errors %}
+                      <div class="text-danger small">{{ form.password1.errors }}</div>
+                    {% endif %}
+                    <div class="form-text">Минимум 6 символов</div>
+                  </div>
+
+                  <div class="form-floating mb-4">
+                    {{ form.password2 }}
+                    <label for="{{ form.password2.id_for_label }}">Подтвердите пароль</label>
+                    {% if form.password2.errors %}
+                      <div class="text-danger small">{{ form.password2.errors }}</div>
+                    {% endif %}
+                  </div>
+
+                  <button type="submit" class="btn btn-primary btn-lg w-100 mb-3 rounded-pill shadow-sm">
+                    <i class="fas fa-user-plus me-2"></i>Зарегистрироваться
+                  </button>
+                </form>
+                <hr>
+                <p class="text-center mb-0">
+                  Уже есть аккаунт? <a href="{% url 'login' %}" class="fw-bold">Войти</a>
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+  .register-page {
+    background: linear-gradient(135deg, #e6f2ff 0%, #c2def7 100%);
+    min-height: 100vh;
+    padding-top: 2rem;
+    padding-bottom: 2rem;
+  }
+  .register-card {
+    border-radius: 20px;
+    overflow: hidden;
+  }
+  .register-left {
+    background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+  }
+  .register-left-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+  .form-floating > input {
+    border-radius: 12px;
+  }
+  .btn-primary {
+    background-color: #2a86da;
+    border: none;
+  }
+  .btn-primary:hover {
+    background-color: #1a5a9e;
+  }
+</style>
+{% endblock %}

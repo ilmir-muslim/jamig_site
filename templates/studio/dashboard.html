@@ -1,0 +1,93 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container">
+    <h1>Студия автора</h1>
+    <p>Добро пожаловать, {{ user.get_full_name }}!</p>
+    <div class="row mt-3">
+        <div class="col-md-4 mb-3">
+            <div class="card shadow-sm text-center">
+                <div class="card-body">
+                    <h5 class="card-title">Видео</h5>
+                    <p class="card-text">Всего: {{ videos.count }}</p>
+                    <a href="{% url 'studio_video_create' %}" class="btn btn-primary btn-sm">Добавить видео</a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 mb-3">
+            <div class="card shadow-sm text-center">
+                <div class="card-body">
+                    <h5 class="card-title">Аудио</h5>
+                    <p class="card-text">Всего: {{ audios.count }}</p>
+                    <a href="{% url 'studio_audio_create' %}" class="btn btn-primary btn-sm">Добавить аудио</a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 mb-3">
+            <div class="card shadow-sm text-center">
+                <div class="card-body">
+                    <h5 class="card-title">Статьи</h5>
+                    <p class="card-text">Всего: {{ texts.count }}</p>
+                    <a href="{% url 'studio_text_create' %}" class="btn btn-primary btn-sm">Добавить статью</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <h3>Мои видео</h3>
+    <table class="table">
+        <thead>
+            <tr><th>Название</th><th>Статус</th><th>Действия</th></tr>
+        </thead>
+        <tbody>
+            {% for video in videos %}
+            <tr>
+                <td>{{ video.title }}</td>
+                <td>{{ video.get_status_display }}</td>
+                <td>
+                    <a href="{% url 'studio_video_edit' video.pk %}" class="btn btn-sm btn-outline-secondary">Редактировать</a>
+                    <a href="{% url 'studio_video_delete' video.pk %}" class="btn btn-sm btn-outline-danger">Удалить</a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <h3>Мои аудио</h3>
+    <table class="table">
+        <thead>
+            <tr><th>Название</th><th>Статус</th><th>Действия</th></tr>
+        </thead>
+        <tbody>
+            {% for audio in audios %}
+            <tr>
+                <td>{{ audio.title }}</td>
+                <td>{{ audio.get_status_display }}</td>
+                <td>
+                    <a href="{% url 'studio_audio_edit' audio.pk %}" class="btn btn-sm btn-outline-secondary">Редактировать</a>
+                    <a href="{% url 'studio_audio_delete' audio.pk %}" class="btn btn-sm btn-outline-danger">Удалить</a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <h3>Мои статьи</h3>
+    <table class="table">
+        <thead>
+            <tr><th>Название</th><th>Статус</th><th>Действия</th></tr>
+        </thead>
+        <tbody>
+            {% for text in texts %}
+            <tr>
+                <td>{{ text.title }}</td>
+                <td>{{ text.get_status_display }}</td>
+                <td>
+                    <a href="{% url 'studio_text_edit' text.pk %}" class="btn btn-sm btn-outline-secondary">Редактировать</a>
+                    <a href="{% url 'studio_text_delete' text.pk %}" class="btn btn-sm btn-outline-danger">Удалить</a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}
