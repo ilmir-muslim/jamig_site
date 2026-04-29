@@ -1,18 +1,20 @@
 {% extends 'base.html' %}
 {% block content %}
-<div class="container py-4">
-    <h1 class="fw-bold mb-4">Наши авторы</h1>
-    <div class="row">
+<div class="main-container section">
+    <div class="section-header">
+        <span class="section-tag">👥 Коллектив</span>
+        <h2 class="section-title">Наши авторы</h2>
+        <div class="divider"></div>
+    </div>
+    <div class="cards-grid">
         {% for author in authors %}
-        <div class="col-md-6 col-lg-3 mb-4">
-            <div class="card text-center h-100 shadow-sm border-0 rounded-4">
-                <div class="card-body">
-                    <h5 class="card-title fw-bold">{{ author.user.get_full_name }}</h5>
-                    <p class="card-text text-muted">{{ author.specialization }}</p>
-                    <a href="{% url 'author_detail' author.pk %}" class="btn btn-sm btn-outline-primary rounded-pill">Смотреть материалы</a>
-                </div>
+        <a href="{% url 'author_detail' author.pk %}" style="text-decoration:none;">
+            <div class="card text-center">
+                <div class="card-icon"><i class="fas fa-user"></i></div>
+                <h3>{{ author.user.get_full_name }}</h3>
+                <p>{{ author.specialization }}</p>
             </div>
-        </div>
+        </a>
         {% endfor %}
     </div>
 </div>

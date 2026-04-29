@@ -1,0 +1,323 @@
+/* static/css/studio.css */
+
+/* Изоляция от глобальных стилей */
+.studio-wrapper {
+    --studio-bg: #f0f4fa;
+    --sidebar-bg: #1a2538;
+    --sidebar-hover: #253449;
+    --sidebar-active: #3b82f6;
+    --card-bg: #ffffff;
+    --card-border: #e2e8f0;
+    --text-main: #1e293b;
+    --text-muted: #64748b;
+    --accent: #3b82f6;
+    --success: #22c55e;
+    --warning: #f59e0b;
+    --danger: #ef4444;
+    --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.04);
+    --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.06);
+    --radius: 14px;
+
+    display: flex;
+    min-height: calc(100vh - 56px);
+    background-color: var(--studio-bg);
+    color: var(--text-main);
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+}
+
+/* Отключаем глобальный сброс для элементов внутри студии, чтобы Bootstrap работал */
+.studio-wrapper *,
+.studio-wrapper *::before,
+.studio-wrapper *::after {
+    box-sizing: border-box;
+}
+
+/* ===== САЙДБАР ===== */
+.studio-sidebar {
+    width: 260px;
+    background: var(--sidebar-bg);
+    color: #cbd5e1;
+    display: flex;
+    flex-direction: column;
+    flex-shrink: 0;
+    border-right: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.sidebar-brand {
+    padding: 1.5rem 1.2rem;
+    font-size: 1.15rem;
+    font-weight: 600;
+    letter-spacing: -0.3px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    color: #f1f5f9;
+}
+
+.sidebar-nav {
+    list-style: none;
+    padding: 1rem 0.75rem;
+    margin: 0;
+    flex: 1;
+}
+
+.sidebar-nav li {
+    margin-bottom: 2px;
+}
+
+.sidebar-nav a {
+    display: flex;
+    align-items: center;
+    gap: 0.9rem;
+    padding: 0.7rem 1rem;
+    border-radius: 10px;
+    color: #cbd5e1;
+    text-decoration: none;
+    font-weight: 500;
+    font-size: 0.95rem;
+    transition: all 0.2s;
+}
+
+.sidebar-nav a i {
+    width: 20px;
+    font-size: 1.1rem;
+    text-align: center;
+}
+
+.sidebar-nav a:hover {
+    background: var(--sidebar-hover);
+    color: #ffffff;
+}
+
+.sidebar-nav a.active {
+    background: var(--sidebar-active);
+    color: #ffffff;
+    font-weight: 600;
+}
+
+.sidebar-footer {
+    padding: 1rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+/* ===== ОСНОВНАЯ ОБЛАСТЬ ===== */
+.studio-main {
+    flex: 1;
+    overflow-y: auto;
+    background: var(--studio-bg);
+}
+
+/* ===== КАРТОЧКИ (перебиваем Bootstrap) ===== */
+.studio-wrapper .card {
+    /* Сбрасываем Bootstrap-стили для .card внутри студии */
+    border: none;
+    border-radius: var(--radius);
+}
+
+.studio-wrapper .studio-card {
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-sm);
+    transition: box-shadow 0.2s, transform 0.2s;
+}
+
+.studio-wrapper .studio-card:hover {
+    box-shadow: var(--shadow-md);
+    transform: translateY(-1px);
+}
+
+/* Статистические карточки */
+.studio-wrapper .stat-card {
+    padding: 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-sm);
+}
+
+.studio-wrapper .stat-icon {
+    width: 50px;
+    height: 50px;
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    background: #eff6ff;
+    color: var(--accent);
+    flex-shrink: 0;
+}
+
+.studio-wrapper .stat-info h3 {
+    font-size: 1.8rem;
+    font-weight: 700;
+    margin: 0 0 0.2rem;
+    line-height: 1.2;
+    color: var(--text-main);
+}
+
+.studio-wrapper .stat-info p {
+    margin: 0;
+    color: var(--text-muted);
+    font-size: 0.875rem;
+}
+
+.studio-wrapper .stat-info small {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+}
+
+/* ===== ТАБЛИЦЫ ===== */
+.studio-wrapper .table-studio {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0 6px;
+}
+
+.studio-wrapper .table-studio thead th {
+    background: transparent;
+    font-weight: 600;
+    color: var(--text-muted);
+    padding: 0.6rem 1rem;
+    border: none;
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+}
+
+.studio-wrapper .table-studio tbody tr {
+    background: #fff;
+    border-radius: 10px;
+    box-shadow: var(--shadow-sm);
+    transition: background 0.15s;
+}
+
+.studio-wrapper .table-studio tbody tr:hover {
+    background: #f8fafc;
+}
+
+.studio-wrapper .table-studio td {
+    padding: 0.9rem 1rem;
+    vertical-align: middle;
+    border-top: none;
+}
+
+.studio-wrapper .table-studio td:first-child {
+    border-radius: 10px 0 0 10px;
+}
+
+.studio-wrapper .table-studio td:last-child {
+    border-radius: 0 10px 10px 0;
+}
+
+/* Статус-бейджи */
+.studio-wrapper .badge-status {
+    padding: 0.2rem 0.8rem;
+    border-radius: 20px;
+    font-weight: 500;
+    font-size: 0.75rem;
+}
+
+.studio-wrapper .badge-published {
+    background: #dcfce7;
+    color: #166534;
+}
+
+.studio-wrapper .badge-draft {
+    background: #fef9c3;
+    color: #854d0e;
+}
+
+.studio-wrapper .badge-archived {
+    background: #f1f5f9;
+    color: #475569;
+}
+
+/* ===== ФОРМЫ ===== */
+.studio-wrapper .studio-form-card {
+    max-width: 720px;
+    margin: 0 auto;
+}
+
+.studio-wrapper .form-control,
+.studio-wrapper .form-select {
+    border-radius: 10px;
+    border: 1px solid var(--card-border);
+    padding: 0.5rem 0.9rem;
+    font-size: 0.95rem;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.studio-wrapper .form-control:focus,
+.studio-wrapper .form-select:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+}
+
+.studio-wrapper .btn-primary {
+    background-color: var(--accent);
+    border: none;
+    border-radius: 24px;
+    padding: 0.55rem 1.6rem;
+    font-weight: 600;
+    transition: background 0.2s, box-shadow 0.2s;
+}
+
+.studio-wrapper .btn-primary:hover {
+    background-color: #2563eb;
+    box-shadow: 0 4px 14px rgba(59, 130, 246, 0.35);
+}
+
+.studio-wrapper .btn-outline-secondary {
+    border-color: #cbd5e1;
+    color: #475569;
+    border-radius: 24px;
+}
+
+.studio-wrapper .btn-outline-secondary:hover {
+    background: #f1f5f9;
+}
+
+/* ===== АДАПТИВНОСТЬ ===== */
+@media (max-width: 768px) {
+    .studio-wrapper {
+        flex-direction: column;
+    }
+
+    .studio-sidebar {
+        width: 100%;
+        flex-direction: row;
+        overflow-x: auto;
+        padding: 0.5rem;
+    }
+
+    .sidebar-brand {
+        display: none;
+    }
+
+    .sidebar-nav {
+        display: flex;
+        gap: 0.25rem;
+    }
+
+    .sidebar-nav li {
+        margin: 0;
+    }
+
+    .sidebar-nav a {
+        padding: 0.5rem 0.75rem;
+    }
+
+    .sidebar-footer {
+        display: none;
+    }
+
+    .studio-wrapper .stat-card {
+        padding: 1.2rem;
+    }
+}

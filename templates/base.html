@@ -1,4 +1,3 @@
-<!-- templates/base.html -->
 <!DOCTYPE html>
 <html lang="ru">
 <head>
@@ -7,68 +6,108 @@
     <title>{% block title %}Мечеть «Джамиг» — духовно-просветительский портал{% endblock %}</title>
     <!-- Bootstrap 5 -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Amiri:wght@400;700&display=swap" rel="stylesheet">
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Amiri:wght@400;700&display=swap" rel="stylesheet">
     {% load static %}
+    <!-- Публичные стили (подключаем после Bootstrap, переопределяем нужное) -->
     <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    {% block extra_css %}{% endblock %}
 </head>
 <body>
-    <!-- Навигация -->
-    <nav class="navbar navbar-expand-lg navbar-dark">
-        <div class="container">
-            <a class="navbar-brand" href="{% url 'home' %}">
-                <i class="fas fa-mosque me-2"></i>Мечеть «Джамиг»
+
+    {% block header %}
+    <header class="header" id="header">
+        <div class="header-inner">
+            <a href="{% url 'home' %}" class="logo-area" aria-label="Мечеть Джамиг — на главную">
+                <div class="logo-icon"><i class="fas fa-mosque"></i></div>
+                <div>
+                    <div class="logo-text">Мечеть «Джамиг»</div>
+                    <div class="logo-sub">Дом веры и знаний</div>
+                </div>
             </a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-                <span class="navbar-toggler-icon"></span>
+            <button class="burger" id="burger" aria-label="Меню" aria-expanded="false">
+                <span></span><span></span><span></span>
             </button>
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav ms-auto">
-                    <li class="nav-item">
-                        <a class="nav-link {% if request.resolver_match.url_name == 'home' %}active{% endif %}" 
-                        href="{% url 'home' %}">Главная</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link {% if request.resolver_match.url_name in 'author_list,author_detail' %}active{% endif %}" 
-                        href="{% url 'author_list' %}">Авторы</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link {% if request.resolver_match.url_name in 'course_list,course_detail' %}active{% endif %}" 
-                        href="{% url 'course_list' %}">Курсы</a>
-                    </li>
+            <nav>
+                <ul class="nav-list" id="navList">
+                    <li><a href="{% url 'home' %}" class="nav-link {% if request.resolver_match.url_name == 'home' %}active{% endif %}">Главная</a></li>
+                    <li><a href="{% url 'author_list' %}" class="nav-link {% if 'author' in request.resolver_match.url_name %}active{% endif %}">Авторы</a></li>
+                    <li><a href="{% url 'course_list' %}" class="nav-link {% if 'course' in request.resolver_match.url_name %}active{% endif %}">Курсы</a></li>
                     {% if user.is_authenticated %}
                         {% if user.user_type == 'author' %}
-                        <li class="nav-item">
-                            <a class="nav-link {% if 'studio' in request.resolver_match.view_name %}active{% endif %}" 
-                            href="{% url 'studio_dashboard' %}">Студия</a>
-                        </li>
+                        <li><a href="{% url 'studio_dashboard' %}" class="nav-link {% if 'studio' in request.resolver_match.view_name %}active{% endif %}">Студия</a></li>
                         {% endif %}
-                        <li class="nav-item">
-                            <a class="nav-link" href="{% url 'logout' %}">Выйти ({{ user.first_name }})</a>
-                        </li>
+                        <li><a href="{% url 'logout' %}" class="nav-link">Выйти ({{ user.first_name }})</a></li>
                     {% else %}
-                        <li class="nav-item">
-                            <a class="nav-link {% if request.resolver_match.url_name == 'login' %}active{% endif %}" 
-                            href="{% url 'login' %}">Войти</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link {% if request.resolver_match.url_name == 'register' %}active{% endif %}" 
-                            href="{% url 'register' %}">Регистрация</a>
-                        </li>
+                        <li><a href="{% url 'login' %}" class="nav-link">Войти</a></li>
+                        <li><a href="{% url 'register' %}" class="nav-link nav-cta">Регистрация</a></li>
                     {% endif %}
                 </ul>
-            </div>
+            </nav>
         </div>
-    </nav>
+    </header>
+    {% endblock %}
 
-    <!-- Основной контент -->
-    <main class="py-4">
+    <main>
         {% block content %}
         {% endblock %}
     </main>
 
+    {% block footer %}
+    <footer class="footer" id="contact">
+        <div class="footer-inner">
+            <div class="footer-col">
+                <h4>🕌 Мечеть «Джамиг»</h4>
+                <p>Духовно-просветительский портал</p>
+                <p>Открыты для всех ищущих знание</p>
+            </div>
+            <div class="footer-col">
+                <h4>📍 Адрес</h4>
+                <p>ул. Примерная, 1</p>
+                <p>г. Ваш Город</p>
+            </div>
+            <div class="footer-col">
+                <h4>📞 Контакты</h4>
+                <a href="tel:+79999999999">+7 (999) 999-99-99</a>
+                <a href="mailto:info@jamig.ru">info@jamig.ru</a>
+                <a href="#">Telegram-канал</a>
+            </div>
+            <div class="footer-col">
+                <h4>🔗 Ссылки</h4>
+                <a href="{% url 'home' %}">Главная</a>
+                <a href="{% url 'author_list' %}">Авторы</a>
+                <a href="{% url 'course_list' %}">Курсы</a>
+                <a href="#">Пожертвовать</a>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            © 2026 Мечеть «Джамиг». Все права защищены.
+        </div>
+    </footer>
+    {% endblock %}
+
+    <!-- Bootstrap JS (нужен для мобильного меню и других компонентов) -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Бургер-меню
+        const burger = document.getElementById('burger');
+        const navList = document.getElementById('navList');
+        const navLinks = navList.querySelectorAll('.nav-link');
+
+        burger.addEventListener('click', () => {
+            const isOpen = navList.classList.toggle('open');
+            burger.setAttribute('aria-expanded', isOpen);
+        });
+
+        navLinks.forEach(link => {
+            link.addEventListener('click', () => {
+                navList.classList.remove('open');
+                burger.setAttribute('aria-expanded', 'false');
+            });
+        });
+    </script>
+    {% block extra_js %}{% endblock %}
 </body>
 </html>

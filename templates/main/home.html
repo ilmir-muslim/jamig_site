@@ -1,150 +1,147 @@
-<!-- templates/main/home.html -->
 {% extends 'base.html' %}
 {% load static %}
 
 {% block content %}
-<div class="container">
-    <!-- Приветственный баннер -->
-    <div class="hero-section p-4 p-md-5 mb-4 rounded-3 text-white">
-        <div class="row align-items-center">
-            <div class="col-lg-8">
-                <h1 class="display-5 fw-bold">Добро пожаловать на сайт мечети «Джамиг»</h1>
-                <p class="fs-5">Место духовного просвещения, единства и добра. Присоединяйтесь к нашим урокам, слушайте проповеди и следите за новостями.</p>
-            </div>
-            <div class="col-lg-4 text-center d-none d-lg-block">
-                <i class="fas fa-mosque fa-6x opacity-75"></i>
-            </div>
+<!-- HERO -->
+<section class="hero">
+    <div class="hero-mosque-silhouette">
+        <svg viewBox="0 0 400 200" xmlns="http://www.w3.org/2000/svg">
+            <polygon points="200,10 230,80 260,80 260,160 140,160 140,80 170,80"/>
+            <rect x="170" y="120" width="60" height="40"/>
+            <circle cx="200" cy="50" r="12"/>
+            <polygon points="200,18 208,45 200,38 192,45"/>
+        </svg>
+    </div>
+    <div class="hero-content">
+        <span class="hero-badge">🕌 Добро пожаловать</span>
+        <h1>Мечеть <span class="accent">«Джамиг»</span> —<br>свет веры в твоём сердце</h1>
+        <p class="hero-subtitle">Духовное просвещение, единство и добро. Присоединяйтесь к нашим урокам, слушайте проповеди и следите за новостями.</p>
+        <div class="hero-buttons">
+            <a href="#video-section" class="btn btn-primary"><i class="fas fa-play"></i> Смотреть видео</a>
+            <a href="#news-section" class="btn btn-outline">Последние новости</a>
         </div>
     </div>
+</section>
 
-    <!-- Основной контент: видео, времена намазов (заглушка), новости -->
-    <div class="row g-4">
-        <!-- Видео плеер -->
-        <div class="col-md-7 col-lg-5">
-            <div class="card h-100 border-0 shadow-sm">
-                <div class="card-header bg-white border-0 pt-3 px-3">
-                    <h5 class="mb-0 fw-bold">
-                        {% if current_video and current_video.is_live %}
-                            <span class="live-badge me-2">LIVE</span>
-                        {% endif %}
-                        {% if current_video %}
-                            {{ current_video.title }}
-                        {% else %}
-                            Последнее видео
-                        {% endif %}
-                    </h5>
-                </div>
-                <div class="card-body p-3">
-                    {% if current_video %}
-                        <div class="video-wrapper mb-3">
-                            {{ current_video.get_embed_html|safe }}
-                        </div>
-                        <div class="video-info">
-                            <p class="text-muted small mb-2">
-                                <i class="fas fa-user me-1"></i> {{ current_video.author.user.get_full_name|default:"Автор" }}
-                                {% if current_video.duration %}
-                                    · <i class="fas fa-clock me-1"></i> {{ current_video.duration|time:"H:i" }}
-                                {% endif %}
-                            </p>
-                            <p class="mb-0">{{ current_video.description|truncatechars:120 }}</p>
-                        </div>
-                    {% else %}
-                        <div class="text-center py-5">
-                            <i class="fas fa-video fa-3x text-muted mb-3"></i>
-                            <p class="text-muted">Видео скоро появится</p>
-                        </div>
+<div class="main-container">
+
+    <!-- ВИДЕО -->
+    <section class="section" id="video-section">
+        <div class="section-header">
+            <span class="section-tag">🎥 Медиа</span>
+            <h2 class="section-title">Актуальное видео</h2>
+            <p class="section-desc">Проповеди, лекции и прямые эфиры от наших авторов.</p>
+            <div class="divider"></div>
+        </div>
+        {% if current_video %}
+        <div class="video-card">
+            <div class="video-wrapper">
+                {{ current_video.get_embed_html|safe }}
+            </div>
+            <div class="video-info">
+                <div style="display:flex; justify-content:space-between; align-items:flex-start;">
+                    <div>
+                        <h3 style="margin-bottom:0.2rem;">{{ current_video.title }}</h3>
+                        <p style="font-size:0.9rem; color:var(--text-medium);">
+                            <i class="fas fa-user me-1"></i> {{ current_video.author.user.get_full_name|default:"Автор" }}
+                            {% if current_video.duration %} · <i class="fas fa-clock me-1"></i> {{ current_video.duration|time:"H:i" }}{% endif %}
+                        </p>
+                    </div>
+                    {% if current_video.is_live %}
+                        <span style="display:inline-block; background:#e8f5e9; color:#2e7d32; border:1px solid #c8e6c9; padding:6px 18px; border-radius:50px; font-size:0.85rem; font-weight:600;">🔴 LIVE</span>
                     {% endif %}
                 </div>
+                <p style="margin-top:12px;">{{ current_video.description|truncatechars:120 }}</p>
             </div>
         </div>
-
-        <!-- Времена намазов (заглушка) -->
-        <div class="col-md-5 col-lg-3">
-            <div class="card h-100 border-0 shadow-sm">
-                <div class="card-header bg-white border-0 pt-3 px-3">
-                    <h5 class="mb-0 fw-bold"><i class="fas fa-mosque me-2"></i>Времена намазов</h5>
-                </div>
-                <div class="card-body p-3 text-center d-flex flex-column justify-content-center">
-                    <i class="fas fa-clock fa-4x text-muted mb-3"></i>
-                    <p class="text-muted mb-2">Точное расписание скоро появится</p>
-                    <p class="small text-muted">Мы работаем над интеграцией с API</p>
-                </div>
-            </div>
-        </div>
-
-        <!-- Последние новости -->
-        <div class="col-md-12 col-lg-4">
-            <div class="card h-100 border-0 shadow-sm">
-                <div class="card-header bg-white border-0 pt-3 px-3">
-                    <h5 class="mb-0 fw-bold"><i class="fas fa-newspaper me-2"></i>Последние новости</h5>
-                </div>
-                <div class="card-body p-3">
-                    <div class="news-list">
-                        {% for post in recent_posts %}
-                            <div class="news-item mb-3 pb-3 border-bottom">
-                                <h6 class="fw-bold mb-1">{{ post.title }}</h6>
-                                <p class="small text-muted mb-2">
-                                    <i class="far fa-calendar-alt me-1"></i> {{ post.created_at|date:"d.m.Y H:i" }}
-                                    <span class="badge bg-light text-dark ms-2">{{ post.get_post_type_display }}</span>
-                                </p>
-                                <p class="small mb-0">{{ post.content|truncatewords:15 }}</p>
-                            </div>
-                        {% empty %}
-                            <p class="text-muted text-center py-4">Новостей пока нет</p>
-                        {% endfor %}
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Дополнительные блоки: Авторы и Курсы -->
-    <div class="row mt-4">
-        <!-- Популярные авторы -->
-        {% if authors %}
-        <div class="col-md-6 mb-3">
-            <div class="card h-100 border-0 shadow-sm">
-                <div class="card-header bg-white border-0 pt-3 px-3">
-                    <h5 class="mb-0 fw-bold"><i class="fas fa-users me-2"></i>Наши авторы</h5>
-                </div>
-                <div class="card-body p-3">
-                    <div class="row">
-                        {% for author in authors %}
-                        <div class="col-6 col-md-3 mb-2">
-                            <a href="{% url 'author_detail' author.id %}" class="text-decoration-none">
-                                <div class="text-center">
-                                    <div class="fw-bold small">{{ author.user.get_full_name }}</div>
-                                    <small class="text-muted">{{ author.specialization|truncatechars:30 }}</small>
-                                </div>
-                            </a>
-                        </div>
-                        {% endfor %}
-                    </div>
-                    <a href="{% url 'author_list' %}" class="btn btn-sm btn-outline-primary mt-2">Все авторы</a>
-                </div>
-            </div>
+        {% else %}
+        <div class="card" style="text-align:center; padding:3rem;">
+            <i class="fas fa-video fa-3x" style="color:var(--blue-pale);"></i>
+            <p style="margin-top:1rem;">Видео скоро появится</p>
         </div>
         {% endif %}
+    </section>
 
-        <!-- Активные курсы -->
-        {% if active_courses %}
-        <div class="col-md-6 mb-3">
-            <div class="card h-100 border-0 shadow-sm">
-                <div class="card-header bg-white border-0 pt-3 px-3">
-                    <h5 class="mb-0 fw-bold"><i class="fas fa-graduation-cap me-2"></i>Учебные программы</h5>
+    <!-- НОВОСТИ -->
+    <section class="section" id="news-section">
+        <div class="section-header">
+            <span class="section-tag">📰 Новости</span>
+            <h2 class="section-title">События и объявления</h2>
+            <p class="section-desc">Будьте в курсе жизни мечети и предстоящих мероприятий.</p>
+            <div class="divider"></div>
+        </div>
+        <div class="news-grid">
+            {% for post in recent_posts %}
+            <div class="news-card">
+                <div class="news-card-img">
+                    <span class="news-date-badge">{{ post.created_at|date:"d M" }}</span>
+                    <i class="fas fa-newspaper"></i>
                 </div>
-                <div class="card-body p-3">
-                    {% for course in active_courses %}
-                    <div class="mb-2">
-                        <a href="{% url 'course_detail' course.slug %}" class="fw-bold small">{{ course.title }}</a>
-                        <p class="small text-muted mb-0">{{ course.description|truncatewords:10 }}</p>
-                    </div>
-                    {% endfor %}
-                    <a href="{% url 'course_list' %}" class="btn btn-sm btn-outline-primary mt-2">Все курсы</a>
+                <div class="news-card-body">
+                    <h4>{{ post.title }}</h4>
+                    <p>{{ post.content|truncatewords:15 }}</p>
+                    <span style="display:inline-block; background:var(--blue-ice); color:var(--blue-mid); font-size:0.75rem; padding:3px 10px; border-radius:20px;">{{ post.get_post_type_display }}</span>
                 </div>
             </div>
+            {% empty %}
+            <div class="card" style="text-align:center; padding:2rem; grid-column:1/-1;">
+                <p>Новостей пока нет</p>
+            </div>
+            {% endfor %}
         </div>
-        {% endif %}
-    </div>
+    </section>
+
+    <!-- АВТОРЫ -->
+    {% if authors %}
+    <section class="section">
+        <div class="section-header">
+            <span class="section-tag">👥 Наши авторы</span>
+            <h2 class="section-title">Познакомьтесь с наставниками</h2>
+            <div class="divider"></div>
+        </div>
+        <div class="cards-grid">
+            {% for author in authors %}
+            <a href="{% url 'author_detail' author.id %}" style="text-decoration:none;">
+                <div class="compact-card">
+                    <div class="card-icon" style="margin-bottom:12px;"><i class="fas fa-user"></i></div>
+                    <h4 style="color:var(--blue-deep); font-weight:700;">{{ author.user.get_full_name }}</h4>
+                    <p style="font-size:0.85rem; color:var(--text-medium);">{{ author.specialization|truncatechars:30 }}</p>
+                </div>
+            </a>
+            {% endfor %}
+        </div>
+        <div style="text-align:center; margin-top:2rem;">
+            <a href="{% url 'author_list' %}" class="btn btn-outline" style="color:var(--blue-mid); border-color:var(--blue-mid);">Все авторы</a>
+        </div>
+    </section>
+    {% endif %}
+
+    <!-- КУРСЫ -->
+    {% if active_courses %}
+    <section class="section">
+        <div class="section-header">
+            <span class="section-tag">🎓 Обучение</span>
+            <h2 class="section-title">Учебные программы</h2>
+            <p class="section-desc">Систематизированные курсы для глубокого изучения.</p>
+            <div class="divider"></div>
+        </div>
+        <div class="cards-grid">
+            {% for course in active_courses %}
+            <a href="{% url 'course_detail' course.slug %}" style="text-decoration:none;">
+                <div class="compact-card">
+                    <div class="card-icon" style="margin-bottom:12px;"><i class="fas fa-graduation-cap"></i></div>
+                    <h4 style="color:var(--blue-deep); font-weight:700;">{{ course.title }}</h4>
+                    <p style="font-size:0.85rem; color:var(--text-medium);">{{ course.description|truncatewords:10 }}</p>
+                    <small>{{ course.lessons.count }} уроков</small>
+                </div>
+            </a>
+            {% endfor %}
+        </div>
+        <div style="text-align:center; margin-top:2rem;">
+            <a href="{% url 'course_list' %}" class="btn btn-outline" style="color:var(--blue-mid); border-color:var(--blue-mid);">Все курсы</a>
+        </div>
+    </section>
+    {% endif %}
+
 </div>
 {% endblock %}

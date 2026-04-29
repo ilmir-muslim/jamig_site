@@ -1,9 +1,11 @@
 {% extends 'base.html' %}
 {% load static %}
 
+{% block header %}{% endblock %}
+{% block footer %}{% endblock %}
+
 {% block content %}
 <div class="studio-wrapper">
-    <!-- Левая боковая панель (как в YouTube Studio) -->
     <nav class="studio-sidebar">
         <div class="sidebar-brand">
             <i class="fas fa-play-circle me-2"></i>
@@ -52,8 +54,6 @@
             </a>
         </div>
     </nav>
-
-    <!-- Основной контент -->
     <main class="studio-main">
         <div class="container-fluid p-4">
             {% block studio_content %}{% endblock %}
@@ -63,205 +63,5 @@
 {% endblock %}
 
 {% block extra_css %}
-<style>
-    :root {
-        --studio-bg: #f4f6f9;
-        --sidebar-bg: #1e293b;
-        --sidebar-hover: #334155;
-        --sidebar-active: #3b82f6;
-        --card-bg: #ffffff;
-        --card-border: #e5e7eb;
-        --text-main: #1e293b;
-        --text-muted: #64748b;
-        --accent: #3b82f6;
-        --success: #22c55e;
-        --warning: #f59e0b;
-        --danger: #ef4444;
-        --shadow-sm: 0 1px 3px rgba(0,0,0,0.05);
-        --shadow-md: 0 4px 6px rgba(0,0,0,0.05);
-        --radius: 12px;
-    }
-
-    .studio-wrapper {
-        display: flex;
-        min-height: calc(100vh - 56px);
-        background-color: var(--studio-bg);
-    }
-
-    /* ========== SIDEBAR ========== */
-    .studio-sidebar {
-        width: 260px;
-        background: var(--sidebar-bg);
-        color: #e2e8f0;
-        display: flex;
-        flex-direction: column;
-        flex-shrink: 0;
-    }
-    .sidebar-brand {
-        padding: 1.5rem 1.2rem;
-        font-size: 1.15rem;
-        font-weight: 600;
-        letter-spacing: -0.3px;
-        border-bottom: 1px solid rgba(255,255,255,0.08);
-        display: flex;
-        align-items: center;
-    }
-    .sidebar-nav {
-        list-style: none;
-        padding: 1rem 0.75rem;
-        margin: 0;
-        flex: 1;
-    }
-    .sidebar-nav li {
-        margin-bottom: 2px;
-    }
-    .sidebar-nav a {
-        display: flex;
-        align-items: center;
-        gap: 0.75rem;
-        padding: 0.65rem 1rem;
-        border-radius: 8px;
-        color: #cbd5e1;
-        text-decoration: none;
-        font-weight: 500;
-        transition: all 0.15s;
-    }
-    .sidebar-nav a i {
-        width: 20px;
-        font-size: 1rem;
-    }
-    .sidebar-nav a:hover {
-        background: var(--sidebar-hover);
-        color: #fff;
-    }
-    .sidebar-nav a.active {
-        background: var(--sidebar-active);
-        color: #fff;
-        font-weight: 600;
-    }
-    .sidebar-footer {
-        padding: 1rem;
-        border-top: 1px solid rgba(255,255,255,0.08);
-    }
-
-    /* ========== MAIN CONTENT ========== */
-    .studio-main {
-        flex: 1;
-        overflow-y: auto;
-    }
-
-    /* ========== CARDS ========== */
-    .studio-card {
-        background: var(--card-bg);
-        border: 1px solid var(--card-border);
-        border-radius: var(--radius);
-        box-shadow: var(--shadow-sm);
-    }
-    .studio-card:hover {
-        box-shadow: var(--shadow-md);
-    }
-
-    /* Stat cards */
-    .stat-card {
-        padding: 1.5rem;
-        display: flex;
-        align-items: center;
-        gap: 1rem;
-    }
-    .stat-icon {
-        width: 48px;
-        height: 48px;
-        border-radius: 12px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 1.4rem;
-    }
-    .stat-info h3 {
-        font-size: 1.8rem;
-        font-weight: 700;
-        margin: 0;
-        line-height: 1.2;
-    }
-    .stat-info p {
-        margin: 0;
-        color: var(--text-muted);
-        font-size: 0.875rem;
-    }
-    .stat-info small {
-        font-size: 0.8rem;
-    }
-
-    /* ========== TABLES ========== */
-    .studio-table {
-        width: 100%;
-        border-collapse: separate;
-        border-spacing: 0 8px;
-    }
-    .studio-table thead th {
-        background: transparent;
-        font-weight: 600;
-        color: var(--text-muted);
-        padding: 0.5rem 1rem;
-        border: none;
-    }
-    .studio-table tbody tr {
-        background: #fff;
-        border-radius: 8px;
-        box-shadow: var(--shadow-sm);
-        transition: background 0.1s;
-    }
-    .studio-table tbody tr:hover {
-        background: #f8fafc;
-    }
-    .studio-table td {
-        padding: 0.8rem 1rem;
-        vertical-align: middle;
-        border-top: none;
-    }
-    .studio-table td:first-child {
-        border-radius: 8px 0 0 8px;
-    }
-    .studio-table td:last-child {
-        border-radius: 0 8px 8px 0;
-    }
-
-    /* Status badges */
-    .badge-status {
-        padding: 0.25em 0.75em;
-        border-radius: 20px;
-        font-weight: 500;
-        font-size: 0.75rem;
-    }
-    .badge-published { background: #dcfce7; color: #166534; }
-    .badge-draft     { background: #fef9c3; color: #854d0e; }
-    .badge-archived  { background: #f1f5f9; color: #475569; }
-
-    /* ========== FORMS ========== */
-    .studio-form-card {
-        max-width: 700px;
-        margin: 0 auto;
-    }
-
-    /* ========== RESPONSIVE ========== */
-    @media (max-width: 768px) {
-        .studio-wrapper {
-            flex-direction: column;
-        }
-        .studio-sidebar {
-            width: 100%;
-            flex-direction: row;
-            overflow-x: auto;
-            padding: 0.5rem;
-        }
-        .sidebar-brand { display: none; }
-        .sidebar-nav {
-            display: flex;
-            gap: 0.25rem;
-        }
-        .sidebar-nav li { margin: 0; }
-        .sidebar-nav a { padding: 0.5rem 0.75rem; }
-        .sidebar-footer { display: none; }
-    }
-</style>
+<link rel="stylesheet" href="{% static 'css/studio.css' %}">
 {% endblock %}
