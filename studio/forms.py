@@ -1,4 +1,5 @@
 from django import forms
+from courses.models import Course
 from materials.models import VideoContent, AudioContent, TextContent
 
 
@@ -94,4 +95,26 @@ class TextContentForm(forms.ModelForm):
             ),
             "category": forms.Select(attrs={"class": "form-select"}),
             "cover_image": forms.ClearableFileInput(attrs={"class": "form-control"}),
+        }
+
+
+class CourseForm(forms.ModelForm):
+    class Meta:
+        model = Course
+        fields = ["title", "description", "status", "published_at"]
+        widgets = {
+            "title": forms.TextInput(
+                attrs={"class": "form-control", "placeholder": "Название курса"}
+            ),
+            "description": forms.Textarea(
+                attrs={
+                    "class": "form-control",
+                    "rows": 4,
+                    "placeholder": "Описание курса",
+                }
+            ),
+            "status": forms.Select(attrs={"class": "form-select"}),
+            "published_at": forms.DateTimeInput(
+                attrs={"class": "form-control", "type": "datetime-local"}
+            ),
         }

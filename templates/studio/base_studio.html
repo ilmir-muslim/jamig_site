@@ -38,6 +38,13 @@
                     <span>Статьи</span>
                 </a>
             </li>
+            <li>
+                <a href="{% url 'studio_course_list' %}" 
+                class="{% if 'course' in request.resolver_match.url_name %}active{% endif %}">
+                    <i class="fas fa-graduation-cap"></i>
+                    <span>Курсы</span>
+                </a>
+            </li>
         </ul>
         <div class="sidebar-footer">
             <a href="{% url 'home' %}" class="btn btn-outline-light btn-sm w-100">

@@ -1,0 +1,47 @@
+{% extends 'studio/base_studio.html' %}
+{% block studio_content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h2 class="fw-bold mb-0">Мои курсы</h2>
+    <a href="{% url 'studio_course_create' %}" class="btn btn-primary"><i class="fas fa-plus me-1"></i>Создать курс</a>
+</div>
+
+<div class="card border-0 shadow-sm">
+    <div class="table-responsive">
+        <table class="table table-studio mb-0">
+            <thead class="table-light">
+                <tr>
+                    <th>Название</th>
+                    <th>Статус</th>
+                    <th>Дата обновления</th>
+                    <th>Действия</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for course in courses %}
+                <tr>
+                    <td>
+                        <a href="{% url 'studio_course_edit' course.pk %}" class="fw-bold text-decoration-none">
+                            {{ course.title }}
+                        </a>
+                    </td>
+                    <td>
+                        <span class="badge bg-{% if course.status == 'published' %}success{% elif course.status == 'draft' %}warning{% else %}secondary{% endif %}">
+                            {{ course.get_status_display }}
+                        </span>
+                    </td>
+                    <td>{{ course.updated_at|date:"d.m.Y" }}</td>
+                    <td>
+                        <a href="{% url 'studio_course_edit' course.pk %}" class="btn btn-sm btn-outline-secondary"><i class="fas fa-pen"></i></a>
+                        <a href="{% url 'studio_course_delete' course.pk %}" class="btn btn-sm btn-outline-danger"><i class="fas fa-trash-alt"></i></a>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="4" class="text-center text-muted">Курсы не найдены</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

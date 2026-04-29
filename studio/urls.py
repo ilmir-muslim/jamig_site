@@ -18,4 +18,9 @@ urlpatterns = [
     path("text/create/", views.text_create, name="studio_text_create"),
     path("text/<int:pk>/edit/", views.text_edit, name="studio_text_edit"),
     path("text/<int:pk>/delete/", views.text_delete, name="studio_text_delete"),
+    # Курсы
+    path("courses/", views.course_list_studio, name="studio_course_list"),
+    path("courses/create/", views.course_create, name="studio_course_create"),
+    path("courses/<int:pk>/edit/", views.course_edit, name="studio_course_edit"),
+    path("courses/<int:pk>/delete/", views.course_delete, name="studio_course_delete"),
 ]

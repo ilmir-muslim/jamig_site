@@ -3,8 +3,9 @@ from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib import messages
 from django.db.models import Q, Sum
 from accounts.models import Authors
+from courses.models import Course
 from materials.models import VideoContent, AudioContent, TextContent
-from .forms import VideoContentForm, AudioContentForm, TextContentForm
+from .forms import CourseForm, VideoContentForm, AudioContentForm, TextContentForm
 
 
 def is_author(user):
@@ -249,4 +250,64 @@ def text_delete(request, pk):
         return redirect("studio_text_list")
     return render(
         request, "studio/confirm_delete.html", {"object": text, "type": "текст"}
+    )
+
+
+@login_required
+@user_passes_test(is_author)
+def course_list_studio(request):
+    author = _get_author(request)
+    courses = Course.objects.filter(author=author).order_by("-updated_at")
+    return render(request, "studio/course_list.html", {"courses": courses})
+
+
+@login_required
+@user_passes_test(is_author)
+def course_create(request):
+    if request.method == "POST":
+        form = CourseForm(request.POST)
+        if form.is_valid():
+            course = form.save(commit=False)
+            course.author = _get_author(request)
+            if not course.slug:
+                from django.utils.text import slugify
+
+                course.slug = slugify(course.title)
+            course.save()
+            messages.success(request, "Курс создан.")
+            return redirect("studio_course_list")
+    else:
+        form = CourseForm()
+    return render(
+        request, "studio/course_form.html", {"form": form, "action": "create"}
+    )
+
+
+@login_required
+@user_passes_test(is_author)
+def course_edit(request, pk):
+    author = _get_author(request)
+    course = get_object_or_404(Course, pk=pk, author=author)
+    if request.method == "POST":
+        form = CourseForm(request.POST, instance=course)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Курс обновлён.")
+            return redirect("studio_course_list")
+    else:
+        form = CourseForm(instance=course)
+    return render(request, "studio/course_form.html", {"form": form, "action": "edit"})
+
+
+@login_required
+@user_passes_test(is_author)
+def course_delete(request, pk):
+    author = _get_author(request)
+    course = get_object_or_404(Course, pk=pk, author=author)
+    if request.method == "POST":
+        course.delete()
+        messages.success(request, "Курс удалён.")
+        return redirect("studio_course_list")
+    return render(
+        request, "studio/confirm_delete.html", {"object": course, "type": "курс"}
     )
