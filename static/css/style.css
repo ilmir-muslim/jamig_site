@@ -1,14 +1,18 @@
-/* Основные переменные */
+/* === Глобальные переменные === */
 :root {
     --primary-light: #e6f2ff;
     --primary: #2a86da;
     --primary-dark: #1a5a9e;
     --text-dark: #2c3e50;
     --text-muted: #6c757d;
-    --bg-light: #f0f8ff;
-    --card-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+    --bg-light: #f8fafd;
+    --card-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
+    --border-radius: 12px;
+    --border-radius-sm: 8px;
+    --border-radius-lg: 16px;
 }
 
+/* === Базовые стили === */
 body {
     font-family: 'Inter', sans-serif;
     background-color: var(--bg-light);
@@ -22,17 +26,32 @@ main {
     flex: 1;
 }
 
-/* Навигация */
+/* === Типографика === */
+h1,
+h2,
+h3 {
+    font-weight: 600;
+}
+
+a {
+    color: var(--primary);
+    transition: color 0.2s;
+}
+
+a:hover {
+    color: var(--primary-dark);
+}
+
+/* === Навигация === */
 .navbar {
     background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-    padding: 0.75rem 0;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.06);
+    padding: 0.5rem 0;
 }
 
 .navbar-brand {
     font-weight: 600;
-    font-size: 1.5rem;
-    letter-spacing: -0.5px;
+    font-size: 1.4rem;
 }
 
 .navbar-brand i {
@@ -41,10 +60,11 @@ main {
 
 .nav-link {
     font-weight: 500;
-    margin: 0 0.5rem;
+    margin: 0 0.15rem;
+    padding: 0.45rem 1rem;
+    border-radius: 20px;
+    font-size: 0.95rem;
     transition: all 0.2s;
-    border-radius: 30px;
-    padding: 0.5rem 1.2rem !important;
 }
 
 .nav-link:hover,
@@ -52,53 +72,112 @@ main {
     background-color: rgba(255, 255, 255, 0.15);
 }
 
-/* Герой-блок */
-.hero-section {
-    background: linear-gradient(105deg, var(--primary) 0%, #4fa3e0 100%);
-    border-radius: 20px;
-    box-shadow: var(--card-shadow);
-}
-
-.hero-section .btn-light {
-    background-color: white;
-    border: none;
-    color: var(--primary-dark);
-    font-weight: 600;
-    padding: 0.75rem 2rem;
-    border-radius: 40px;
-    transition: all 0.2s;
-}
-
-.hero-section .btn-light:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
-}
-
-/* Карточки */
+/* === Карточки === */
 .card {
-    border-radius: 20px !important;
+    border: 1px solid rgba(0, 0, 0, 0.05);
+    border-radius: var(--border-radius);
     transition: transform 0.2s, box-shadow 0.2s;
-    overflow: hidden;
 }
 
 .card:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.08) !important;
+    transform: translateY(-2px);
+    box-shadow: var(--card-shadow);
 }
 
 .card-header {
-    background-color: white;
+    background: white;
     border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+    font-weight: 600;
 }
 
-/* Видео */
+/* === Формы === */
+.form-label {
+    font-weight: 500;
+    margin-bottom: 0.3rem;
+    font-size: 0.9rem;
+}
+
+.form-control,
+.form-select {
+    border-radius: var(--border-radius-sm);
+    border: 1px solid #dee2e6;
+    padding: 0.5rem 0.75rem;
+    font-size: 0.95rem;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.form-control:focus,
+.form-select:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(42, 134, 218, 0.15);
+}
+
+textarea.form-control {
+    min-height: 100px;
+}
+
+/* === Кнопки === */
+.btn {
+    border-radius: 8px;
+    font-weight: 500;
+    padding: 0.5rem 1.2rem;
+    font-size: 0.95rem;
+    transition: all 0.2s;
+}
+
+.btn-primary {
+    background-color: var(--primary);
+    border: none;
+}
+
+.btn-primary:hover {
+    background-color: var(--primary-dark);
+    box-shadow: 0 4px 12px rgba(42, 134, 218, 0.3);
+}
+
+.btn-outline-primary {
+    border-color: var(--primary);
+    color: var(--primary);
+}
+
+.btn-outline-primary:hover {
+    background-color: var(--primary);
+    color: white;
+}
+
+.btn-outline-secondary {
+    border-color: #adb5bd;
+    color: #495057;
+}
+
+.btn-outline-secondary:hover {
+    background-color: #adb5bd;
+    color: white;
+}
+
+/* === Фоны для страниц с формами === */
+.form-page {
+    background: linear-gradient(135deg, #eaf2fa 0%, #dce9f7 100%);
+    min-height: 100vh;
+    padding-top: 2rem;
+    padding-bottom: 2rem;
+}
+
+/* === Герой-секция === */
+.hero-section {
+    background: linear-gradient(105deg, var(--primary) 0%, #4fa3e0 100%);
+    border-radius: var(--border-radius-lg);
+    padding: 2rem;
+    box-shadow: var(--card-shadow);
+}
+
+/* === Видео === */
 .video-wrapper {
     position: relative;
     padding-bottom: 56.25%;
-    /* 16:9 */
     height: 0;
     overflow: hidden;
-    border-radius: 16px;
+    border-radius: 12px;
     background-color: #000;
 }
 
@@ -111,92 +190,36 @@ main {
     border: none;
 }
 
-/* Новости */
+/* === Новости === */
 .news-list {
     max-height: 400px;
     overflow-y: auto;
-    padding-right: 0.5rem;
-}
-
-.news-list::-webkit-scrollbar {
-    width: 6px;
-}
-
-.news-list::-webkit-scrollbar-track {
-    background: #f1f1f1;
-    border-radius: 10px;
-}
-
-.news-list::-webkit-scrollbar-thumb {
-    background: var(--primary);
-    border-radius: 10px;
 }
 
 .news-item {
-    transition: background-color 0.2s;
-    padding: 0.75rem;
-    border-radius: 12px;
-}
-
-.news-item:hover {
-    background-color: rgba(42, 134, 218, 0.05);
+    padding: 0.6rem 0;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
 }
 
 .news-item:last-child {
-    border-bottom: none !important;
-    margin-bottom: 0 !important;
-    padding-bottom: 0 !important;
+    border-bottom: none;
 }
 
-.badge.bg-light {
-    background-color: #e9ecef !important;
-    color: var(--text-dark);
-    font-weight: 500;
-    padding: 0.35rem 0.65rem;
+/* === Левая панель авторизации (опционально) === */
+.register-left {
+    background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
 }
 
-/* Live бейдж */
-.live-badge {
-    background-color: #dc3545;
-    color: white;
-    font-size: 0.7rem;
-    font-weight: 700;
-    padding: 0.25rem 0.6rem;
-    border-radius: 30px;
-    animation: pulse 1.5s infinite;
-    display: inline-block;
+.register-left-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
 }
 
-@keyframes pulse {
-    0% {
-        opacity: 1;
-    }
-
-    50% {
-        opacity: 0.7;
-    }
-
-    100% {
-        opacity: 1;
-    }
-}
-
-/* Подвал */
-.footer {
-    background-color: white;
-    border-top: 1px solid rgba(0, 0, 0, 0.05);
-    color: var(--text-muted);
-    font-size: 0.9rem;
-}
-
-/* Адаптивность */
+/* === Адаптивность === */
 @media (max-width: 768px) {
     .hero-section {
         text-align: center;
-    }
-
-    .hero-section .btn-lg {
-        width: 100%;
     }
 
     .card {
@@ -204,23 +227,9 @@ main {
     }
 }
 
-/* >>> Делаем все стандартные контейнеры Bootstrap на всю ширину <<< */
 .container,
 .container-fluid {
-    max-width: 100% !important;
-    width: 100%;
-    padding-right: 1.5rem;
-    padding-left: 1.5rem;
-    margin-right: auto;
-    margin-left: auto;
-}
-
-/* Для крупных экранов можно увеличить боковые отступы */
-@media (min-width: 1400px) {
-
-    .container,
-    .container-fluid {
-        padding-right: 3rem;
-        padding-left: 3rem;
-    }
+    max-width: 100%;
+    padding-right: 1.2rem;
+    padding-left: 1.2rem;
 }

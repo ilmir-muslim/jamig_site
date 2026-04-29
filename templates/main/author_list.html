@@ -1,15 +1,15 @@
 {% extends 'base.html' %}
 {% block content %}
-<div class="container">
-    <h1>Наши авторы</h1>
+<div class="container py-4">
+    <h1 class="fw-bold mb-4">Наши авторы</h1>
     <div class="row">
         {% for author in authors %}
-        <div class="col-md-3 mb-3">
-            <div class="card text-center h-100 shadow-sm">
+        <div class="col-md-6 col-lg-3 mb-4">
+            <div class="card text-center h-100 shadow-sm border-0 rounded-4">
                 <div class="card-body">
-                    <h5 class="card-title">{{ author.user.get_full_name }}</h5>
-                    <p class="card-text">{{ author.specialization }}</p>
-                    <a href="{% url 'author_detail' author.pk %}" class="btn btn-sm btn-outline-primary">Смотреть материалы</a>
+                    <h5 class="card-title fw-bold">{{ author.user.get_full_name }}</h5>
+                    <p class="card-text text-muted">{{ author.specialization }}</p>
+                    <a href="{% url 'author_detail' author.pk %}" class="btn btn-sm btn-outline-primary rounded-pill">Смотреть материалы</a>
                 </div>
             </div>
         </div>

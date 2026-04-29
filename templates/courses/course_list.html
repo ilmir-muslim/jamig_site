@@ -1,23 +1,25 @@
 {% extends 'base.html' %}
 {% block content %}
-<div class="container">
-    <h1>Учебные программы</h1>
+<div class="container py-4">
+    <h1 class="mb-4 fw-bold">Учебные программы</h1>
     <div class="row">
         {% for course in courses %}
-        <div class="col-md-4 mb-3">
-            <div class="card h-100 shadow-sm">
-                <div class="card-body">
-                    <h5 class="card-title">{{ course.title }}</h5>
-                    <p class="card-text">{{ course.description|truncatewords:20 }}</p>
-                    <a href="{% url 'course_detail' course.slug %}" class="btn btn-sm btn-outline-primary">Подробнее</a>
-                </div>
-                <div class="card-footer text-muted">
-                    {{ course.lessons.count }} уроков
+        <div class="col-md-6 col-lg-4 mb-4">
+            <div class="card h-100 shadow-sm border-0 rounded-4">
+                <div class="card-body d-flex flex-column">
+                    <h5 class="card-title fw-bold">{{ course.title }}</h5>
+                    <p class="card-text text-muted">{{ course.description|truncatewords:20 }}</p>
+                    <div class="mt-auto d-flex justify-content-between align-items-center">
+                        <a href="{% url 'course_detail' course.slug %}" class="btn btn-sm btn-outline-primary rounded-pill">Подробнее</a>
+                        <small class="text-muted">{{ course.lessons.count }} уроков</small>
+                    </div>
                 </div>
             </div>
         </div>
         {% empty %}
-        <p>Пока нет доступных курсов.</p>
+        <div class="col-12">
+            <div class="alert alert-info rounded-4">Пока нет доступных курсов.</div>
+        </div>
         {% endfor %}
     </div>
 </div>

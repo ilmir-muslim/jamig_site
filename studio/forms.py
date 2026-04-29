@@ -15,7 +15,21 @@ class VideoContentForm(forms.ModelForm):
             "category",
         ]
         widgets = {
-            "description": forms.Textarea(attrs={"rows": 3}),
+            "title": forms.TextInput(
+                attrs={"class": "form-control", "placeholder": "Название"}
+            ),
+            "description": forms.Textarea(
+                attrs={"class": "form-control", "placeholder": "Описание", "rows": 3}
+            ),
+            "embed_code": forms.Textarea(
+                attrs={"class": "form-control", "placeholder": "Код вставки", "rows": 3}
+            ),
+            "duration": forms.NumberInput(
+                attrs={"class": "form-control", "placeholder": "Длительность"}
+            ),
+            "category": forms.Select(attrs={"class": "form-select"}),
+            "thumbnail": forms.ClearableFileInput(attrs={"class": "form-control"}),
+            "is_live": forms.CheckboxInput(attrs={"class": "form-check-input"}),
         }
 
 
@@ -31,7 +45,18 @@ class AudioContentForm(forms.ModelForm):
             "category",
         ]
         widgets = {
-            "description": forms.Textarea(attrs={"rows": 3}),
+            "title": forms.TextInput(
+                attrs={"class": "form-control", "placeholder": "Название"}
+            ),
+            "description": forms.Textarea(
+                attrs={"class": "form-control", "placeholder": "Описание", "rows": 3}
+            ),
+            "audio_file": forms.ClearableFileInput(attrs={"class": "form-control"}),
+            "duration": forms.NumberInput(
+                attrs={"class": "form-control", "placeholder": "Длительность"}
+            ),
+            "category": forms.Select(attrs={"class": "form-select"}),
+            "cover_image": forms.ClearableFileInput(attrs={"class": "form-control"}),
         }
 
 
@@ -47,6 +72,26 @@ class TextContentForm(forms.ModelForm):
             "category",
         ]
         widgets = {
-            "content": forms.Textarea(attrs={"rows": 10}),
-            "description": forms.Textarea(attrs={"rows": 3}),
+            "title": forms.TextInput(
+                attrs={"class": "form-control", "placeholder": "Название"}
+            ),
+            "subtitle": forms.TextInput(
+                attrs={"class": "form-control", "placeholder": "Подзаголовок"}
+            ),
+            "content": forms.Textarea(
+                attrs={
+                    "class": "form-control",
+                    "placeholder": "Текст статьи",
+                    "rows": 10,
+                }
+            ),
+            "description": forms.Textarea(
+                attrs={
+                    "class": "form-control",
+                    "placeholder": "Краткое описание",
+                    "rows": 3,
+                }
+            ),
+            "category": forms.Select(attrs={"class": "form-select"}),
+            "cover_image": forms.ClearableFileInput(attrs={"class": "form-control"}),
         }

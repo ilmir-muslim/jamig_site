@@ -1,42 +1,48 @@
 {% extends 'base.html' %}
 {% block content %}
-<div class="container">
-    <h1>{{ author.user.get_full_name }}</h1>
-    <p>{{ author.specialization }}</p>
-    <p>{{ author.qualifications|linebreaks }}</p>
+<div class="container py-4">
+    <h1 class="fw-bold">{{ author.user.get_full_name }}</h1>
+    <p class="lead">{{ author.specialization }}</p>
+    <div class="mb-4">{{ author.qualifications|linebreaks }}</div>
 
-    <h3>Видео</h3>
-    <div class="row">
-        {% for video in videos %}
-        <div class="col-md-4 mb-3">
-            <div class="card shadow-sm">
-                <div class="card-body">
-                    <h5>{{ video.title }}</h5>
-                    <p>{{ video.description|truncatewords:10 }}</p>
+    <section class="mb-4">
+        <h3>Видео</h3>
+        <div class="row">
+            {% for video in videos %}
+            <div class="col-md-4 mb-3">
+                <div class="card shadow-sm border-0 rounded-4">
+                    <div class="card-body">
+                        <h5 class="fw-bold">{{ video.title }}</h5>
+                        <p class="text-muted">{{ video.description|truncatewords:10 }}</p>
+                    </div>
                 </div>
             </div>
+            {% empty %}
+            <div class="col-12"><p class="text-muted">Нет видео.</p></div>
+            {% endfor %}
         </div>
-        {% empty %}
-        <p>Нет видео.</p>
-        {% endfor %}
-    </div>
+    </section>
 
-    <h3>Аудио</h3>
-    <ul>
-        {% for audio in audios %}
-        <li>{{ audio.title }}</li>
-        {% empty %}
-        <li>Нет аудио.</li>
-        {% endfor %}
-    </ul>
+    <section class="mb-4">
+        <h3>Аудио</h3>
+        <ul class="list-group">
+            {% for audio in audios %}
+            <li class="list-group-item border-0 shadow-sm mb-2 rounded-4">{{ audio.title }}</li>
+            {% empty %}
+            <li class="list-group-item border-0 text-muted">Нет аудио.</li>
+            {% endfor %}
+        </ul>
+    </section>
 
-    <h3>Статьи</h3>
-    <ul>
-        {% for text in texts %}
-        <li>{{ text.title }}</li>
-        {% empty %}
-        <li>Нет статей.</li>
-        {% endfor %}
-    </ul>
+    <section>
+        <h3>Статьи</h3>
+        <ul class="list-group">
+            {% for text in texts %}
+            <li class="list-group-item border-0 shadow-sm mb-2 rounded-4">{{ text.title }}</li>
+            {% empty %}
+            <li class="list-group-item border-0 text-muted">Нет статей.</li>
+            {% endfor %}
+        </ul>
+    </section>
 </div>
 {% endblock %}

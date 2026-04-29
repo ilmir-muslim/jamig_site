@@ -1,31 +1,33 @@
 {% extends 'base.html' %}
 {% block content %}
-<div class="container">
-    <h1>{{ course.title }}</h1>
-    <p>{{ course.description }}</p>
+<div class="container py-4">
+    <h1 class="fw-bold">{{ course.title }}</h1>
+    <p class="lead">{{ course.description }}</p>
     <p><strong>Автор:</strong> 
         {% if course.author %}
-            <a href="{% url 'author_detail' course.author.id %}">{{ course.author.user.get_full_name }}</a>
+            <a href="{% url 'author_detail' course.author.id %}" class="text-decoration-none">{{ course.author.user.get_full_name }}</a>
         {% else %}
             Не указан
         {% endif %}
     </p>
     <hr>
-    <h3>Уроки</h3>
+    <h3 class="mb-3">Уроки</h3>
     <div class="list-group">
         {% for lesson in lessons %}
-        <div class="list-group-item">
-            <h5>{{ lesson.order }}. {{ lesson.title }}</h5>
-            <p>{{ lesson.description }}</p>
-            {% if lesson.video %}
-                <a href="#" class="btn btn-sm btn-outline-secondary">Смотреть видео</a>
-            {% endif %}
-            {% if lesson.audio %}
-                <a href="#" class="btn btn-sm btn-outline-secondary">Слушать аудио</a>
-            {% endif %}
-            {% if lesson.text %}
-                <a href="#" class="btn btn-sm btn-outline-secondary">Читать статью</a>
-            {% endif %}
+        <div class="list-group-item border-0 shadow-sm mb-3 rounded-4">
+            <h5 class="fw-bold">{{ lesson.order }}. {{ lesson.title }}</h5>
+            <p class="text-muted">{{ lesson.description }}</p>
+            <div class="d-flex gap-2">
+                {% if lesson.video %}
+                    <span class="badge bg-primary rounded-pill"><i class="fas fa-video me-1"></i>Видео</span>
+                {% endif %}
+                {% if lesson.audio %}
+                    <span class="badge bg-success rounded-pill"><i class="fas fa-headphones me-1"></i>Аудио</span>
+                {% endif %}
+                {% if lesson.text %}
+                    <span class="badge bg-info rounded-pill"><i class="fas fa-file-alt me-1"></i>Текст</span>
+                {% endif %}
+            </div>
         </div>
         {% endfor %}
     </div>
