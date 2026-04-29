@@ -1,57 +1,51 @@
-{% extends 'base.html' %}
-{% block content %}
-<div class="form-page">
-  <div class="container">
-    <div class="row justify-content-center">
-      <div class="col-lg-8 col-xl-7">
-        <div class="card shadow-sm border-0" style="border-radius:16px;">
-          <div class="card-body p-4">
-            <h4 class="mb-4 fw-bold">
-              {% if action == 'create' %}Новое видео{% else %}Редактировать видео{% endif %}
-            </h4>
-            <form method="post" enctype="multipart/form-data" novalidate>
-              {% csrf_token %}
-              <div class="mb-3">
+{% extends 'studio/base_studio.html' %}
+
+{% block studio_content %}
+<div class="studio-form-card">
+    <div class="studio-card p-4">
+        <h4 class="mb-4 fw-bold">
+            {% if action == 'create' %}<i class="fas fa-plus-circle me-2" style="color: var(--accent);"></i>Новое видео
+            {% else %}<i class="fas fa-edit me-2" style="color: var(--accent);"></i>Редактировать видео{% endif %}
+        </h4>
+        <form method="post" enctype="multipart/form-data" novalidate>
+            {% csrf_token %}
+            <div class="mb-3">
                 <label class="form-label">Название</label>
                 {{ form.title }}
-              </div>
-              <div class="mb-3">
+            </div>
+            <div class="mb-3">
                 <label class="form-label">Описание</label>
                 {{ form.description }}
-              </div>
-              <div class="mb-3">
+            </div>
+            <div class="mb-3">
                 <label class="form-label">Код вставки (iframe)</label>
                 {{ form.embed_code }}
-              </div>
-              <div class="row mb-3">
+            </div>
+            <div class="row mb-3">
                 <div class="col-6">
-                  <label class="form-label">Длительность (сек.)</label>
-                  {{ form.duration }}
+                    <label class="form-label">Длительность (сек.)</label>
+                    {{ form.duration }}
                 </div>
                 <div class="col-6">
-                  <label class="form-label">Категория</label>
-                  {{ form.category }}
+                    <label class="form-label">Категория</label>
+                    {{ form.category }}
                 </div>
-              </div>
-              <div class="mb-3">
+            </div>
+            <div class="mb-3">
                 <label class="form-label">Обложка</label>
                 {{ form.thumbnail }}
-              </div>
-              <div class="form-check mb-4">
+            </div>
+            <div class="form-check mb-4">
                 {{ form.is_live }}
                 <label class="form-check-label">Прямой эфир</label>
-              </div>
-              <div class="text-end">
-                <button type="submit" class="btn btn-primary">
-                  <i class="fas fa-save me-2"></i>Сохранить
+            </div>
+            <div class="text-end">
+                <button type="submit" class="btn btn-primary px-4" style="border-radius: 10px;">
+                    <i class="fas fa-save me-2"></i>Сохранить
                 </button>
-                <a href="{% url 'studio_dashboard' %}" class="btn btn-outline-secondary ms-2">Отмена</a>
-              </div>
-            </form>
-          </div>
-        </div>
-      </div>
+                <a href="{% url 'studio_video_list' %}" class="btn btn-light ms-2 px-4" style="border-radius: 10px;">Отмена</a>
+            </div>
+        </form>
     </div>
-  </div>
 </div>
 {% endblock %}

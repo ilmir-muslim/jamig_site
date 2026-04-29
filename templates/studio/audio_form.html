@@ -1,53 +1,50 @@
-{% extends 'base.html' %}
-{% block content %}
-<div class="form-page">
-  <div class="container">
-    <div class="row justify-content-center">
-      <div class="col-lg-8 col-xl-7">
-        <div class="card shadow-sm border-0" style="border-radius:16px;">
-          <div class="card-body p-4">
-            <h4 class="mb-4 fw-bold">
-              {% if action == 'create' %}Новое аудио{% else %}Редактировать аудио{% endif %}
-            </h4>
-            <form method="post" enctype="multipart/form-data" novalidate>
-              {% csrf_token %}
-              <div class="mb-3">
-                <label class="form-label">Название</label>
-                {{ form.title }}
-              </div>
-              <div class="mb-3">
-                <label class="form-label">Описание</label>
-                {{ form.description }}
-              </div>
-              <div class="mb-3">
-                <label class="form-label">Аудиофайл</label>
-                {{ form.audio_file }}
-              </div>
-              <div class="row mb-3">
-                <div class="col-6">
-                  <label class="form-label">Длительность (сек.)</label>
-                  {{ form.duration }}
-                </div>
-                <div class="col-6">
-                  <label class="form-label">Категория</label>
-                  {{ form.category }}
-                </div>
-              </div>
-              <div class="mb-3">
-                <label class="form-label">Обложка</label>
-                {{ form.cover_image }}
-              </div>
-              <div class="text-end">
-                <button type="submit" class="btn btn-primary">
-                  <i class="fas fa-save me-2"></i>Сохранить
-                </button>
-                <a href="{% url 'studio_dashboard' %}" class="btn btn-outline-secondary ms-2">Отмена</a>
-              </div>
-            </form>
-          </div>
+{% extends 'studio/base_studio.html' %}
+
+{% block studio_content %}
+<div class="row justify-content-center">
+    <div class="col-lg-8 col-xl-7">
+        <div class="card border-0 shadow-sm" style="border-radius:16px;">
+            <div class="card-body p-4">
+                <h4 class="mb-4 fw-bold">
+                    {% if action == 'create' %}Новое аудио{% else %}Редактировать аудио{% endif %}
+                </h4>
+                <form method="post" enctype="multipart/form-data" novalidate>
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label class="form-label">Название</label>
+                        {{ form.title }}
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Описание</label>
+                        {{ form.description }}
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Аудиофайл</label>
+                        {{ form.audio_file }}
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-6">
+                            <label class="form-label">Длительность (сек.)</label>
+                            {{ form.duration }}
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label">Категория</label>
+                            {{ form.category }}
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Обложка</label>
+                        {{ form.cover_image }}
+                    </div>
+                    <div class="text-end">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save me-2"></i>Сохранить
+                        </button>
+                        <a href="{% url 'studio_audio_list' %}" class="btn btn-outline-secondary ms-2">Отмена</a>
+                    </div>
+                </form>
+            </div>
         </div>
-      </div>
     </div>
-  </div>
 </div>
 {% endblock %}
