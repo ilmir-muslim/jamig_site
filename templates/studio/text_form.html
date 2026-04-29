@@ -34,6 +34,9 @@
                         <div class="col-6">
                             <label class="form-label">Обложка</label>
                             {{ form.cover_image }}
+                            <div id="cover-preview" class="mt-2 text-center" style="display: none;">
+                                <img id="cover-img" src="#" alt="Предпросмотр обложки" class="img-thumbnail" style="max-width: 300px; max-height: 200px;">
+                            </div>
                         </div>
                     </div>
                     <div class="text-end">
@@ -47,4 +50,26 @@
         </div>
     </div>
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    const coverInput = document.querySelector('#id_cover_image');
+    const coverPreview = document.getElementById('cover-preview');
+    const coverImg = document.getElementById('cover-img');
+
+    coverInput.addEventListener('change', function() {
+        const file = this.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                coverImg.src = e.target.result;
+                coverPreview.style.display = 'block';
+            }
+            reader.readAsDataURL(file);
+        } else {
+            coverPreview.style.display = 'none';
+        }
+    });
+</script>
 {% endblock %}

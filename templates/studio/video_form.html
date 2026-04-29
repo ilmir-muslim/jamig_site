@@ -1,51 +1,103 @@
 {% extends 'studio/base_studio.html' %}
 
 {% block studio_content %}
-<div class="studio-form-card">
-    <div class="studio-card p-4">
-        <h4 class="mb-4 fw-bold">
-            {% if action == 'create' %}<i class="fas fa-plus-circle me-2" style="color: var(--accent);"></i>Новое видео
-            {% else %}<i class="fas fa-edit me-2" style="color: var(--accent);"></i>Редактировать видео{% endif %}
-        </h4>
-        <form method="post" enctype="multipart/form-data" novalidate>
-            {% csrf_token %}
-            <div class="mb-3">
-                <label class="form-label">Название</label>
-                {{ form.title }}
+<div class="row justify-content-center">
+    <div class="col-lg-8 col-xl-7">
+        <div class="card border-0 shadow-sm" style="border-radius:16px;">
+            <div class="card-body p-4">
+                <h4 class="mb-4 fw-bold">
+                    {% if action == 'create' %}Новое видео{% else %}Редактировать видео{% endif %}
+                </h4>
+                <form method="post" enctype="multipart/form-data" novalidate>
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label class="form-label">Название</label>
+                        {{ form.title }}
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Описание</label>
+                        {{ form.description }}
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Код вставки (iframe)</label>
+                        {{ form.embed_code }}
+                        <div id="embed-preview" class="mt-2" style="display: none;">
+                            <label class="form-label">Предпросмотр видео</label>
+                            <div class="video-preview-wrapper"></div>
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-6">
+                            <label class="form-label">Длительность (сек.)</label>
+                            {{ form.duration }}
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label">Категория</label>
+                            {{ form.category }}
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Обложка</label>
+                        {{ form.thumbnail }}
+                        <div id="thumbnail-preview" class="mt-2 text-center" style="display: none;">
+                            <img id="thumbnail-img" src="#" alt="Предпросмотр обложки" class="img-thumbnail" style="max-width: 300px; max-height: 200px;">
+                        </div>
+                    </div>
+                    <div class="form-check mb-4">
+                        {{ form.is_live }}
+                        <label class="form-check-label">Прямой эфир</label>
+                    </div>
+                    <div class="text-end">
+                        <button type="submit" class="btn btn-primary px-4" style="border-radius: 10px;">
+                            <i class="fas fa-save me-2"></i>Сохранить
+                        </button>
+                        <a href="{% url 'studio_video_list' %}" class="btn btn-light ms-2 px-4" style="border-radius: 10px;">Отмена</a>
+                    </div>
+                </form>
             </div>
-            <div class="mb-3">
-                <label class="form-label">Описание</label>
-                {{ form.description }}
-            </div>
-            <div class="mb-3">
-                <label class="form-label">Код вставки (iframe)</label>
-                {{ form.embed_code }}
-            </div>
-            <div class="row mb-3">
-                <div class="col-6">
-                    <label class="form-label">Длительность (сек.)</label>
-                    {{ form.duration }}
-                </div>
-                <div class="col-6">
-                    <label class="form-label">Категория</label>
-                    {{ form.category }}
-                </div>
-            </div>
-            <div class="mb-3">
-                <label class="form-label">Обложка</label>
-                {{ form.thumbnail }}
-            </div>
-            <div class="form-check mb-4">
-                {{ form.is_live }}
-                <label class="form-check-label">Прямой эфир</label>
-            </div>
-            <div class="text-end">
-                <button type="submit" class="btn btn-primary px-4" style="border-radius: 10px;">
-                    <i class="fas fa-save me-2"></i>Сохранить
-                </button>
-                <a href="{% url 'studio_video_list' %}" class="btn btn-light ms-2 px-4" style="border-radius: 10px;">Отмена</a>
-            </div>
-        </form>
+        </div>
     </div>
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Предпросмотр обложки
+    const thumbnailInput = document.querySelector('#id_thumbnail');
+    const thumbnailPreview = document.getElementById('thumbnail-preview');
+    const thumbnailImg = document.getElementById('thumbnail-img');
+
+    thumbnailInput.addEventListener('change', function() {
+        const file = this.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                thumbnailImg.src = e.target.result;
+                thumbnailPreview.style.display = 'block';
+            }
+            reader.readAsDataURL(file);
+        } else {
+            thumbnailPreview.style.display = 'none';
+        }
+    });
+
+    // Предпросмотр embed-кода (Rutube или другой iframe)
+    const embedInput = document.querySelector('#id_embed_code');
+    const embedPreview = document.getElementById('embed-preview');
+    const embedWrapper = embedPreview.querySelector('.video-preview-wrapper');
+
+    function updateEmbedPreview() {
+        const code = embedInput.value.trim();
+        if (code) {
+            embedWrapper.innerHTML = code;
+            embedPreview.style.display = 'block';
+        } else {
+            embedPreview.style.display = 'none';
+        }
+    }
+
+    embedInput.addEventListener('input', updateEmbedPreview);
+    // Вызываем сразу, если форма редактирования уже содержит код
+    document.addEventListener('DOMContentLoaded', updateEmbedPreview);
+</script>
 {% endblock %}
