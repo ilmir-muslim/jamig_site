@@ -1,10 +1,8 @@
 {% extends 'base.html' %}
 {% load static %}
-
 {% block content %}
 <div class="container py-4">
     <h1 class="mb-4 fw-bold">Аудио</h1>
-
     {% if categories %}
     <div class="mb-4">
         <a href="{% url 'audio_list' %}" class="btn btn-sm btn-outline-secondary me-2">Все</a>
@@ -13,22 +11,24 @@
         {% endfor %}
     </div>
     {% endif %}
-
     <div class="row">
         {% for audio in audios %}
         <div class="col-md-6 col-lg-4 mb-4">
             <div class="card h-100 shadow-sm border-0 rounded-4 overflow-hidden">
-                <div style="height: 200px;">
-                    {% if audio.cover_image %}
-                        <img src="{{ audio.cover_image.url }}" alt="{{ audio.title }}" class="w-100 h-100" style="object-fit: cover;">
-                    {% else %}
-                        <div class="d-flex align-items-center justify-content-center h-100 bg-light">
-                            <i class="fas fa-headphones fa-3x text-secondary"></i>
-                        </div>
-                    {% endif %}
-                </div>
                 <div class="card-body">
                     <h5 class="card-title fw-bold">{{ audio.title }}</h5>
+                    <p class="card-text text-muted small">{{ audio.description|truncatewords:15 }}</p>
+                    {% if audio.audio_file %}
+                        <audio controls class="w-100 mb-2">
+                            <source src="{{ audio.audio_file.url }}" type="audio/mpeg">
+                            Ваш браузер не поддерживает аудио.
+                        </audio>
+                        <a href="{{ audio.audio_file.url }}" class="btn btn-sm btn-outline-secondary" download>
+                            <i class="fas fa-download me-1"></i>Скачать
+                        </a>
+                    {% else %}
+                        <div class="alert alert-warning mb-0">Аудиофайл отсутствует</div>
+                    {% endif %}
                 </div>
             </div>
         </div>
@@ -38,21 +38,5 @@
         </div>
         {% endfor %}
     </div>
-
-    {% if is_paginated %}
-    <nav class="mt-4">
-        <ul class="pagination justify-content-center">
-            {% if page_obj.has_previous %}
-                <li class="page-item"><a class="page-link" href="?page={{ page_obj.previous_page_number }}">&laquo;</a></li>
-            {% endif %}
-            {% for num in page_obj.paginator.page_range %}
-                <li class="page-item {% if page_obj.number == num %}active{% endif %}"><a class="page-link" href="?page={{ num }}">{{ num }}</a></li>
-            {% endfor %}
-            {% if page_obj.has_next %}
-                <li class="page-item"><a class="page-link" href="?page={{ page_obj.next_page_number }}">&raquo;</a></li>
-            {% endif %}
-        </ul>
-    </nav>
-    {% endif %}
 </div>
 {% endblock %}

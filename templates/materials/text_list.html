@@ -1,10 +1,8 @@
 {% extends 'base.html' %}
 {% load static %}
-
 {% block content %}
 <div class="container py-4">
     <h1 class="mb-4 fw-bold">Статьи</h1>
-
     {% if categories %}
     <div class="mb-4">
         <a href="{% url 'text_list' %}" class="btn btn-sm btn-outline-secondary me-2">Все</a>
@@ -13,22 +11,16 @@
         {% endfor %}
     </div>
     {% endif %}
-
     <div class="row">
         {% for text in texts %}
         <div class="col-md-6 col-lg-4 mb-4">
             <div class="card h-100 shadow-sm border-0 rounded-4 overflow-hidden">
-                <div style="height: 200px;">
-                    {% if text.cover_image %}
-                        <img src="{{ text.cover_image.url }}" alt="{{ text.title }}" class="w-100 h-100" style="object-fit: cover;">
-                    {% else %}
-                        <div class="d-flex align-items-center justify-content-center h-100 bg-light">
-                            <i class="fas fa-file-alt fa-3x text-secondary"></i>
-                        </div>
-                    {% endif %}
-                </div>
                 <div class="card-body">
                     <h5 class="card-title fw-bold">{{ text.title }}</h5>
+                    <p class="card-text text-muted small">{{ text.description|truncatewords:20 }}</p>
+                    <a href="{% url 'text_detail' text.slug %}" class="btn btn-sm btn-outline-primary">
+                        <i class="fas fa-book-open me-1"></i>Читать
+                    </a>
                 </div>
             </div>
         </div>
@@ -38,21 +30,5 @@
         </div>
         {% endfor %}
     </div>
-
-    {% if is_paginated %}
-    <nav class="mt-4">
-        <ul class="pagination justify-content-center">
-            {% if page_obj.has_previous %}
-                <li class="page-item"><a class="page-link" href="?page={{ page_obj.previous_page_number }}">&laquo;</a></li>
-            {% endif %}
-            {% for num in page_obj.paginator.page_range %}
-                <li class="page-item {% if page_obj.number == num %}active{% endif %}"><a class="page-link" href="?page={{ num }}">{{ num }}</a></li>
-            {% endfor %}
-            {% if page_obj.has_next %}
-                <li class="page-item"><a class="page-link" href="?page={{ page_obj.next_page_number }}">&raquo;</a></li>
-            {% endif %}
-        </ul>
-    </nav>
-    {% endif %}
 </div>
 {% endblock %}
