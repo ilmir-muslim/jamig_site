@@ -8,7 +8,7 @@
                 <h4 class="mb-4 fw-bold">
                     {% if action == 'create' %}Новое видео{% else %}Редактировать видео{% endif %}
                 </h4>
-                <form method="post" enctype="multipart/form-data" novalidate>
+                <form method="post" enctype="multipart/form-data" novalidate id="content-form">
                     {% csrf_token %}
                     <div class="mb-3">
                         <label class="form-label">Название</label>
@@ -26,15 +26,9 @@
                             <div class="video-preview-wrapper"></div>
                         </div>
                     </div>
-                    <div class="row mb-3">
-                        <div class="col-6">
-                            <label class="form-label">Длительность (сек.)</label>
-                            {{ form.duration }}
-                        </div>
-                        <div class="col-6">
-                            <label class="form-label">Категория</label>
-                            {{ form.category }}
-                        </div>
+                    <div class="mb-3">
+                        <label class="form-label">Категория</label>
+                        {{ form.category }}
                     </div>
                     <div class="mb-3">
                         <label class="form-label">Обложка</label>
@@ -47,11 +41,18 @@
                         {{ form.is_live }}
                         <label class="form-check-label">Прямой эфир</label>
                     </div>
-                    <div class="text-end">
-                        <button type="submit" class="btn btn-primary px-4" style="border-radius: 10px;">
+                    <div class="mb-4">
+                        <label class="form-label">Статус</label>
+                        {{ form.status }}
+                    </div>
+                    <div class="d-flex justify-content-end gap-2">
+                        <button type="submit" class="btn btn-outline-primary">
                             <i class="fas fa-save me-2"></i>Сохранить
                         </button>
-                        <a href="{% url 'studio_video_list' %}" class="btn btn-light ms-2 px-4" style="border-radius: 10px;">Отмена</a>
+                        <button type="button" class="btn btn-primary" id="publish-btn">
+                            <i class="fas fa-check-circle me-2"></i>Опубликовать
+                        </button>
+                        <a href="{% url 'studio_video_list' %}" class="btn btn-light">Отмена</a>
                     </div>
                 </form>
             </div>
@@ -81,7 +82,7 @@
         }
     });
 
-    // Предпросмотр embed-кода (Rutube или другой iframe)
+    // Предпросмотр embed-кода
     const embedInput = document.querySelector('#id_embed_code');
     const embedPreview = document.getElementById('embed-preview');
     const embedWrapper = embedPreview.querySelector('.video-preview-wrapper');
@@ -95,9 +96,17 @@
             embedPreview.style.display = 'none';
         }
     }
-
     embedInput.addEventListener('input', updateEmbedPreview);
-    // Вызываем сразу, если форма редактирования уже содержит код
     document.addEventListener('DOMContentLoaded', updateEmbedPreview);
+
+    // Кнопка "Опубликовать"
+    const publishBtn = document.getElementById('publish-btn');
+    const statusSelect = document.getElementById('id_status');
+    const form = document.getElementById('content-form');
+
+    publishBtn.addEventListener('click', function() {
+        statusSelect.value = 'published';
+        form.submit();
+    });
 </script>
 {% endblock %}

@@ -1,0 +1,35 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container py-4">
+    <h1 class="fw-bold">{{ video.title }}</h1>
+    {% if video.author %}
+    <p class="text-muted">
+        <i class="fas fa-user me-1"></i> {{ video.author.user.get_full_name }}
+    </p>
+    {% endif %}
+
+    <div class="row mt-4">
+        <div class="col-lg-8">
+            <div class="video-wrapper mb-4">
+                {{ video.get_embed_html|safe }}
+            </div>
+        </div>
+        <div class="col-lg-4">
+            <div class="card border-0 shadow-sm rounded-4">
+                <div class="card-body">
+                    <h5>Описание</h5>
+                    <p>{{ video.description|linebreaks }}</p>
+                    {% if video.category %}
+                    <span class="badge bg-primary rounded-pill">{{ video.category.title }}</span>
+                    {% endif %}
+                    <hr>
+                    <small class="text-muted">Просмотров: {{ video.views_count }}</small><br>
+                    <small class="text-muted">Опубликовано: {{ video.published_at|date:"d.m.Y" }}</small>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

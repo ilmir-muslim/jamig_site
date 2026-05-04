@@ -1,0 +1,38 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container py-4">
+    <h1 class="fw-bold">{{ audio.title }}</h1>
+    {% if audio.author %}
+    <p class="text-muted">
+        <i class="fas fa-user me-1"></i> {{ audio.author.user.get_full_name }}
+    </p>
+    {% endif %}
+
+    <div class="row mt-4">
+        <div class="col-lg-8">
+            <div class="card border-0 shadow-sm rounded-4 p-3 mb-4">
+                <audio controls class="w-100">
+                    <source src="{{ audio.audio_file.url }}" type="audio/mpeg">
+                    Ваш браузер не поддерживает аудио.
+                </audio>
+            </div>
+        </div>
+        <div class="col-lg-4">
+            <div class="card border-0 shadow-sm rounded-4">
+                <div class="card-body">
+                    <h5>Описание</h5>
+                    <p>{{ audio.description|linebreaks }}</p>
+                    {% if audio.category %}
+                    <span class="badge bg-success rounded-pill">{{ audio.category.title }}</span>
+                    {% endif %}
+                    <hr>
+                    <small class="text-muted">Прослушиваний: {{ audio.listens_count }}</small><br>
+                    <small class="text-muted">Опубликовано: {{ audio.published_at|date:"d.m.Y" }}</small>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

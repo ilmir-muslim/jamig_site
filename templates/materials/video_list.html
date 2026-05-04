@@ -1,0 +1,80 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container py-4">
+    <h1 class="mb-4 fw-bold">Видео</h1>
+
+    {% if categories %}
+    <div class="mb-4">
+        <a href="{% url 'video_list' %}" class="btn btn-sm btn-outline-secondary me-2">Все</a>
+        {% for cat in categories %}
+            <a href="?category={{ cat.slug }}" class="btn btn-sm btn-outline-secondary me-2">{{ cat.title }}</a>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <div class="row">
+        {% for video in videos %}
+        <div class="col-md-6 col-lg-4 mb-4">
+            <div class="card h-100 shadow-sm border-0 rounded-4 overflow-hidden">
+                <div class="video-card-preview">
+                    {% if video.embed_code %}
+                        {{ video.get_embed_html|safe }}
+                    {% else %}
+                        <div class="d-flex align-items-center justify-content-center h-100 bg-light">
+                            <i class="fas fa-video fa-3x text-secondary"></i>
+                        </div>
+                    {% endif %}
+                </div>
+                <div class="card-body">
+                    <h5 class="card-title fw-bold">{{ video.title }}</h5>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="col-12">
+            <div class="alert alert-info rounded-4">Видео пока нет.</div>
+        </div>
+        {% endfor %}
+    </div>
+
+    {% if is_paginated %}
+    <nav class="mt-4">
+        <ul class="pagination justify-content-center">
+            {% if page_obj.has_previous %}
+                <li class="page-item"><a class="page-link" href="?page={{ page_obj.previous_page_number }}">&laquo;</a></li>
+            {% endif %}
+            {% for num in page_obj.paginator.page_range %}
+                <li class="page-item {% if page_obj.number == num %}active{% endif %}"><a class="page-link" href="?page={{ num }}">{{ num }}</a></li>
+            {% endfor %}
+            {% if page_obj.has_next %}
+                <li class="page-item"><a class="page-link" href="?page={{ page_obj.next_page_number }}">&raquo;</a></li>
+            {% endif %}
+        </ul>
+    </nav>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .video-card-preview {
+        position: relative;
+        padding-bottom: 56.25%; /* 16:9 */
+        height: 0;
+        overflow: hidden;
+        background: #000;
+    }
+    .video-card-preview iframe {
+        position: absolute !important;
+        top: 0 !important;
+        left: 0 !important;
+        width: 100% !important;
+        height: 100% !important;
+        max-width: 100% !important;
+        max-height: 100% !important;
+        border: none !important;
+    }
+</style>
+{% endblock %}

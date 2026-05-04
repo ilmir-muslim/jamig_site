@@ -1,3 +1,4 @@
+# studio/forms.py
 from django import forms
 from courses.models import Course
 from materials.models import VideoContent, AudioContent, TextContent
@@ -10,10 +11,10 @@ class VideoContentForm(forms.ModelForm):
             "title",
             "description",
             "embed_code",
-            "duration",
+            "category",
             "thumbnail",
             "is_live",
-            "category",
+            "status",  # <-- Добавлено
         ]
         widgets = {
             "title": forms.TextInput(
@@ -25,12 +26,10 @@ class VideoContentForm(forms.ModelForm):
             "embed_code": forms.Textarea(
                 attrs={"class": "form-control", "placeholder": "Код вставки", "rows": 3}
             ),
-            "duration": forms.NumberInput(
-                attrs={"class": "form-control", "placeholder": "Длительность"}
-            ),
             "category": forms.Select(attrs={"class": "form-select"}),
             "thumbnail": forms.ClearableFileInput(attrs={"class": "form-control"}),
             "is_live": forms.CheckboxInput(attrs={"class": "form-check-input"}),
+            "status": forms.Select(attrs={"class": "form-select"}),  # <-- Виджет
         }
 
 
@@ -41,9 +40,9 @@ class AudioContentForm(forms.ModelForm):
             "title",
             "description",
             "audio_file",
-            "duration",
-            "cover_image",
             "category",
+            "cover_image",
+            "status",  # <-- Добавлено
         ]
         widgets = {
             "title": forms.TextInput(
@@ -53,11 +52,9 @@ class AudioContentForm(forms.ModelForm):
                 attrs={"class": "form-control", "placeholder": "Описание", "rows": 3}
             ),
             "audio_file": forms.ClearableFileInput(attrs={"class": "form-control"}),
-            "duration": forms.NumberInput(
-                attrs={"class": "form-control", "placeholder": "Длительность"}
-            ),
             "category": forms.Select(attrs={"class": "form-select"}),
             "cover_image": forms.ClearableFileInput(attrs={"class": "form-control"}),
+            "status": forms.Select(attrs={"class": "form-select"}),  # <-- Виджет
         }
 
 
@@ -71,6 +68,7 @@ class TextContentForm(forms.ModelForm):
             "description",
             "cover_image",
             "category",
+            "status",  # <-- Добавлено
         ]
         widgets = {
             "title": forms.TextInput(
@@ -95,6 +93,7 @@ class TextContentForm(forms.ModelForm):
             ),
             "category": forms.Select(attrs={"class": "form-select"}),
             "cover_image": forms.ClearableFileInput(attrs={"class": "form-control"}),
+            "status": forms.Select(attrs={"class": "form-select"}),  # <-- Виджет
         }
 
 

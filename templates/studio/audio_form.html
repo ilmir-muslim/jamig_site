@@ -8,7 +8,7 @@
                 <h4 class="mb-4 fw-bold">
                     {% if action == 'create' %}Новое аудио{% else %}Редактировать аудио{% endif %}
                 </h4>
-                <form method="post" enctype="multipart/form-data" novalidate>
+                <form method="post" enctype="multipart/form-data" novalidate id="content-form">
                     {% csrf_token %}
                     <div class="mb-3">
                         <label class="form-label">Название</label>
@@ -22,15 +22,9 @@
                         <label class="form-label">Аудиофайл</label>
                         {{ form.audio_file }}
                     </div>
-                    <div class="row mb-3">
-                        <div class="col-6">
-                            <label class="form-label">Длительность (сек.)</label>
-                            {{ form.duration }}
-                        </div>
-                        <div class="col-6">
-                            <label class="form-label">Категория</label>
-                            {{ form.category }}
-                        </div>
+                    <div class="mb-3">
+                        <label class="form-label">Категория</label>
+                        {{ form.category }}
                     </div>
                     <div class="mb-3">
                         <label class="form-label">Обложка</label>
@@ -39,11 +33,18 @@
                             <img id="cover-img" src="#" alt="Предпросмотр обложки" class="img-thumbnail" style="max-width: 300px; max-height: 200px;">
                         </div>
                     </div>
-                    <div class="text-end">
-                        <button type="submit" class="btn btn-primary">
+                    <div class="mb-4">
+                        <label class="form-label">Статус</label>
+                        {{ form.status }}
+                    </div>
+                    <div class="d-flex justify-content-end gap-2">
+                        <button type="submit" class="btn btn-outline-primary">
                             <i class="fas fa-save me-2"></i>Сохранить
                         </button>
-                        <a href="{% url 'studio_audio_list' %}" class="btn btn-outline-secondary ms-2">Отмена</a>
+                        <button type="button" class="btn btn-primary" id="publish-btn">
+                            <i class="fas fa-check-circle me-2"></i>Опубликовать
+                        </button>
+                        <a href="{% url 'studio_audio_list' %}" class="btn btn-light">Отмена</a>
                     </div>
                 </form>
             </div>
@@ -54,6 +55,7 @@
 
 {% block extra_js %}
 <script>
+    // Предпросмотр обложки
     const coverInput = document.querySelector('#id_cover_image');
     const coverPreview = document.getElementById('cover-preview');
     const coverImg = document.getElementById('cover-img');
@@ -70,6 +72,16 @@
         } else {
             coverPreview.style.display = 'none';
         }
+    });
+
+    // Кнопка "Опубликовать"
+    const publishBtn = document.getElementById('publish-btn');
+    const statusSelect = document.getElementById('id_status');
+    const form = document.getElementById('content-form');
+
+    publishBtn.addEventListener('click', function() {
+        statusSelect.value = 'published';
+        form.submit();
     });
 </script>
 {% endblock %}
