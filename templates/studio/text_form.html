@@ -22,10 +22,16 @@
                         <label class="form-label">Краткое описание</label>
                         {{ form.description }}
                     </div>
+
+                    <!-- Визуальный редактор Quill вместо textarea -->
                     <div class="mb-3">
                         <label class="form-label">Содержание</label>
+                        <!-- Скрытое поле, куда будет сохраняться HTML -->
                         {{ form.content }}
+                        <!-- Контейнер для редактора -->
+                        <div id="quill-editor" class="quill-editor"></div>
                     </div>
+
                     <div class="mb-3">
                         <label class="form-label">Категория</label>
                         {{ form.category }}
@@ -58,34 +64,91 @@
 {% endblock %}
 
 {% block extra_js %}
+<!-- Подключаем Quill (можно и без CDN, если загрузили в статику, но так проще) -->
+<link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
+<script src="https://cdn.quilljs.com/1.3.6/quill.min.js"></script>
 <script>
-    // Предпросмотр обложки
-    const coverInput = document.querySelector('#id_cover_image');
-    const coverPreview = document.getElementById('cover-preview');
-    const coverImg = document.getElementById('cover-img');
+    document.addEventListener('DOMContentLoaded', function() {
+        // Находим скрытое поле контента (в нём будет HTML)
+        const contentHidden = document.getElementById('{{ form.content.id_for_label }}');
+        // Контейнер редактора
+        const editorContainer = document.getElementById('quill-editor');
 
-    coverInput.addEventListener('change', function() {
-        const file = this.files[0];
-        if (file) {
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                coverImg.src = e.target.result;
-                coverPreview.style.display = 'block';
-            }
-            reader.readAsDataURL(file);
-        } else {
-            coverPreview.style.display = 'none';
+        // Инициализируем Quill
+        const quill = new Quill(editorContainer, {
+            theme: 'snow',
+            modules: {
+                toolbar: [
+                    ['bold', 'italic', 'underline', 'strike'],        // стили текста
+                    [{'header': [1, 2, 3, false]}],                  // заголовки
+                    [{'align': []}],                                  // выравнивание
+                    ['blockquote', 'code-block'],                     // цитаты и код
+                    [{'list': 'ordered'}, {'list': 'bullet'}],        // списки
+                    ['link', 'image'],                                // ссылки и изображения
+                    ['clean']                                         // очистить форматирование
+                ]
+            },
+            placeholder: 'Начните писать статью...'
+        });
+
+        // Если поле уже содержит HTML (при редактировании), загружаем его в редактор
+        const existingHtml = contentHidden.value;
+        if (existingHtml) {
+            quill.root.innerHTML = existingHtml;
         }
-    });
 
-    // Кнопка "Опубликовать"
-    const publishBtn = document.getElementById('publish-btn');
-    const statusSelect = document.getElementById('id_status');
-    const form = document.getElementById('content-form');
+        // Перед отправкой формы копируем HTML из редактора в скрытое поле
+        const form = document.getElementById('content-form');
+        form.addEventListener('submit', function() {
+            contentHidden.value = quill.root.innerHTML;
+        });
 
-    publishBtn.addEventListener('click', function() {
-        statusSelect.value = 'published';
-        form.submit();
+        // Предпросмотр обложки (ваш код)
+        const coverInput = document.querySelector('#id_cover_image');
+        const coverPreview = document.getElementById('cover-preview');
+        const coverImg = document.getElementById('cover-img');
+        coverInput.addEventListener('change', function() {
+            const file = this.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    coverImg.src = e.target.result;
+                    coverPreview.style.display = 'block';
+                }
+                reader.readAsDataURL(file);
+            } else {
+                coverPreview.style.display = 'none';
+            }
+        });
+
+        // Кнопка "Опубликовать"
+        const publishBtn = document.getElementById('publish-btn');
+        const statusSelect = document.getElementById('id_status');
+        publishBtn.addEventListener('click', function() {
+            statusSelect.value = 'published';
+            form.submit();
+        });
     });
 </script>
+
+<style>
+    /* Стилизация редактора под студию */
+    .quill-editor {
+        min-height: 350px;
+        font-family: 'Inter', sans-serif;
+        font-size: 0.95rem;
+        background: #fff;
+        border-radius: 10px;
+    }
+    /* Убираем двойную рамку, так как Quill сам рисует бордюр */
+    .ql-toolbar.ql-snow {
+        border: 1px solid var(--card-border, #e2e8f0);
+        border-radius: 10px 10px 0 0;
+        border-bottom: none;
+    }
+    .ql-container.ql-snow {
+        border: 1px solid var(--card-border, #e2e8f0);
+        border-radius: 0 0 10px 10px;
+    }
+</style>
 {% endblock %}

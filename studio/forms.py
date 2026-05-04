@@ -14,7 +14,7 @@ class VideoContentForm(forms.ModelForm):
             "category",
             "thumbnail",
             "is_live",
-            "status",  # <-- Добавлено
+            "status",
         ]
         widgets = {
             "title": forms.TextInput(
@@ -29,7 +29,7 @@ class VideoContentForm(forms.ModelForm):
             "category": forms.Select(attrs={"class": "form-select"}),
             "thumbnail": forms.ClearableFileInput(attrs={"class": "form-control"}),
             "is_live": forms.CheckboxInput(attrs={"class": "form-check-input"}),
-            "status": forms.Select(attrs={"class": "form-select"}),  # <-- Виджет
+            "status": forms.Select(attrs={"class": "form-select"}),
         }
 
 
@@ -42,7 +42,7 @@ class AudioContentForm(forms.ModelForm):
             "audio_file",
             "category",
             "cover_image",
-            "status",  # <-- Добавлено
+            "status",
         ]
         widgets = {
             "title": forms.TextInput(
@@ -54,7 +54,7 @@ class AudioContentForm(forms.ModelForm):
             "audio_file": forms.ClearableFileInput(attrs={"class": "form-control"}),
             "category": forms.Select(attrs={"class": "form-select"}),
             "cover_image": forms.ClearableFileInput(attrs={"class": "form-control"}),
-            "status": forms.Select(attrs={"class": "form-select"}),  # <-- Виджет
+            "status": forms.Select(attrs={"class": "form-select"}),
         }
 
 
@@ -68,7 +68,7 @@ class TextContentForm(forms.ModelForm):
             "description",
             "cover_image",
             "category",
-            "status",  # <-- Добавлено
+            "status",
         ]
         widgets = {
             "title": forms.TextInput(
@@ -77,13 +77,8 @@ class TextContentForm(forms.ModelForm):
             "subtitle": forms.TextInput(
                 attrs={"class": "form-control", "placeholder": "Подзаголовок"}
             ),
-            "content": forms.Textarea(
-                attrs={
-                    "class": "form-control",
-                    "placeholder": "Текст статьи",
-                    "rows": 10,
-                }
-            ),
+            # Вместо textarea теперь скрытое поле – его заполнит редактор
+            "content": forms.HiddenInput(),
             "description": forms.Textarea(
                 attrs={
                     "class": "form-control",
@@ -93,7 +88,7 @@ class TextContentForm(forms.ModelForm):
             ),
             "category": forms.Select(attrs={"class": "form-select"}),
             "cover_image": forms.ClearableFileInput(attrs={"class": "form-control"}),
-            "status": forms.Select(attrs={"class": "form-select"}),  # <-- Виджет
+            "status": forms.Select(attrs={"class": "form-select"}),
         }
 
 
