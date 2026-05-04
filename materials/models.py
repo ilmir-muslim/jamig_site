@@ -1,4 +1,3 @@
-### BEGIN: materials/models.py
 from django.db import models
 from django.urls import reverse
 from django.utils.text import slugify
@@ -203,4 +202,3 @@ class TextContent(BaseContent):
     class Meta:
         verbose_name = "Текстовая статья"
         verbose_name_plural = "Текстовые статьи"
-### END: materials/models.py
