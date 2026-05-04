@@ -8,11 +8,36 @@
         <div class="card shadow-sm border-0" style="border-radius:16px; overflow:hidden;">
           <div class="row g-0">
             <div class="col-md-5 d-none d-md-flex register-left p-0">
-              <img src="https://via.placeholder.com/600x800/2a5298/ffffff?text=Ваше+изображение" alt="" class="register-left-image">
+              <img src="/media/photo_2024-03-13_11-07-16.jpg" alt="Джамиг" class="register-left-image">
             </div>
             <div class="col-md-7">
               <div class="card-body p-4">
                 <h4 class="mb-4 fw-bold text-center">Вход</h4>
+
+                <!-- Сообщения Django -->
+                {% if messages %}
+                  {% for message in messages %}
+                    <div class="alert alert-{% if message.tags == 'error' %}danger{% else %}{{ message.tags }}{% endif %} alert-dismissible fade show" role="alert">
+                      {{ message }}
+                      <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                  {% endfor %}
+                {% endif %}
+
+                <!-- Ошибки формы -->
+                {% if form.errors %}
+                  <div class="alert alert-danger">
+                    {% for field in form %}
+                      {% for error in field.errors %}
+                        <p class="mb-0">{{ error }}</p>
+                      {% endfor %}
+                    {% endfor %}
+                    {% for error in form.non_field_errors %}
+                      <p class="mb-0">{{ error }}</p>
+                    {% endfor %}
+                  </div>
+                {% endif %}
+
                 <form method="post" novalidate>
                   {% csrf_token %}
                   <div class="mb-3">
