@@ -1,6 +1,7 @@
+import pytils.translit
+
 from django.db import models
 from django.urls import reverse
-from django.utils.crypto import get_random_string
 from django.utils.text import slugify
 from accounts.models import Authors
 from jamig_site import settings
@@ -62,22 +63,25 @@ class BaseContent(models.Model):
 
 
     def save(self, *args, **kwargs):
-        # Принудительно генерируем slug, если он пуст или не задан
         if not self.slug:
-            base_slug = slugify(self.title) if self.title else ""
-            # Если заголовок не дал нормального slug, создаём уникальный
-            self.slug = base_slug or f"untitled-{get_random_string(8)}"
+            if self.title:
+                # Транслитерация, затем slugify для чистоты
+                base = pytils.translit.slugify(self.title)
+                # slugify добивает пробелы и спецсимволы
+                from django.utils.text import slugify as django_slugify
 
-        # Если статус меняется на published и дата публикации не указана
+                self.slug = django_slugify(base) or base
+            if not self.slug:  # если ничего не вышло
+                from django.utils.crypto import get_random_string
+
+                self.slug = f"bez-nazvaniya-{get_random_string(6)}"
+
         if self.status == "published" and not self.published_at:
             from django.utils import timezone
 
             self.published_at = timezone.now()
 
         super().save(*args, **kwargs)
-
-    def __str__(self):
-        return self.title
 
 
 class VideoContent(BaseContent):

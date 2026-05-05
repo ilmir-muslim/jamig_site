@@ -157,15 +157,18 @@ def save_progress(request):
 def download_text(request, slug, format):
     text = get_object_or_404(TextContent, slug=slug, status="published")
 
+    # Безопасное имя файла из заголовка
+    from django.utils.text import slugify as django_slugify
+
+    safe_filename = django_slugify(text.title) or text.slug
+
     if format == "txt":
-        # Убираем HTML-теги, оставляем чистый текст
         clean = re.sub(r"<[^>]+>", "", text.content)
         response = HttpResponse(clean, content_type="text/plain; charset=utf-8")
-        response["Content-Disposition"] = f'attachment; filename="{text.slug}.txt"'
+        response["Content-Disposition"] = f'attachment; filename="{safe_filename}.txt"'
         return response
 
     elif format == "pdf":
-        # Генерируем простую HTML-страницу для печати
         html_str = render_to_string("materials/reader_pdf.html", {"text": text})
         pdf_file = io.BytesIO()
         HTML(string=html_str, base_url=request.build_absolute_uri("/")).write_pdf(
@@ -173,7 +176,7 @@ def download_text(request, slug, format):
         )
         pdf_file.seek(0)
         response = HttpResponse(pdf_file.read(), content_type="application/pdf")
-        response["Content-Disposition"] = f'attachment; filename="{text.slug}.pdf"'
+        response["Content-Disposition"] = f'attachment; filename="{safe_filename}.pdf"'
         return response
 
     elif format == "epub":
@@ -188,25 +191,21 @@ def download_text(request, slug, format):
         book.set_language("ru")
         book.add_author(text.author.user.get_full_name() if text.author else "Unknown")
 
-        # Создаём главу
         chapter = epub.EpubHtml(title=text.title, file_name="content.xhtml", lang="ru")
-        # Оборачиваем контент в базовый HTML
         chapter.content = f"<h1>{text.title}</h1>{text.content}"
         book.add_item(chapter)
 
-        # Настройка структуры
         book.toc = (epub.Link("content.xhtml", text.title, "content"),)
         book.add_item(epub.EpubNcx())
         book.add_item(epub.EpubNav())
         book.spine = ["nav", chapter]
 
-        # Сохраняем в байты
         epub_data = io.BytesIO()
         epub.write_epub(epub_data, book)
         epub_data.seek(0)
 
         response = HttpResponse(epub_data.read(), content_type="application/epub+zip")
-        response["Content-Disposition"] = f'attachment; filename="{text.slug}.epub"'
+        response["Content-Disposition"] = f'attachment; filename="{safe_filename}.epub"'
         return response
 
     else:
