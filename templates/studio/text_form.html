@@ -1,154 +1,107 @@
 {% extends 'studio/base_studio.html' %}
+{% load static %}
 
 {% block studio_content %}
-<div class="row justify-content-center">
-    <div class="col-lg-8 col-xl-7">
-        <div class="card border-0 shadow-sm" style="border-radius:16px;">
-            <div class="card-body p-4">
-                <h4 class="mb-4 fw-bold">
-                    {% if action == 'create' %}Новая статья{% else %}Редактировать статью{% endif %}
-                </h4>
-                <form method="post" enctype="multipart/form-data" novalidate id="content-form">
-                    {% csrf_token %}
-                    <div class="mb-3">
-                        <label class="form-label">Название</label>
-                        {{ form.title }}
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label">Подзаголовок</label>
-                        {{ form.subtitle }}
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label">Краткое описание</label>
-                        {{ form.description }}
-                    </div>
+<div class="d-flex flex-column" style="height: calc(100vh - 56px);">
+    <!-- Вывод ошибок валидации -->
+    {% if form.errors %}
+        <div class="alert alert-danger m-3 mb-0">
+            <strong>Ошибки в форме:</strong>
+            <ul class="mb-0">
+                {% for field in form %}
+                    {% for error in field.errors %}
+                        <li>{{ field.label }}: {{ error }}</li>
+                    {% endfor %}
+                {% endfor %}
+                {% for error in form.non_field_errors %}
+                    <li>{{ error }}</li>
+                {% endfor %}
+            </ul>
+        </div>
+    {% endif %}
 
-                    <!-- Визуальный редактор Quill вместо textarea -->
-                    <div class="mb-3">
-                        <label class="form-label">Содержание</label>
-                        <!-- Скрытое поле, куда будет сохраняться HTML -->
-                        {{ form.content }}
-                        <!-- Контейнер для редактора -->
-                        <div id="quill-editor" class="quill-editor"></div>
-                    </div>
+    <!-- Вся страница – одна форма -->
+    <form method="post" enctype="multipart/form-data" novalidate id="content-form" class="flex-grow-1 d-flex flex-column">
+        {% csrf_token %}
 
-                    <div class="mb-3">
-                        <label class="form-label">Категория</label>
-                        {{ form.category }}
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label">Обложка</label>
-                        {{ form.cover_image }}
-                        <div id="cover-preview" class="mt-2 text-center" style="display: none;">
-                            <img id="cover-img" src="#" alt="Предпросмотр обложки" class="img-thumbnail" style="max-width: 300px; max-height: 200px;">
-                        </div>
-                    </div>
-                    <div class="mb-4">
-                        <label class="form-label">Статус</label>
-                        {{ form.status }}
-                    </div>
-                    <div class="d-flex justify-content-end gap-2">
-                        <button type="submit" class="btn btn-outline-primary">
-                            <i class="fas fa-save me-2"></i>Сохранить
-                        </button>
-                        <button type="button" class="btn btn-primary" id="publish-btn">
-                            <i class="fas fa-check-circle me-2"></i>Опубликовать
-                        </button>
-                        <a href="{% url 'studio_text_list' %}" class="btn btn-light">Отмена</a>
-                    </div>
-                </form>
+        <!-- Верхняя панель: Название, Подзаголовок, Статус -->
+        <div class="p-3 bg-white border-bottom">
+            <div class="row g-2 align-items-end">
+                <div class="col-md-5">
+                    <label class="form-label small mb-1 text-muted">Название</label>
+                    {{ form.title }}
+                </div>
+                <div class="col-md-5">
+                    <label class="form-label small mb-1 text-muted">Подзаголовок</label>
+                    {{ form.subtitle }}
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label small mb-1 text-muted">Статус</label>
+                    {{ form.status }}
+                </div>
             </div>
         </div>
-    </div>
+
+        <!-- Скрытое поле контента (обязательно) -->
+        {{ form.content }}
+
+        <!-- Quill редактор -->
+        <div id="quill-editor" class="flex-grow-1"></div>
+
+        <!-- Кнопки управления -->
+        <div class="p-2 bg-white border-top d-flex justify-content-end gap-2">
+            <button type="submit" class="btn btn-outline-primary">
+                <i class="fas fa-save me-2"></i>Сохранить
+            </button>
+            <button type="button" class="btn btn-primary" id="publish-btn">
+                <i class="fas fa-check-circle me-2"></i>Опубликовать
+            </button>
+            <a href="{% url 'studio_text_list' %}" class="btn btn-light">Отмена</a>
+        </div>
+    </form>
 </div>
 {% endblock %}
 
 {% block extra_js %}
-<!-- Подключаем Quill (можно и без CDN, если загрузили в статику, но так проще) -->
+<!-- Quill -->
 <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
 <script src="https://cdn.quilljs.com/1.3.6/quill.min.js"></script>
+
+<!-- Передача настроек редактора -->
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        // Находим скрытое поле контента (в нём будет HTML)
-        const contentHidden = document.getElementById('{{ form.content.id_for_label }}');
-        // Контейнер редактора
-        const editorContainer = document.getElementById('quill-editor');
-
-        // Инициализируем Quill
-        const quill = new Quill(editorContainer, {
-            theme: 'snow',
-            modules: {
-                toolbar: [
-                    ['bold', 'italic', 'underline', 'strike'],        // стили текста
-                    [{'header': [1, 2, 3, false]}],                  // заголовки
-                    [{'align': []}],                                  // выравнивание
-                    ['blockquote', 'code-block'],                     // цитаты и код
-                    [{'list': 'ordered'}, {'list': 'bullet'}],        // списки
-                    ['link', 'image'],                                // ссылки и изображения
-                    ['clean']                                         // очистить форматирование
-                ]
-            },
-            placeholder: 'Начните писать статью...'
-        });
-
-        // Если поле уже содержит HTML (при редактировании), загружаем его в редактор
-        const existingHtml = contentHidden.value;
-        if (existingHtml) {
-            quill.root.innerHTML = existingHtml;
-        }
-
-        // Перед отправкой формы копируем HTML из редактора в скрытое поле
-        const form = document.getElementById('content-form');
-        form.addEventListener('submit', function() {
-            contentHidden.value = quill.root.innerHTML;
-        });
-
-        // Предпросмотр обложки (ваш код)
-        const coverInput = document.querySelector('#id_cover_image');
-        const coverPreview = document.getElementById('cover-preview');
-        const coverImg = document.getElementById('cover-img');
-        coverInput.addEventListener('change', function() {
-            const file = this.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    coverImg.src = e.target.result;
-                    coverPreview.style.display = 'block';
-                }
-                reader.readAsDataURL(file);
-            } else {
-                coverPreview.style.display = 'none';
-            }
-        });
-
-        // Кнопка "Опубликовать"
-        const publishBtn = document.getElementById('publish-btn');
-        const statusSelect = document.getElementById('id_status');
-        publishBtn.addEventListener('click', function() {
-            statusSelect.value = 'published';
-            form.submit();
-        });
-    });
+    window.STUDIO_TEXT_CONFIG = {
+        contentFieldId: '{{ form.content.id_for_label }}',
+        editorContainerId: 'quill-editor',
+        formId: 'content-form',
+        statusFieldId: 'id_status',
+        publishBtnId: 'publish-btn'
+    };
 </script>
 
+<!-- Вынесенный скрипт -->
+<script src="{% static 'js/studio_text_form.js' %}"></script>
+
 <style>
-    /* Стилизация редактора под студию */
-    .quill-editor {
-        min-height: 350px;
-        font-family: 'Inter', sans-serif;
-        font-size: 0.95rem;
-        background: #fff;
-        border-radius: 10px;
-    }
-    /* Убираем двойную рамку, так как Quill сам рисует бордюр */
     .ql-toolbar.ql-snow {
-        border: 1px solid var(--card-border, #e2e8f0);
-        border-radius: 10px 10px 0 0;
-        border-bottom: none;
+        border: none;
+        border-bottom: 1px solid #e2e8f0;
+        background: #f8fafc;
     }
     .ql-container.ql-snow {
-        border: 1px solid var(--card-border, #e2e8f0);
-        border-radius: 0 0 10px 10px;
+        border: none;
+        font-size: 16px;
+        line-height: 1.6;
+    }
+    .ql-editor {
+        min-height: 100%;
+        padding: 1.5rem 2rem;
+    }
+    .ql-editor.ql-blank::before {
+        font-style: normal;
+        color: #94a3b8;
+    }
+    .studio-main > .container-fluid {
+        padding: 0 !important;
     }
 </style>
 {% endblock %}

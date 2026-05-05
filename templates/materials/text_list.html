@@ -18,7 +18,7 @@
                 <div class="card-body">
                     <h5 class="card-title fw-bold">{{ text.title }}</h5>
                     <p class="card-text text-muted small">{{ text.description|truncatewords:20 }}</p>
-                    <a href="{% url 'text_detail' text.slug %}" class="btn btn-sm btn-outline-primary">
+                    <a href="{% url 'text_reader' text.slug %}" class="btn btn-sm btn-outline-primary">
                         <i class="fas fa-book-open me-1"></i>Читать
                     </a>
                 </div>

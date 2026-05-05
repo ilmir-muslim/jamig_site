@@ -1,6 +1,14 @@
+import json
+import time
+
+from django.db import transaction, OperationalError
+from django.http import JsonResponse
+from django.shortcuts import get_object_or_404, render
 from django.views.generic import ListView, DetailView
-from .models import VideoContent, AudioContent, TextContent, Category
-from django.db.models import Q
+from django.views.decorators.http import require_POST
+from django.contrib.auth.decorators import login_required
+
+from .models import VideoContent, AudioContent, TextContent, Category, ReadingProgress
 
 
 class VideoListView(ListView):
@@ -21,7 +29,7 @@ class VideoListView(ListView):
         if category:
             qs = qs.filter(category__slug=category)
         if author:
-            qs = qs.filter(author__user__username=author)  # или author__id
+            qs = qs.filter(author__user__username=author)
         return qs
 
     def get_context_data(self, **kwargs):
@@ -96,7 +104,46 @@ class TextListView(ListView):
         return context
 
 
-class TextDetailView(DetailView):
-    model = TextContent
-    template_name = "materials/text_detail.html"
-    context_object_name = "text"
+# ================== ЧИТАЛКА ==================
+def reader_view(request, slug):
+    text = get_object_or_404(TextContent, slug=slug, status="published")
+    chapter_content = text.content
+    server_page = None
+    if request.user.is_authenticated:
+        progress = ReadingProgress.objects.filter(user=request.user, text=text).first()
+        if progress:
+            server_page = progress.page_number
+    context = {
+        "text": text,
+        "chapter_content": chapter_content,
+        "server_page": server_page,
+        "text_id": text.id,
+    }
+    return render(request, "materials/reader.html", context)
+
+
+@login_required
+@require_POST
+def save_progress(request):
+    data = json.loads(request.body)
+    text_id = data.get("text_id")
+    page_number = data.get("page_number", 1)
+    text = get_object_or_404(TextContent, pk=text_id)
+
+    max_retries = 3
+    for attempt in range(max_retries):
+        try:
+            with transaction.atomic():
+                ReadingProgress.objects.update_or_create(
+                    user=request.user,
+                    text=text,
+                    defaults={"page_number": page_number},
+                )
+            break 
+        except OperationalError as e:
+            if "database is locked" in str(e) and attempt < max_retries - 1:
+                time.sleep(0.3 * (attempt + 1)) 
+            else:
+                raise  
+
+    return JsonResponse({"status": "ok"})

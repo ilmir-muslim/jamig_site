@@ -1,0 +1,60 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ text.title }} — Читалка{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/reader.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="reader-container" id="reader-app">
+    <main class="reader-main">
+        <!-- Панель инструментов -->
+        <div class="reader-toolbar">
+            <span class="chapter-title">📖 {{ text.title }}</span>
+            <div class="toolbar-group">
+                <div class="font-size-control">
+                    <button class="btn btn-sm btn-outline-secondary" id="font-minus">A-</button>
+                    <span id="font-size-display">100%</span>
+                    <button class="btn btn-sm btn-outline-secondary" id="font-plus">A+</button>
+                </div>
+                <div class="theme-control">
+                    <button class="btn btn-sm btn-outline-secondary theme-btn active" data-theme="light">День</button>
+                    <button class="btn btn-sm btn-outline-secondary theme-btn" data-theme="sepia">Сепия</button>
+                    <button class="btn btn-sm btn-outline-secondary theme-btn" data-theme="dark">Ночь</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Область текста -->
+        <div class="reader-viewport" id="viewport">
+            <div class="page-content" id="page-content"></div>
+        </div>
+
+        <!-- Нижняя панель: пагинация -->
+        <div class="reader-pagination">
+            <button class="btn btn-outline-secondary" id="prev-page" disabled>
+                <i class="fas fa-chevron-left"></i> Предыдущая
+            </button>
+            <span id="page-indicator">Стр. <span id="current-page">1</span> / <span id="total-pages">1</span></span>
+            <button class="btn btn-outline-secondary" id="next-page">
+                Следующая <i class="fas fa-chevron-right"></i>
+            </button>
+        </div>
+    </main>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Данные из Django
+    window.READER_CONTENT = `{{ chapter_content|escapejs }}`;
+    window.READER_CONFIG = {
+        textId: {{ text_id }},
+        serverPage: {{ server_page|default:"null" }},
+        saveUrl: "{% url 'save_progress' %}",
+    };
+</script>
+<script src="{% static 'js/reader.js' %}"></script>
+{% endblock %}
