@@ -24,16 +24,20 @@
     <form method="post" enctype="multipart/form-data" novalidate id="content-form" class="flex-grow-1 d-flex flex-column">
         {% csrf_token %}
 
-        <!-- Верхняя панель: Название, Подзаголовок, Статус -->
+        <!-- Верхняя панель: Название, Подзаголовок, Категория, Статус -->
         <div class="p-3 bg-white border-bottom">
             <div class="row g-2 align-items-end">
-                <div class="col-md-5">
+                <div class="col-md-4">
                     <label class="form-label small mb-1 text-muted">Название</label>
                     {{ form.title }}
                 </div>
-                <div class="col-md-5">
+                <div class="col-md-4">
                     <label class="form-label small mb-1 text-muted">Подзаголовок</label>
                     {{ form.subtitle }}
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label small mb-1 text-muted">Категория</label>
+                    {{ form.category }}
                 </div>
                 <div class="col-md-2">
                     <label class="form-label small mb-1 text-muted">Статус</label>
