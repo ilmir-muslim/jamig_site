@@ -14,10 +14,18 @@
         <div class="reader-toolbar">
             <span class="chapter-title">📖 {{ text.title }}</span>
             <div class="toolbar-group">
-                <!-- Кнопка содержания -->
                 <button class="btn btn-sm btn-outline-secondary" id="chapters-btn" title="Содержание">
                     <i class="fas fa-list"></i>
                 </button>
+                <a href="{% url 'download_text' text.slug 'txt' %}" class="btn btn-sm btn-outline-secondary" title="Скачать TXT">
+                    <i class="fas fa-file-alt"></i> TXT
+                </a>
+                <a href="{% url 'download_text' text.slug 'pdf' %}" class="btn btn-sm btn-outline-secondary" title="Скачать PDF">
+                    <i class="fas fa-file-pdf"></i> PDF
+                </a>
+                <a href="{% url 'download_text' text.slug 'epub' %}" class="btn btn-sm btn-outline-secondary" title="Скачать EPUB">
+                    <i class="fas fa-book"></i> EPUB
+                </a>
                 <div class="font-size-control">
                     <button class="btn btn-sm btn-outline-secondary" id="font-minus">A-</button>
                     <span id="font-size-display">100%</span>

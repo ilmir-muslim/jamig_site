@@ -1,4 +1,3 @@
-# materials/urls.py
 from django.urls import path
 from . import views
 
@@ -9,5 +8,10 @@ urlpatterns = [
     path("audios/<slug:slug>/", views.AudioDetailView.as_view(), name="audio_detail"),
     path("texts/", views.TextListView.as_view(), name="text_list"),
     path("texts/<slug:slug>/reader/", views.reader_view, name="text_reader"),
+    path(
+        "texts/<slug:slug>/download/<str:format>/",
+        views.download_text,
+        name="download_text",
+    ),
     path("texts/save-progress/", views.save_progress, name="save_progress"),
 ]
