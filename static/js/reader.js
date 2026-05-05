@@ -3,12 +3,13 @@
 class BookReader {
     constructor(htmlContent, config) {
         this.pages = [];
+        this.chapters = [];          // { title, startPage }
         this.currentPage = 1;
         this.totalPages = 1;
         this.textId = config.textId;
         this.serverPage = config.serverPage;
         this.saveUrl = config.saveUrl;
-        this.saveTimeout = null; // для debounce
+        this.saveTimeout = null;
 
         this.viewport = document.getElementById('viewport');
         this.pageContent = document.getElementById('page-content');
@@ -18,7 +19,12 @@ class BookReader {
         this.totalPagesSpan = document.getElementById('total-pages');
         this.fontSizeDisplay = document.getElementById('font-size-display');
 
-        // Восстанавливаем настройки из localStorage
+        // Навигация по главам
+        this.chaptersBtn = document.getElementById('chapters-btn');
+        this.chaptersModal = document.getElementById('chapters-modal');
+        this.chaptersList = document.getElementById('chapters-list');
+        this.closeChaptersBtn = document.getElementById('close-chapters');
+
         this.fontSize = this._loadSetting('reader_fontSize', 18);
         this.lineHeight = this._loadSetting('reader_lineHeight', 1.8);
 
@@ -47,6 +53,8 @@ class BookReader {
     }
 
     loadContent(html) {
+        // Удаляем все HTML-теги, кроме заголовочных (h1-h3), чтобы потом найти главы
+        // Но сохраняем структуру для пагинации.
         const testDiv = document.createElement('div');
         testDiv.style.cssText = `
             position: absolute; visibility: hidden;
@@ -86,13 +94,12 @@ class BookReader {
         if (this.pages.length === 0) this.pages = [''];
 
         this.totalPages = this.pages.length;
-        // Определяем стартовую страницу: сначала сервер, потом localStorage
         this.currentPage = this.determineStartPage();
+        this.buildChapters();       // строим список глав после пагинации
         this.updatePage();
     }
 
     determineStartPage() {
-        // Приоритет: серверный прогресс > localStorage > 1
         if (this.serverPage && this.serverPage >= 1 && this.serverPage <= this.totalPages) {
             return this.serverPage;
         }
@@ -104,6 +111,75 @@ class BookReader {
         return 1;
     }
 
+    // --- Работа с главами ---
+    buildChapters() {
+        this.chapters = [];
+        // Регулярное выражение для поиска заголовков h1, h2, h3 (открывающий тег)
+        const headingRegex = /<h[123][^>]*>(.*?)<\/h[123]>/i;
+
+        this.pages.forEach((pageContent, index) => {
+            const match = pageContent.match(headingRegex);
+            if (match) {
+                // Извлекаем текст заголовка, убирая возможные HTML-теги внутри
+                const tempDiv = document.createElement('div');
+                tempDiv.innerHTML = match[1];
+                const title = tempDiv.textContent.trim();
+                if (title) {
+                    this.chapters.push({
+                        title: title,
+                        startPage: index + 1   // страницы нумеруются с 1
+                    });
+                }
+            }
+        });
+
+        // Обновляем модальное окно с главами, если оно открыто
+        this.renderChaptersList();
+        // Если мы на какой-то странице, можно подсветить текущую главу (опционально)
+    }
+
+    renderChaptersList() {
+        if (!this.chaptersList) return;
+        this.chaptersList.innerHTML = '';
+        if (this.chapters.length === 0) {
+            this.chaptersList.innerHTML = '<li class="list-group-item text-muted">Главы не найдены</li>';
+            return;
+        }
+        this.chapters.forEach((chapter, idx) => {
+            const li = document.createElement('li');
+            li.className = 'list-group-item list-group-item-action';
+            li.textContent = chapter.title;
+            li.addEventListener('click', () => {
+                this.goToPage(chapter.startPage);
+                this.closeChaptersModal();
+            });
+            // Подсветка текущей главы
+            if (this.currentPage >= chapter.startPage) {
+                // если текущая страница >= начала этой главы, считаем её текущей (найдём последнюю такую)
+                li.classList.add('active');
+                // снимем active с предыдущих
+                const allItems = this.chaptersList.querySelectorAll('.list-group-item');
+                allItems.forEach(item => item.classList.remove('active'));
+                li.classList.add('active');
+            }
+            this.chaptersList.appendChild(li);
+        });
+    }
+
+    openChaptersModal() {
+        if (this.chaptersModal) {
+            this.renderChaptersList();
+            this.chaptersModal.style.display = 'block';
+        }
+    }
+
+    closeChaptersModal() {
+        if (this.chaptersModal) {
+            this.chaptersModal.style.display = 'none';
+        }
+    }
+    // -----------------------
+
     updatePage() {
         this.pageContent.innerHTML = this.pages[this.currentPage - 1] || '';
         this.currentPageSpan.textContent = this.currentPage;
@@ -111,13 +187,15 @@ class BookReader {
         this.prevBtn.disabled = this.currentPage <= 1;
         this.nextBtn.disabled = this.currentPage >= this.totalPages;
         this.saveProgress();
+        // Обновим подсветку главы в модальном окне, если оно открыто
+        if (this.chaptersModal && this.chaptersModal.style.display === 'block') {
+            this.renderChaptersList();
+        }
     }
 
     saveProgress() {
-        // Локально сохраняем всегда мгновенно
         localStorage.setItem(`reader_progress_${this.textId}`, this.currentPage);
 
-        // Отправляем на сервер с задержкой 800 мс после последнего вызова
         if (this.saveTimeout) clearTimeout(this.saveTimeout);
         this.saveTimeout = setTimeout(() => {
             if (this.saveUrl && navigator.onLine) {
@@ -131,7 +209,7 @@ class BookReader {
                         text_id: this.textId,
                         page_number: this.currentPage,
                     }),
-                }).catch(() => { /* тихо */ });
+                }).catch(() => { });
             }
         }, 800);
     }
@@ -175,6 +253,20 @@ class BookReader {
             });
         });
 
+        // Кнопка "Содержание"
+        if (this.chaptersBtn) {
+            this.chaptersBtn.addEventListener('click', () => this.openChaptersModal());
+        }
+        if (this.closeChaptersBtn) {
+            this.closeChaptersBtn.addEventListener('click', () => this.closeChaptersModal());
+        }
+        // Закрытие по клику вне модального окна
+        window.addEventListener('click', (e) => {
+            if (e.target === this.chaptersModal) {
+                this.closeChaptersModal();
+            }
+        });
+
         // Горячие клавиши
         document.addEventListener('keydown', (e) => {
             if (e.key === 'ArrowRight') { e.preventDefault(); this.nextPage(); }
@@ -191,7 +283,6 @@ class BookReader {
     }
 }
 
-// Вспомогательная функция получения CSRF‑токена
 function getCookie(name) {
     let cookieValue = null;
     if (document.cookie && document.cookie !== '') {
@@ -207,10 +298,8 @@ function getCookie(name) {
     return cookieValue;
 }
 
-// Инициализация
 document.addEventListener('DOMContentLoaded', () => {
     if (window.READER_CONTENT) {
-        // Восстановить тему
         const savedTheme = localStorage.getItem('reader_theme') || 'light';
         if (savedTheme !== 'light') {
             document.body.classList.add(savedTheme + '-theme');

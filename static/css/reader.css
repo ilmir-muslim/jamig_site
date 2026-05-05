@@ -110,6 +110,7 @@ body.dark-theme {
     line-height: var(--reader-line-height);
     color: var(--reader-text);
     overflow: hidden;
+    /* изменено с auto */
     text-align: justify;
     white-space: pre-wrap;
     word-wrap: break-word;
@@ -128,6 +129,71 @@ body.dark-theme {
 #page-indicator {
     font-size: 0.9rem;
     color: var(--reader-toolbar-text);
+}
+
+/* --- Модальное окно глав --- */
+.chapters-modal {
+    display: none;
+    position: fixed;
+    z-index: 9999;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0, 0, 0, 0.5);
+}
+
+.chapters-modal-content {
+    background-color: var(--reader-bg);
+    color: var(--reader-text);
+    margin: 10% auto;
+    padding: 1.5rem;
+    border: 1px solid var(--reader-border);
+    border-radius: 12px;
+    width: 90%;
+    max-width: 500px;
+    max-height: 70vh;
+    overflow-y: auto;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.2);
+}
+
+.chapters-modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+.chapters-modal-header h3 {
+    margin: 0;
+    font-size: 1.3rem;
+}
+
+.close-chapters {
+    font-size: 1.8rem;
+    font-weight: bold;
+    cursor: pointer;
+    color: var(--reader-toolbar-text);
+    border: none;
+    background: none;
+    line-height: 1;
+}
+
+.chapters-modal .list-group-item {
+    cursor: pointer;
+    background-color: var(--reader-bg);
+    color: var(--reader-text);
+    border-color: var(--reader-border);
+}
+
+.chapters-modal .list-group-item:hover {
+    background-color: rgba(0, 0, 0, 0.05);
+}
+
+.chapters-modal .list-group-item.active {
+    background-color: var(--gold-accent, #c9a84c);
+    color: white;
 }
 
 @media (max-width: 768px) {

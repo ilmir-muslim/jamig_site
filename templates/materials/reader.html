@@ -14,6 +14,10 @@
         <div class="reader-toolbar">
             <span class="chapter-title">📖 {{ text.title }}</span>
             <div class="toolbar-group">
+                <!-- Кнопка содержания -->
+                <button class="btn btn-sm btn-outline-secondary" id="chapters-btn" title="Содержание">
+                    <i class="fas fa-list"></i>
+                </button>
                 <div class="font-size-control">
                     <button class="btn btn-sm btn-outline-secondary" id="font-minus">A-</button>
                     <span id="font-size-display">100%</span>
@@ -44,11 +48,23 @@
         </div>
     </main>
 </div>
+
+<!-- Модальное окно содержания -->
+<div id="chapters-modal" class="chapters-modal">
+    <div class="chapters-modal-content">
+        <div class="chapters-modal-header">
+            <h3>Содержание</h3>
+            <button class="close-chapters" id="close-chapters">&times;</button>
+        </div>
+        <ul id="chapters-list" class="list-group">
+            <!-- Заполняется через JS -->
+        </ul>
+    </div>
+</div>
 {% endblock %}
 
 {% block extra_js %}
 <script>
-    // Данные из Django
     window.READER_CONTENT = `{{ chapter_content|escapejs }}`;
     window.READER_CONFIG = {
         textId: {{ text_id }},
