@@ -2,7 +2,8 @@
 {% load static %}
 
 {% block studio_content %}
-<div class="d-flex flex-column" style="height: calc(100vh - 56px);">
+<!-- Абсолютная обёртка на всю высоту рабочей области студии -->
+<div class="text-form-full-height">
     <!-- Вывод ошибок валидации -->
     {% if form.errors %}
         <div class="alert alert-danger m-3 mb-0">
@@ -20,7 +21,7 @@
         </div>
     {% endif %}
 
-    <!-- Вся страница – одна форма -->
+    <!-- Форма растягивается на всё оставшееся место -->
     <form method="post" enctype="multipart/form-data" novalidate id="content-form" class="flex-grow-1 d-flex flex-column">
         {% csrf_token %}
 
@@ -54,13 +55,13 @@
             </div>
         </div>
 
-        <!-- Скрытое поле контента (обязательно) -->
+        <!-- Скрытое поле контента -->
         {{ form.content }}
 
-        <!-- Quill редактор -->
+        <!-- Редактор Quill — единственная прокручиваемая область -->
         <div id="quill-editor" class="flex-grow-1"></div>
 
-        <!-- Кнопки управления -->
+        <!-- Нижняя панель с кнопками -->
         <div class="p-2 bg-white border-top d-flex justify-content-end gap-2">
             <button type="submit" class="btn btn-outline-primary">
                 <i class="fas fa-save me-2"></i>Сохранить
@@ -92,10 +93,46 @@
     };
 </script>
 
-<!-- Вынесенный скрипт -->
 <script src="{% static 'js/studio_text_form.js' %}"></script>
 
 <style>
+    /* ====== НАДЁЖНАЯ ФИКСАЦИЯ ПАНЕЛЕЙ И ПРОКРУТКА ТЕКСТА ====== */
+
+    /* Делаем .studio-main контекстом для абсолютного позиционирования */
+    .studio-main {
+        position: relative;
+        overflow: hidden;            /* убираем скролл всей рабочей области */
+    }
+
+    /* Обёртка формы — на весь .studio-main */
+    .text-form-full-height {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        display: flex;
+        flex-direction: column;
+    }
+
+    /* Форма внутри тоже flex-колонка, растянутая на всю высоту */
+    #content-form {
+        min-height: 0;               /* позволяет сжиматься flex-элементу */
+    }
+
+    /* Редактор занимает оставшееся место, а его контейнер получает скролл */
+    #quill-editor {
+        flex: 1;
+        min-height: 0;
+        display: flex;
+        flex-direction: column;
+    }
+    #quill-editor .ql-container {
+        flex: 1;
+        overflow-y: auto !important; /* <-- вот тут будет скролл текста */
+    }
+
+    /* Дефолтные стили Quill (можно подправить под себя) */
     .ql-toolbar.ql-snow {
         border: none;
         border-bottom: 1px solid #e2e8f0;
@@ -113,9 +150,6 @@
     .ql-editor.ql-blank::before {
         font-style: normal;
         color: #94a3b8;
-    }
-    .studio-main > .container-fluid {
-        padding: 0 !important;
     }
 </style>
 {% endblock %}
