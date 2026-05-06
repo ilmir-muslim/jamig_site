@@ -210,3 +210,17 @@ def download_text(request, slug, format):
 
     else:
         raise Http404("Unsupported format")
+
+
+def category_detail(request, slug):
+    category = get_object_or_404(Category, slug=slug, is_active=True)
+    videos = VideoContent.objects.filter(category=category, status="published")
+    audios = AudioContent.objects.filter(category=category, status="published")
+    texts = TextContent.objects.filter(category=category, status="published")
+    context = {
+        "category": category,
+        "videos": videos,
+        "audios": audios,
+        "texts": texts,
+    }
+    return render(request, "materials/category_detail.html", context)

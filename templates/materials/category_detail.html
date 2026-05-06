@@ -1,0 +1,93 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container py-4">
+    <h1 class="mb-4 fw-bold">{{ category.title }}</h1>
+    <p class="lead">{{ category.description }}</p>
+
+    {% if videos %}
+    <section class="mb-5">
+        <h3 class="mb-3"><i class="fas fa-video me-2"></i>Видео</h3>
+        <div class="row">
+            {% for video in videos %}
+            <div class="col-md-6 col-lg-4 mb-4">
+                <div class="card h-100 shadow-sm border-0 rounded-4 overflow-hidden">
+                    <div class="video-card-preview">
+                        {{ video.get_embed_html|safe }}
+                    </div>
+                    <div class="card-body">
+                        <h5 class="card-title fw-bold">{{ video.title }}</h5>
+                        <a href="{{ video.get_absolute_url }}" class="btn btn-sm btn-outline-primary">Смотреть</a>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </section>
+    {% endif %}
+
+    {% if audios %}
+    <section class="mb-5">
+        <h3 class="mb-3"><i class="fas fa-headphones me-2"></i>Аудио</h3>
+        <div class="row">
+            {% for audio in audios %}
+            <div class="col-md-6 col-lg-4 mb-4">
+                <div class="card h-100 shadow-sm border-0 rounded-4">
+                    <div class="card-body">
+                        <h5 class="card-title fw-bold">{{ audio.title }}</h5>
+                        <p>{{ audio.description|truncatewords:15 }}</p>
+                        <audio controls class="w-100 mb-2">
+                            <source src="{{ audio.audio_file.url }}" type="audio/mpeg">
+                        </audio>
+                        <a href="{{ audio.audio_file.url }}" class="btn btn-sm btn-outline-secondary" download>Скачать</a>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </section>
+    {% endif %}
+
+    {% if texts %}
+    <section class="mb-5">
+        <h3 class="mb-3"><i class="fas fa-file-alt me-2"></i>Статьи</h3>
+        <div class="row">
+            {% for text in texts %}
+            <div class="col-md-6 col-lg-4 mb-4">
+                <div class="card h-100 shadow-sm border-0 rounded-4">
+                    <div class="card-body">
+                        <h5 class="card-title fw-bold">{{ text.title }}</h5>
+                        <p>{{ text.description|truncatewords:20 }}</p>
+                        <a href="{% url 'text_reader' text.slug %}" class="btn btn-sm btn-outline-primary">Читать</a>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </section>
+    {% endif %}
+
+    {% if not videos and not audios and not texts %}
+        <div class="alert alert-info">В этой категории пока нет материалов.</div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .video-card-preview {
+        position: relative;
+        padding-bottom: 56.25%;
+        height: 0;
+        overflow: hidden;
+        background: #000;
+    }
+    .video-card-preview iframe {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        border: none;
+    }
+</style>
+{% endblock %}

@@ -225,6 +225,66 @@ body::before {
     transition: var(--transition);
 }
 
+/* ===================== */
+/* ВЫПАДАЮЩЕЕ МЕНЮ       */
+/* ===================== */
+
+.main-nav .dropdown-menu {
+    background: linear-gradient(135deg, var(--blue-deep) 0%, var(--blue-dark) 100%);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: var(--radius-md);
+    padding: 0.5rem 0;
+    margin-top: 12px;
+    min-width: 220px;
+    box-shadow: var(--shadow-lg);
+    opacity: 0;
+    transform: translateY(-8px);
+    transition: opacity 0.25s ease, transform 0.25s ease;
+    pointer-events: none;
+    display: block;
+    /* всегда block для анимации, управляем opacity */
+}
+
+.main-nav .dropdown-menu.show {
+    opacity: 1;
+    transform: translateY(0);
+    pointer-events: auto;
+}
+
+.main-nav .dropdown-item {
+    color: var(--blue-pale);
+    font-weight: 500;
+    padding: 0.55rem 1.5rem;
+    transition: background 0.2s, color 0.2s;
+}
+
+.main-nav .dropdown-item:hover,
+.main-nav .dropdown-item:focus {
+    background: rgba(255, 255, 255, 0.1);
+    color: var(--white);
+}
+
+/* Стрелочка для пункта "Категории" */
+.main-nav .nav-item.dropdown>.nav-link.dropdown-toggle::after {
+    display: inline-block;
+    margin-left: 0.255em;
+    vertical-align: middle;
+    content: "";
+    border-top: 0.3em solid;
+    border-right: 0.3em solid transparent;
+    border-bottom: 0;
+    border-left: 0.3em solid transparent;
+}
+
+/* Разделитель в дропдауне */
+.main-nav .dropdown-divider {
+    border-top: 1px solid rgba(255, 255, 255, 0.15);
+    margin: 0.5rem 0;
+}
+
+/* ===================== */
+/* АДАПТИВ (МОБИЛЬНАЯ ВЕРСИЯ) */
+/* ===================== */
 @media (max-width: 900px) {
     .nav-list {
         display: none;
@@ -250,6 +310,23 @@ body::before {
 
     .burger {
         display: flex;
+    }
+
+    .main-nav .dropdown-menu {
+        position: static !important;
+        background: transparent;
+        border: none;
+        box-shadow: none;
+        padding-left: 1.5rem;
+        opacity: 1;
+        transform: none;
+        pointer-events: auto;
+        display: none;
+        margin-top: 0;
+    }
+
+    .main-nav .dropdown-menu.show {
+        display: block;
     }
 }
 

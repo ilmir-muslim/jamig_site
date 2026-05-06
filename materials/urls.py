@@ -14,4 +14,5 @@ urlpatterns = [
         name="download_text",
     ),
     path("texts/save-progress/", views.save_progress, name="save_progress"),
+    path("category/<slug:slug>/", views.category_detail, name="category_detail"),
 ]
