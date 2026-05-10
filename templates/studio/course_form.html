@@ -1,39 +1,276 @@
 {% extends 'studio/base_studio.html' %}
+{% load static %}
+
 {% block studio_content %}
-<div class="row justify-content-center">
-    <div class="col-lg-8 col-xl-7">
-        <div class="card border-0 shadow-sm" style="border-radius:16px;">
-            <div class="card-body p-4">
-                <h4 class="mb-4 fw-bold">
-                    {% if action == 'create' %}Новый курс{% else %}Редактировать курс{% endif %}
-                </h4>
-                <form method="post" novalidate>
-                    {% csrf_token %}
-                    <div class="mb-3">
-                        <label class="form-label">Название</label>
-                        {{ form.title }}
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label">Описание</label>
-                        {{ form.description }}
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label">Статус</label>
-                        {{ form.status }}
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label">Дата публикации</label>
-                        {{ form.published_at }}
-                    </div>
-                    <div class="text-end">
-                        <button type="submit" class="btn btn-primary">
-                            <i class="fas fa-save me-2"></i>Сохранить
-                        </button>
-                        <a href="{% url 'studio_course_list' %}" class="btn btn-outline-secondary ms-2">Отмена</a>
-                    </div>
-                </form>
-            </div>
-        </div>
+<div class="course-editor" id="courseEditorApp">
+  <div class="editor-layout">
+    <!-- ЛЕВАЯ КОЛОНКА: поля формы -->
+    <div class="editor-form">
+      <form method="post" novalidate id="content-form">
+        {% csrf_token %}
+
+        <!-- === Секция: Основное === -->
+        <section class="form-section">
+          <div class="section-header">
+            <i class="fas fa-info-circle"></i>
+            <h3>Основная информация</h3>
+          </div>
+          <div class="mb-4">
+            <label class="form-label-lg">Название курса</label>
+            {{ form.title }}
+          </div>
+          <div class="mb-4">
+            <label class="form-label-lg">Описание</label>
+            {{ form.description }}
+          </div>
+          <div class="mb-3">
+            <label class="form-label-lg">Статус</label>
+            {{ form.status }}
+          </div>
+        </section>
+
+        <!-- === Секция: Публикация === -->
+        <section class="form-section">
+          <div class="section-header">
+            <i class="fas fa-calendar-alt"></i>
+            <h3>Публикация</h3>
+          </div>
+          <div class="mb-3">
+            <label class="form-label-lg">Дата публикации</label>
+            {{ form.published_at }}
+            <small class="text-muted">Оставьте пустым для немедленной публикации при выборе статуса «Опубликовано»</small>
+          </div>
+        </section>
+
+        {{ form.non_field_errors }}
+      </form>
     </div>
+
+    <!-- ПРАВАЯ КОЛОНКА: прогресс, действия -->
+    <div class="editor-sidebar">
+      <!-- Прогресс заполнения -->
+      <div class="progress-card">
+        <div class="d-flex justify-content-between mb-2">
+          <span class="fw-semibold">Готовность курса</span>
+          <span id="completionPercent">0%</span>
+        </div>
+        <div class="progress" style="height: 8px;">
+          <div class="progress-bar bg-primary" id="completionBar" style="width: 0%;"></div>
+        </div>
+        <div class="checklist mt-3" id="completionChecklist">
+          <div class="check-item" data-field="title"><i class="fas fa-circle"></i> Название</div>
+          <div class="check-item" data-field="description"><i class="fas fa-circle"></i> Описание</div>
+          <div class="check-item" data-field="status"><i class="fas fa-circle"></i> Статус</div>
+        </div>
+      </div>
+
+      <!-- Действия -->
+      <div class="action-buttons">
+        <button type="button" class="btn btn-outline-secondary w-100 mb-2" id="saveDraftBtn">
+          <i class="fas fa-save me-2"></i>Сохранить как черновик
+        </button>
+        <button type="button" class="btn btn-publish w-100" id="publishBtn">
+          <i class="fas fa-check-circle me-2"></i>Опубликовать сейчас
+        </button>
+        <a href="{% url 'studio_course_list' %}" class="btn btn-link text-muted w-100 mt-2">Отмена</a>
+      </div>
+    </div>
+  </div>
 </div>
+{% endblock %}
+
+{% block extra_css %}
+{{ block.super }}
+<style>
+  .course-editor {
+    color: var(--text-main);
+  }
+
+  .editor-layout {
+    display: grid;
+    grid-template-columns: 1fr 340px;
+    gap: 1.5rem;
+    align-items: start;
+  }
+
+  @media (max-width: 992px) {
+    .editor-layout {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  /* === Секции формы === */
+  .form-section {
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: var(--radius);
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+    box-shadow: var(--shadow-sm);
+  }
+
+  .section-header {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 1.5rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid var(--card-border);
+  }
+
+  .section-header i {
+    font-size: 1.2rem;
+    color: var(--accent);
+  }
+
+  .section-header h3 {
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin: 0;
+    color: var(--text-main);
+  }
+
+  .form-label-lg {
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    display: block;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-size: 0.8rem;
+  }
+
+  .form-control, .form-select {
+    background-color: #fff;
+    border: 1px solid var(--card-border);
+    color: var(--text-main);
+    border-radius: 10px;
+    padding: 0.65rem 1rem;
+    transition: all 0.2s;
+  }
+
+  .form-control:focus, .form-select:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+    background-color: #fff;
+  }
+
+  .form-control::placeholder {
+    color: var(--text-muted);
+    opacity: 0.7;
+  }
+
+  /* Правая панель */
+  .editor-sidebar {
+    position: sticky;
+    top: 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+  }
+
+  .progress-card {
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: var(--radius);
+    padding: 1.2rem;
+    box-shadow: var(--shadow-sm);
+  }
+
+  .check-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0.5rem;
+    font-size: 0.9rem;
+    color: var(--text-muted);
+  }
+
+  .check-item.completed {
+    color: var(--success);
+  }
+
+  .check-item i {
+    font-size: 0.6rem;
+  }
+
+  .action-buttons {
+    margin-top: auto;
+  }
+
+  .btn-publish {
+    background: var(--accent);
+    border: none;
+    color: white;
+    font-weight: 600;
+    border-radius: 10px;
+    padding: 0.7rem;
+    transition: 0.2s;
+  }
+
+  .btn-publish:hover {
+    background: #2563eb;
+    transform: translateY(-1px);
+  }
+</style>
+{% endblock %}
+
+{% block extra_js %}
+{{ block.super }}
+<script>
+  (function() {
+    const form = document.getElementById('content-form');
+    const statusField = document.getElementById('id_status');
+    const titleField = document.getElementById('id_title');
+    const descriptionField = document.getElementById('id_description');
+    const completionBar = document.getElementById('completionBar');
+    const completionPercent = document.getElementById('completionPercent');
+    const checkItems = document.querySelectorAll('.check-item');
+    const saveDraftBtn = document.getElementById('saveDraftBtn');
+    const publishBtn = document.getElementById('publishBtn');
+
+    function updateCompletion() {
+      let filled = 0;
+      const total = 3;
+      if (titleField.value.trim()) filled++;
+      if (descriptionField.value.trim()) filled++;
+      // Статус считаем заполненным, если выбрано значение (всегда выбрано, если есть default)
+      if (statusField.value) filled++;
+
+      const percent = Math.round((filled / total) * 100);
+      completionBar.style.width = percent + '%';
+      completionPercent.textContent = percent + '%';
+
+      checkItems.forEach(item => {
+        const field = item.dataset.field;
+        let isDone = false;
+        if (field === 'title') isDone = !!titleField.value.trim();
+        if (field === 'description') isDone = !!descriptionField.value.trim();
+        if (field === 'status') isDone = !!statusField.value;
+        if (isDone) {
+          item.classList.add('completed');
+          item.querySelector('i').className = 'fas fa-check-circle';
+        } else {
+          item.classList.remove('completed');
+          item.querySelector('i').className = 'fas fa-circle';
+        }
+      });
+    }
+
+    titleField.addEventListener('input', updateCompletion);
+    descriptionField.addEventListener('input', updateCompletion);
+    statusField.addEventListener('change', updateCompletion);
+
+    saveDraftBtn.addEventListener('click', () => {
+      statusField.value = 'draft';
+      form.submit();
+    });
+    publishBtn.addEventListener('click', () => {
+      statusField.value = 'published';
+      form.submit();
+    });
+
+    updateCompletion();
+  })();
+</script>
 {% endblock %}

@@ -1,112 +1,462 @@
 {% extends 'studio/base_studio.html' %}
+{% load static %}
 
 {% block studio_content %}
-<div class="row justify-content-center">
-    <div class="col-lg-8 col-xl-7">
-        <div class="card border-0 shadow-sm" style="border-radius:16px;">
-            <div class="card-body p-4">
-                <h4 class="mb-4 fw-bold">
-                    {% if action == 'create' %}Новое видео{% else %}Редактировать видео{% endif %}
-                </h4>
-                <form method="post" enctype="multipart/form-data" novalidate id="content-form">
-                    {% csrf_token %}
-                    <div class="mb-3">
-                        <label class="form-label">Название</label>
-                        {{ form.title }}
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label">Описание</label>
-                        {{ form.description }}
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label">Код вставки (iframe)</label>
-                        {{ form.embed_code }}
-                        <div id="embed-preview" class="mt-2" style="display: none;">
-                            <label class="form-label">Предпросмотр видео</label>
-                            <div class="video-preview-wrapper"></div>
-                        </div>
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label">Категория</label>
-                        {{ form.category }}
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label">Обложка</label>
-                        {{ form.thumbnail }}
-                        <div id="thumbnail-preview" class="mt-2 text-center" style="display: none;">
-                            <img id="thumbnail-img" src="#" alt="Предпросмотр обложки" class="img-thumbnail" style="max-width: 300px; max-height: 200px;">
-                        </div>
-                    </div>
-                    <div class="form-check mb-4">
-                        {{ form.is_live }}
-                        <label class="form-check-label">Прямой эфир</label>
-                    </div>
-                    <div class="mb-4">
-                        <label class="form-label">Статус</label>
-                        {{ form.status }}
-                    </div>
-                    <div class="d-flex justify-content-end gap-2">
-                        <button type="submit" class="btn btn-outline-primary">
-                            <i class="fas fa-save me-2"></i>Сохранить
-                        </button>
-                        <button type="button" class="btn btn-primary" id="publish-btn">
-                            <i class="fas fa-check-circle me-2"></i>Опубликовать
-                        </button>
-                        <a href="{% url 'studio_video_list' %}" class="btn btn-light">Отмена</a>
-                    </div>
-                </form>
+<div class="video-editor" id="videoEditorApp">
+  <div class="editor-layout">
+    <!-- ЛЕВАЯ КОЛОНКА: поля формы -->
+    <div class="editor-form">
+      <form method="post" enctype="multipart/form-data" novalidate id="content-form">
+        {% csrf_token %}
+        
+        <!-- === Секция: Основное === -->
+        <section class="form-section">
+          <div class="section-header">
+            <i class="fas fa-info-circle"></i>
+            <h3>Основная информация</h3>
+          </div>
+          <div class="mb-4">
+            <label class="form-label-lg">Название видео</label>
+            {{ form.title }}
+          </div>
+          <div class="mb-4">
+            <label class="form-label-lg">Описание</label>
+            {{ form.description }}
+          </div>
+        </section>
+
+        <!-- === Секция: Видео === -->
+        <section class="form-section">
+          <div class="section-header">
+            <i class="fas fa-video"></i>
+            <h3>Видео</h3>
+          </div>
+          <div class="mb-4">
+            <label class="form-label-lg">Код вставки (iframe)</label>
+            <div class="embed-input-group">
+              {{ form.embed_code }}
             </div>
-        </div>
+            <!-- Блок предпросмотра удалён -->
+          </div>
+        </section>
+
+        <!-- === Секция: Оформление === -->
+        <section class="form-section">
+          <div class="section-header">
+            <i class="fas fa-paint-brush"></i>
+            <h3>Оформление</h3>
+          </div>
+          <div class="row">
+            <div class="col-md-6 mb-4">
+              <label class="form-label-lg">Обложка</label>
+              <div class="thumbnail-uploader" id="thumbnailUploader">
+                {{ form.thumbnail }}
+                <div class="upload-area" id="thumbnailDropArea">
+                  <div class="upload-placeholder">
+                    <i class="fas fa-cloud-upload-alt"></i>
+                    <p>Перетащите изображение сюда или кликните для выбора</p>
+                    <small>JPEG, PNG, не более 5 МБ</small>
+                  </div>
+                  <img id="thumbnailPreviewImg" src="#" alt="Превью обложки" style="display:none;">
+                </div>
+              </div>
+            </div>
+            <div class="col-md-6 mb-4">
+              <label class="form-label-lg">Категория</label>
+              {{ form.category }}
+            </div>
+          </div>
+          <div class="form-check form-switch mb-4">
+            {{ form.is_live }}
+            <label class="form-check-label" for="{{ form.is_live.id_for_label }}">
+              <i class="fas fa-broadcast-tower me-1"></i> Прямой эфир
+            </label>
+          </div>
+        </section>
+
+        <!-- === Секция: Публикация === -->
+        <section class="form-section">
+          <div class="section-header">
+            <i class="fas fa-paper-plane"></i>
+            <h3>Публикация</h3>
+          </div>
+          <div class="row align-items-end">
+            <div class="col-md-6 mb-3">
+              <label class="form-label-lg">Статус</label>
+              {{ form.status }}
+            </div>
+            <div class="col-md-6 mb-3">
+              <label class="form-label-lg">Запланировать публикацию</label>
+              <div class="input-group">
+                {{ form.published_at }}
+                <span class="input-group-text"><i class="fas fa-calendar-alt"></i></span>
+              </div>
+              <small class="text-muted">Оставьте пустым для немедленной публикации при выборе статуса «Опубликовано»</small>
+            </div>
+          </div>
+        </section>
+
+        <!-- Скрытые поля (если нужны) -->
+        {{ form.non_field_errors }}
+      </form>
     </div>
+
+    <!-- ПРАВАЯ КОЛОНКА: прогресс, действия, превью видео -->
+    <div class="editor-sidebar">
+      <!-- Прогресс заполнения -->
+      <div class="progress-card">
+        <div class="d-flex justify-content-between mb-2">
+          <span class="fw-semibold">Готовность видео</span>
+          <span id="completionPercent">0%</span>
+        </div>
+        <div class="progress" style="height: 8px;">
+          <div class="progress-bar bg-primary" id="completionBar" style="width: 0%;"></div>
+        </div>
+        <div class="checklist mt-3" id="completionChecklist">
+          <div class="check-item" data-field="title"><i class="fas fa-circle"></i> Название</div>
+          <div class="check-item" data-field="embed_code"><i class="fas fa-circle"></i> Видео</div>
+          <div class="check-item" data-field="category"><i class="fas fa-circle"></i> Категория</div>
+          <div class="check-item" data-field="thumbnail"><i class="fas fa-circle"></i> Обложка</div>
+        </div>
+      </div>
+
+      <!-- Превью видео -->
+      <div class="video-preview-card">
+        <h5><i class="fas fa-eye me-2"></i>Предпросмотр</h5>
+        <div class="ratio ratio-16x9" id="sidebarVideoPreview">
+          <div class="d-flex align-items-center justify-content-center bg-dark text-white-50" style="height:100%;">
+            <i class="fas fa-play-circle fa-3x"></i>
+          </div>
+        </div>
+      </div>
+
+      <!-- Кнопки действий -->
+      <div class="action-buttons">
+        <button type="button" class="btn btn-outline-secondary w-100 mb-2" id="saveDraftBtn">
+          <i class="fas fa-save me-2"></i>Сохранить как черновик
+        </button>
+        <button type="button" class="btn btn-publish w-100" id="publishBtn">
+          <i class="fas fa-check-circle me-2"></i>Опубликовать сейчас
+        </button>
+        <a href="{% url 'studio_video_list' %}" class="btn btn-link text-muted w-100 mt-2">Отмена</a>
+      </div>
+    </div>
+  </div>
 </div>
 {% endblock %}
 
-{% block extra_js %}
-<script>
-    // Предпросмотр обложки
-    const thumbnailInput = document.querySelector('#id_thumbnail');
-    const thumbnailPreview = document.getElementById('thumbnail-preview');
-    const thumbnailImg = document.getElementById('thumbnail-img');
+{% block extra_css %}
+{{ block.super }}
+<style>
+  .video-editor {
+    color: var(--text-main);
+  }
 
-    thumbnailInput.addEventListener('change', function() {
-        const file = this.files[0];
-        if (file) {
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                thumbnailImg.src = e.target.result;
-                thumbnailPreview.style.display = 'block';
-            }
-            reader.readAsDataURL(file);
-        } else {
-            thumbnailPreview.style.display = 'none';
-        }
-    });
+  .editor-layout {
+    display: grid;
+    grid-template-columns: 1fr 340px;
+    gap: 1.5rem;
+    align-items: start;
+  }
 
-    // Предпросмотр embed-кода
-    const embedInput = document.querySelector('#id_embed_code');
-    const embedPreview = document.getElementById('embed-preview');
-    const embedWrapper = embedPreview.querySelector('.video-preview-wrapper');
-
-    function updateEmbedPreview() {
-        const code = embedInput.value.trim();
-        if (code) {
-            embedWrapper.innerHTML = code;
-            embedPreview.style.display = 'block';
-        } else {
-            embedPreview.style.display = 'none';
-        }
+  @media (max-width: 992px) {
+    .editor-layout {
+      grid-template-columns: 1fr;
     }
-    embedInput.addEventListener('input', updateEmbedPreview);
-    document.addEventListener('DOMContentLoaded', updateEmbedPreview);
+  }
 
-    // Кнопка "Опубликовать"
-    const publishBtn = document.getElementById('publish-btn');
-    const statusSelect = document.getElementById('id_status');
+  /* === Секции формы === */
+  .form-section {
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: var(--radius);
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+    box-shadow: var(--shadow-sm);
+  }
+
+  .section-header {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 1.5rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid var(--card-border);
+  }
+
+  .section-header i {
+    font-size: 1.2rem;
+    color: var(--accent);
+  }
+
+  .section-header h3 {
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin: 0;
+    color: var(--text-main);
+  }
+
+  .form-label-lg {
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    display: block;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-size: 0.8rem;
+  }
+
+  .form-control, .form-select {
+    background-color: #fff;
+    border: 1px solid var(--card-border);
+    color: var(--text-main);
+    border-radius: 10px;
+    padding: 0.65rem 1rem;
+    transition: all 0.2s;
+  }
+
+  .form-control:focus, .form-select:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+    background-color: #fff;
+  }
+
+  .form-control::placeholder {
+    color: var(--text-muted);
+    opacity: 0.7;
+  }
+
+  /* Группа embed */
+  .embed-input-group {
+    display: flex;
+    gap: 0.5rem;
+  }
+
+  .embed-input-group textarea {
+    flex: 1;
+  }
+
+  /* Загрузка обложки */
+  .thumbnail-uploader {
+    position: relative;
+  }
+
+  .upload-area {
+    border: 2px dashed var(--card-border);
+    border-radius: 12px;
+    padding: 1.5rem;
+    text-align: center;
+    cursor: pointer;
+    transition: 0.2s;
+    background: #f8fafc;
+    min-height: 150px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .upload-area:hover, .upload-area.dragover {
+    border-color: var(--accent);
+    background: rgba(59, 130, 246, 0.03);
+  }
+
+  .upload-area img {
+    max-height: 140px;
+    border-radius: 8px;
+  }
+
+  #id_thumbnail {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    opacity: 0;
+    cursor: pointer;
+  }
+
+  /* Правая панель */
+  .editor-sidebar {
+    position: sticky;
+    top: 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+  }
+
+  .progress-card, .video-preview-card {
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: var(--radius);
+    padding: 1.2rem;
+    box-shadow: var(--shadow-sm);
+  }
+
+  .check-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0.5rem;
+    font-size: 0.9rem;
+    color: var(--text-muted);
+  }
+
+  .check-item.completed {
+    color: var(--success);
+  }
+
+  .check-item i {
+    font-size: 0.6rem;
+  }
+
+  .action-buttons {
+    margin-top: auto;
+  }
+
+  .btn-publish {
+    background: var(--accent);
+    border: none;
+    color: white;
+    font-weight: 600;
+    border-radius: 10px;
+    padding: 0.7rem;
+    transition: 0.2s;
+  }
+
+  .btn-publish:hover {
+    background: #2563eb;
+    transform: translateY(-1px);
+  }
+
+  #sidebarVideoPreview {
+    border-radius: 10px;
+    overflow: hidden;
+    background: #1e293b; /* тёмный фон для видео */
+  }
+</style>
+{% endblock %}
+
+{% block extra_js %}
+{{ block.super }}
+<script>
+  (function() {
+    // Элементы
+    const embedField = document.querySelector('#id_embed_code');
+    const sidebarPreview = document.getElementById('sidebarVideoPreview');
+    const thumbInput = document.getElementById('id_thumbnail');
+    const thumbPreviewImg = document.getElementById('thumbnailPreviewImg');
+    const dropArea = document.getElementById('thumbnailDropArea');
+    const saveDraftBtn = document.getElementById('saveDraftBtn');
+    const publishBtn = document.getElementById('publishBtn');
     const form = document.getElementById('content-form');
+    const statusField = document.getElementById('id_status');
+    const titleField = document.getElementById('id_title');
+    const categoryField = document.getElementById('id_category');
+    const completionBar = document.getElementById('completionBar');
+    const completionPercent = document.getElementById('completionPercent');
+    const checkItems = document.querySelectorAll('.check-item');
 
-    publishBtn.addEventListener('click', function() {
-        statusSelect.value = 'published';
-        form.submit();
+    // === Функция обновления превью embed ===
+    function updateEmbedPreview() {
+      const code = embedField.value.trim();
+      if (code) {
+        sidebarPreview.innerHTML = code;
+      } else {
+        sidebarPreview.innerHTML = `<div class="d-flex align-items-center justify-content-center bg-dark text-white-50" style="height:100%;"><i class="fas fa-play-circle fa-3x"></i></div>`;
+      }
+      updateCompletion();
+    }
+
+    // === Предпросмотр обложки ===
+    function updateThumbnailPreview(file) {
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          thumbPreviewImg.src = e.target.result;
+          thumbPreviewImg.style.display = 'block';
+          dropArea.querySelector('.upload-placeholder').style.display = 'none';
+          updateCompletion();
+        };
+        reader.readAsDataURL(file);
+      } else {
+        thumbPreviewImg.style.display = 'none';
+        dropArea.querySelector('.upload-placeholder').style.display = '';
+      }
+    }
+
+    // === Drag & Drop + клик ===
+    ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+      dropArea.addEventListener(eventName, (e) => e.preventDefault());
     });
+    dropArea.addEventListener('dragover', () => dropArea.classList.add('dragover'));
+    dropArea.addEventListener('dragleave', () => dropArea.classList.remove('dragover'));
+    dropArea.addEventListener('drop', (e) => {
+      dropArea.classList.remove('dragover');
+      const files = e.dataTransfer.files;
+      if (files.length) {
+        thumbInput.files = files; // передаём в input
+        updateThumbnailPreview(files[0]);
+      }
+    });
+    dropArea.addEventListener('click', () => thumbInput.click());
+    thumbInput.addEventListener('change', (e) => {
+      if (e.target.files.length) updateThumbnailPreview(e.target.files[0]);
+    });
+
+    // === Заполненность ===
+    function updateCompletion() {
+      let filled = 0;
+      const total = 4;
+      if (titleField.value.trim()) filled++;
+      if (embedField.value.trim()) filled++;
+      if (categoryField.value) filled++;
+      if (thumbInput.files.length || (thumbPreviewImg.src && thumbPreviewImg.src !== '#')) filled++;
+
+      const percent = Math.round((filled / total) * 100);
+      completionBar.style.width = percent + '%';
+      completionPercent.textContent = percent + '%';
+
+      checkItems.forEach(item => {
+        const field = item.dataset.field;
+        let isDone = false;
+        if (field === 'title') isDone = !!titleField.value.trim();
+        if (field === 'embed_code') isDone = !!embedField.value.trim();
+        if (field === 'category') isDone = !!categoryField.value;
+        if (field === 'thumbnail') isDone = !!(thumbInput.files.length || (thumbPreviewImg.src && thumbPreviewImg.src !== '#'));
+        if (isDone) {
+          item.classList.add('completed');
+          item.querySelector('i').className = 'fas fa-check-circle';
+        } else {
+          item.classList.remove('completed');
+          item.querySelector('i').className = 'fas fa-circle';
+        }
+      });
+    }
+
+    // События полей
+    titleField.addEventListener('input', updateCompletion);
+    categoryField.addEventListener('change', updateCompletion);
+    embedField.addEventListener('input', updateEmbedPreview);
+
+    // Кнопки действий
+    saveDraftBtn.addEventListener('click', () => {
+      statusField.value = 'draft';
+      form.submit();
+    });
+    publishBtn.addEventListener('click', () => {
+      statusField.value = 'published';
+      form.submit();
+    });
+
+    // Инициализация
+    updateEmbedPreview();
+    updateCompletion();
+    // Если уже загружена обложка (при редактировании) — показать
+    if (thumbInput.dataset.initialUrl) {
+      thumbPreviewImg.src = thumbInput.dataset.initialUrl;
+      thumbPreviewImg.style.display = 'block';
+      dropArea.querySelector('.upload-placeholder').style.display = 'none';
+    }
+  })();
 </script>
 {% endblock %}
