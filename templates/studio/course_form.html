@@ -42,13 +42,118 @@
           </div>
         </section>
 
+        <!-- === Секция: Уроки === -->
+        <section class="form-section" id="lessons-section">
+          <div class="d-flex justify-content-between align-items-center mb-3">
+            <div class="section-header mb-0">
+              <i class="fas fa-list-ol"></i>
+              <h3>Уроки</h3>
+            </div>
+            <button type="button" class="btn btn-sm btn-primary" id="add-lesson-btn">
+              <i class="fas fa-plus me-1"></i> Добавить урок
+            </button>
+          </div>
+
+          {{ lesson_formset.management_form }}
+          <div id="lessons-container">
+            {% for lesson_form in lesson_formset %}
+              <div class="lesson-form card mb-3" data-form-index="{{ forloop.counter0 }}">
+                <div class="card-body">
+                  <div class="row">
+                    <div class="col-md-6 mb-2">
+                      <label>{{ lesson_form.title.label }}</label>
+                      {{ lesson_form.title }}
+                    </div>
+                    <div class="col-md-3 mb-2">
+                      <label>Порядок</label>
+                      {{ lesson_form.order }}
+                    </div>
+                    <div class="col-md-3 mb-2 d-flex align-items-end">
+                      <button type="button" class="btn btn-sm btn-outline-danger remove-lesson-btn">
+                        <i class="fas fa-trash-alt"></i>
+                      </button>
+                    </div>
+                  </div>
+                  <div class="mb-2">
+                    <label>{{ lesson_form.description.label }}</label>
+                    {{ lesson_form.description }}
+                  </div>
+                  <div class="row">
+                    <!-- Видео -->
+                    <div class="col-md-4 mb-2">
+                      <label class="form-label-lg">Видео</label>
+                      <div class="material-picker">
+                        {{ lesson_form.video }}
+                        <span class="selected-material-name" data-type="video">
+                          {% if lesson_form.instance.video %}
+                            {{ lesson_form.instance.video.title }}
+                          {% else %}
+                            Не выбрано
+                          {% endif %}
+                        </span>
+                        <button type="button" class="btn btn-sm btn-outline-secondary pick-material-btn" data-type="video">
+                          <i class="fas fa-search"></i> Выбрать
+                        </button>
+                        <button type="button" class="btn btn-sm btn-outline-secondary create-material-btn" data-type="video">
+                          <i class="fas fa-plus-circle"></i> Создать
+                        </button>
+                      </div>
+                    </div>
+                    <!-- Аудио -->
+                    <div class="col-md-4 mb-2">
+                      <label class="form-label-lg">Аудио</label>
+                      <div class="material-picker">
+                        {{ lesson_form.audio }}
+                        <span class="selected-material-name" data-type="audio">
+                          {% if lesson_form.instance.audio %}
+                            {{ lesson_form.instance.audio.title }}
+                          {% else %}
+                            Не выбрано
+                          {% endif %}
+                        </span>
+                        <button type="button" class="btn btn-sm btn-outline-secondary pick-material-btn" data-type="audio">
+                          <i class="fas fa-search"></i> Выбрать
+                        </button>
+                        <button type="button" class="btn btn-sm btn-outline-secondary create-material-btn" data-type="audio">
+                          <i class="fas fa-plus-circle"></i> Создать
+                        </button>
+                      </div>
+                    </div>
+                    <!-- Текст -->
+                    <div class="col-md-4 mb-2">
+                      <label class="form-label-lg">Текст</label>
+                      <div class="material-picker">
+                        {{ lesson_form.text }}
+                        <span class="selected-material-name" data-type="text">
+                          {% if lesson_form.instance.text %}
+                            {{ lesson_form.instance.text.title }}
+                          {% else %}
+                            Не выбрано
+                          {% endif %}
+                        </span>
+                        <button type="button" class="btn btn-sm btn-outline-secondary pick-material-btn" data-type="text">
+                          <i class="fas fa-search"></i> Выбрать
+                        </button>
+                        <button type="button" class="btn btn-sm btn-outline-secondary create-material-btn" data-type="text">
+                          <i class="fas fa-plus-circle"></i> Создать
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="text-danger small">{{ lesson_form.non_field_errors }}</div>
+                  {% for hidden in lesson_form.hidden_fields %}{{ hidden }}{% endfor %}
+                </div>
+              </div>
+            {% endfor %}
+          </div>
+        </section>
+
         {{ form.non_field_errors }}
       </form>
     </div>
 
     <!-- ПРАВАЯ КОЛОНКА: прогресс, действия -->
     <div class="editor-sidebar">
-      <!-- Прогресс заполнения -->
       <div class="progress-card">
         <div class="d-flex justify-content-between mb-2">
           <span class="fw-semibold">Готовность курса</span>
@@ -64,7 +169,6 @@
         </div>
       </div>
 
-      <!-- Действия -->
       <div class="action-buttons">
         <button type="button" class="btn btn-outline-secondary w-100 mb-2" id="saveDraftBtn">
           <i class="fas fa-save me-2"></i>Сохранить как черновик
@@ -77,6 +181,10 @@
     </div>
   </div>
 </div>
+
+{% include "studio/includes/material_creation_modals.html" %}
+{% include "studio/includes/material_selection_modals.html" %}
+
 {% endblock %}
 
 {% block extra_css %}
@@ -99,7 +207,6 @@
     }
   }
 
-  /* === Секции формы === */
   .form-section {
     background: var(--card-bg);
     border: 1px solid var(--card-border);
@@ -160,7 +267,6 @@
     opacity: 0.7;
   }
 
-  /* Правая панель */
   .editor-sidebar {
     position: sticky;
     top: 1rem;
@@ -212,6 +318,30 @@
     background: #2563eb;
     transform: translateY(-1px);
   }
+
+  .material-picker {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  .selected-material-name {
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: var(--text-main);
+    max-width: 150px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: inline-block;
+    vertical-align: middle;
+  }
+  .lesson-form .card-body {
+    padding: 1rem;
+  }
+  .btn-sm {
+    border-radius: 8px;
+  }
 </style>
 {% endblock %}
 
@@ -219,6 +349,7 @@
 {{ block.super }}
 <script>
   (function() {
+    // ---- Прогресс заполнения ----
     const form = document.getElementById('content-form');
     const statusField = document.getElementById('id_status');
     const titleField = document.getElementById('id_title');
@@ -234,13 +365,10 @@
       const total = 3;
       if (titleField.value.trim()) filled++;
       if (descriptionField.value.trim()) filled++;
-      // Статус считаем заполненным, если выбрано значение (всегда выбрано, если есть default)
       if (statusField.value) filled++;
-
       const percent = Math.round((filled / total) * 100);
       completionBar.style.width = percent + '%';
       completionPercent.textContent = percent + '%';
-
       checkItems.forEach(item => {
         const field = item.dataset.field;
         let isDone = false;
@@ -271,6 +399,165 @@
     });
 
     updateCompletion();
+
+    // ---- Управление уроками (formset) ----
+    const lessonsContainer = document.getElementById('lessons-container');
+    const addButton = document.getElementById('add-lesson-btn');
+    const totalFormsInput = document.querySelector('#id_lessons-TOTAL_FORMS');
+
+    function getEmptyFormHtml() {
+      const template = document.createElement('div');
+      template.innerHTML = `{% filter escapejs %}{% include "studio/includes/lesson_form_template.html" %}{% endfilter %}`;
+      return template.innerHTML.replace(/__prefix__/g, totalFormsInput.value);
+    }
+
+    function addLessonForm() {
+      const newFormHtml = getEmptyFormHtml();
+      const tempDiv = document.createElement('div');
+      tempDiv.innerHTML = newFormHtml;
+      const newForm = tempDiv.firstElementChild;
+      lessonsContainer.appendChild(newForm);
+      totalFormsInput.value = parseInt(totalFormsInput.value) + 1;
+      attachFormEvents(newForm);
+    }
+
+    let currentLessonForm = null;
+
+    function attachFormEvents(formElement) {
+      formElement.querySelector('.remove-lesson-btn').addEventListener('click', function() {
+        const deleteCheckbox = formElement.querySelector('input[type=checkbox][name$="-DELETE"]');
+        if (deleteCheckbox) deleteCheckbox.checked = true;
+        formElement.style.display = 'none';
+      });
+
+      formElement.querySelectorAll('.create-material-btn').forEach(btn => {
+        btn.addEventListener('click', function(e) {
+          e.preventDefault();
+          const type = this.dataset.type;
+          currentLessonForm = this.closest('.lesson-form');
+          openCreateMaterialModal(type);
+        });
+      });
+
+      formElement.querySelectorAll('.pick-material-btn').forEach(btn => {
+        btn.addEventListener('click', function(e) {
+          e.preventDefault();
+          const type = this.dataset.type;
+          currentLessonForm = this.closest('.lesson-form');
+          openPickMaterialModal(type);
+        });
+      });
+    }
+
+    document.querySelectorAll('.lesson-form').forEach(formEl => attachFormEvents(formEl));
+    addButton.addEventListener('click', addLessonForm);
+
+    // ---- Создание материала (модалка) ----
+    function openCreateMaterialModal(type) {
+      const modalId = `modal-create-${type}`;
+      const modal = document.getElementById(modalId);
+      if (!modal) return;
+      const bsModal = new bootstrap.Modal(modal);
+      bsModal.show();
+      modal.dataset.lessonFormIndex = currentLessonForm ? currentLessonForm.dataset.formIndex : '';
+      modal.dataset.materialType = type;
+    }
+
+    document.querySelectorAll('.modal-material-form').forEach(modalForm => {
+      modalForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+        const formData = new FormData(this);
+        const url = this.action;
+        const type = this.dataset.materialType;
+        const modal = this.closest('.modal');
+
+        fetch(url, {
+          method: 'POST',
+          body: formData,
+          headers: {
+            'X-Requested-With': 'XMLHttpRequest',
+            'X-CSRFToken': formData.get('csrfmiddlewaretoken') || getCookie('csrftoken')
+          }
+        })
+        .then(response => {
+          if (!response.ok) throw new Error('Ошибка сети');
+          return response.json();
+        })
+        .then(data => {
+          if (data.success) {
+            bootstrap.Modal.getInstance(modal).hide();
+            if (currentLessonForm) {
+              updateMaterialField(currentLessonForm, type, data.id, data.title);
+            } else {
+              document.querySelectorAll('.lesson-form').forEach(form => {
+                updateMaterialField(form, type, data.id, data.title);
+              });
+            }
+            modalForm.reset();
+          } else {
+            let errorMsg = '';
+            for (const [field, msgs] of Object.entries(data.errors)) {
+              errorMsg += `${field}: ${msgs.join(', ')}\n`;
+            }
+            alert('Ошибки формы:\n' + errorMsg);
+          }
+        })
+        .catch(() => alert('Не удалось создать материал.'));
+      });
+    });
+
+    // ---- Выбор существующего материала (ИСПРАВЛЕНО) ----
+    function openPickMaterialModal(type) {
+      const modalId = `modal-pick-${type}`;
+      const modal = document.getElementById(modalId);
+      if (!modal) return;
+      const bsModal = new bootstrap.Modal(modal);
+      bsModal.show();
+
+      // Навешиваем обработчики на все элементы списка
+      modal.querySelectorAll('.material-choice').forEach(link => {
+        link.onclick = function(e) {
+          e.preventDefault();
+          const id = this.dataset.id;
+          const title = this.textContent.trim();  // ← БЕРЁМ НАЗВАНИЕ ПРЯМО ИЗ ТЕКСТА
+          if (currentLessonForm) {
+            updateMaterialField(currentLessonForm, type, id, title);
+          }
+          bootstrap.Modal.getInstance(modal).hide();
+        };
+      });
+
+      const createLink = modal.querySelector('.create-material-link');
+      if (createLink) {
+        createLink.onclick = function(e) {
+          e.preventDefault();
+          bootstrap.Modal.getInstance(modal).hide();
+          openCreateMaterialModal(type);
+        };
+      }
+    }
+
+    function updateMaterialField(lessonForm, type, id, title) {
+      const hiddenInput = lessonForm.querySelector(`input[type="hidden"][name*="-${type}"]`);
+      const nameSpan = lessonForm.querySelector(`.selected-material-name[data-type="${type}"]`);
+      if (hiddenInput) hiddenInput.value = id;
+      if (nameSpan) nameSpan.textContent = title || 'Не выбрано';
+    }
+
+    function getCookie(name) {
+      let cookieValue = null;
+      if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+          const cookie = cookies[i].trim();
+          if (cookie.substring(0, name.length + 1) === (name + '=')) {
+            cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+            break;
+          }
+        }
+      }
+      return cookieValue;
+    }
   })();
 </script>
 {% endblock %}

@@ -1,6 +1,5 @@
-# studio/forms.py
 from django import forms
-from courses.models import Course
+from courses.models import Course, Lesson
 from materials.models import VideoContent, AudioContent, TextContent
 
 
@@ -77,7 +76,6 @@ class TextContentForm(forms.ModelForm):
             "subtitle": forms.TextInput(
                 attrs={"class": "form-control", "placeholder": "Подзаголовок"}
             ),
-            # Вместо textarea теперь скрытое поле – его заполнит редактор
             "content": forms.HiddenInput(),
             "description": forms.Textarea(
                 attrs={
@@ -112,3 +110,31 @@ class CourseForm(forms.ModelForm):
                 attrs={"class": "form-control", "type": "datetime-local"}
             ),
         }
+
+
+class LessonForm(forms.ModelForm):
+    class Meta:
+        model = Lesson
+        fields = ["title", "description", "order", "video", "audio", "text"]
+        widgets = {
+            "title": forms.TextInput(
+                attrs={"class": "form-control", "placeholder": "Название урока"}
+            ),
+            "description": forms.Textarea(
+                attrs={
+                    "class": "form-control",
+                    "rows": 2,
+                    "placeholder": "Краткое описание",
+                }
+            ),
+            "order": forms.HiddenInput(),
+            "video": forms.HiddenInput(),
+            "audio": forms.HiddenInput(),
+            "text": forms.HiddenInput(),
+        }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields["video"].queryset = VideoContent.objects.none()
+        self.fields["audio"].queryset = AudioContent.objects.none()
+        self.fields["text"].queryset = TextContent.objects.none()

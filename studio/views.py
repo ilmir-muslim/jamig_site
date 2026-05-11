@@ -2,21 +2,43 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib import messages
 from django.db.models import Q, Sum
+from django.http import JsonResponse
+from django.views.decorators.http import require_POST
+from django.forms import modelformset_factory
+
 from accounts.models import Authors
-from courses.models import Course
+from courses.models import Course, Lesson
 from materials.models import VideoContent, AudioContent, TextContent
-from .forms import CourseForm, VideoContentForm, AudioContentForm, TextContentForm
+from .forms import (
+    CourseForm,
+    VideoContentForm,
+    AudioContentForm,
+    TextContentForm,
+    LessonForm,
+)
+
+LessonFormSet = modelformset_factory(Lesson, form=LessonForm, extra=0, can_delete=True)
 
 
 def is_author(user):
     return user.is_authenticated and user.user_type == "author"
 
 
+def _get_author(request):
+    return Authors.objects.get(user=request.user)
+
+
+def _status_filter(request, queryset, status_param="status"):
+    status = request.GET.get(status_param, "all")
+    if status in ["draft", "published", "archived"]:
+        queryset = queryset.filter(status=status)
+    return queryset, status
+
+
 @login_required
 @user_passes_test(is_author, login_url="admin:login")
 def dashboard(request):
-    author = Authors.objects.get(user=request.user)
-    # Статистика
+    author = _get_author(request)
     total_videos = VideoContent.objects.filter(author=author).count()
     published_videos = VideoContent.objects.filter(
         author=author, status="published"
@@ -30,7 +52,6 @@ def dashboard(request):
         author=author, status="published"
     ).count()
 
-    # Общее количество просмотров (сумма по всем материалам)
     video_views = (
         VideoContent.objects.filter(author=author).aggregate(s=Sum("views_count"))["s"]
         or 0
@@ -68,17 +89,6 @@ def dashboard(request):
     return render(request, "studio/dashboard.html", context)
 
 
-def _get_author(request):
-    return Authors.objects.get(user=request.user)
-
-
-def _status_filter(request, queryset, status_param="status"):
-    status = request.GET.get(status_param, "all")
-    if status in ["draft", "published", "archived"]:
-        queryset = queryset.filter(status=status)
-    return queryset, status
-
-
 # ---------- ВИДЕО ----------
 @login_required
 @user_passes_test(is_author)
@@ -86,10 +96,7 @@ def video_list(request):
     author = _get_author(request)
     qs = VideoContent.objects.filter(author=author).order_by("-updated_at")
     qs, current_filter = _status_filter(request, qs)
-    context = {
-        "videos": qs,
-        "current_filter": current_filter,
-    }
+    context = {"videos": qs, "current_filter": current_filter}
     return render(request, "studio/video_list.html", context)
 
 
@@ -144,10 +151,7 @@ def audio_list(request):
     author = _get_author(request)
     qs = AudioContent.objects.filter(author=author).order_by("-updated_at")
     qs, current_filter = _status_filter(request, qs)
-    context = {
-        "audios": qs,
-        "current_filter": current_filter,
-    }
+    context = {"audios": qs, "current_filter": current_filter}
     return render(request, "studio/audio_list.html", context)
 
 
@@ -202,10 +206,7 @@ def text_list(request):
     author = _get_author(request)
     qs = TextContent.objects.filter(author=author).order_by("-updated_at")
     qs, current_filter = _status_filter(request, qs)
-    context = {
-        "texts": qs,
-        "current_filter": current_filter,
-    }
+    context = {"texts": qs, "current_filter": current_filter}
     return render(request, "studio/text_list.html", context)
 
 
@@ -253,6 +254,17 @@ def text_delete(request, pk):
     )
 
 
+# ---------- КУРСЫ (с уроками) ----------
+def _set_lesson_formset_material_querysets(formset, author):
+    videos = VideoContent.objects.filter(author=author)
+    audios = AudioContent.objects.filter(author=author)
+    texts = TextContent.objects.filter(author=author)
+    for form in formset.forms:
+        form.fields["video"].queryset = videos
+        form.fields["audio"].queryset = audios
+        form.fields["text"].queryset = texts
+
+
 @login_required
 @user_passes_test(is_author)
 def course_list_studio(request):
@@ -264,23 +276,46 @@ def course_list_studio(request):
 @login_required
 @user_passes_test(is_author)
 def course_create(request):
+    author = _get_author(request)
     if request.method == "POST":
-        form = CourseForm(request.POST)
-        if form.is_valid():
-            course = form.save(commit=False)
-            course.author = _get_author(request)
+        course_form = CourseForm(request.POST)
+        formset = LessonFormSet(request.POST, prefix="lessons")
+        if course_form.is_valid() and formset.is_valid():
+            course = course_form.save(commit=False)
+            course.author = author
             if not course.slug:
                 from django.utils.text import slugify
 
                 course.slug = slugify(course.title)
             course.save()
+
+            lessons = formset.save(commit=False)
+            for i, lesson in enumerate(lessons):
+                lesson.course = course
+                if not lesson.order:
+                    lesson.order = i + 1
+                lesson.save()
+            for obj in formset.deleted_objects:
+                obj.delete()
+
             messages.success(request, "Курс создан.")
             return redirect("studio_course_list")
     else:
-        form = CourseForm()
-    return render(
-        request, "studio/course_form.html", {"form": form, "action": "create"}
-    )
+        course_form = CourseForm()
+        formset = LessonFormSet(prefix="lessons", queryset=Lesson.objects.none())
+
+    _set_lesson_formset_material_querysets(formset, author)
+
+    # Загружаем материалы автора для модальных окон выбора
+    context = {
+        "form": course_form,
+        "lesson_formset": formset,
+        "action": "create",
+        "author_videos": VideoContent.objects.filter(author=author),
+        "author_audios": AudioContent.objects.filter(author=author),
+        "author_texts": TextContent.objects.filter(author=author),
+    }
+    return render(request, "studio/course_form.html", context)
 
 
 @login_required
@@ -289,14 +324,37 @@ def course_edit(request, pk):
     author = _get_author(request)
     course = get_object_or_404(Course, pk=pk, author=author)
     if request.method == "POST":
-        form = CourseForm(request.POST, instance=course)
-        if form.is_valid():
-            form.save()
+        course_form = CourseForm(request.POST, instance=course)
+        formset = LessonFormSet(
+            request.POST, prefix="lessons", queryset=course.lessons.all()
+        )
+        if course_form.is_valid() and formset.is_valid():
+            course_form.save()
+            lessons = formset.save(commit=False)
+            for i, lesson in enumerate(lessons):
+                lesson.course = course
+                if not lesson.order:
+                    lesson.order = i + 1
+                lesson.save()
+            for obj in formset.deleted_objects:
+                obj.delete()
             messages.success(request, "Курс обновлён.")
             return redirect("studio_course_list")
     else:
-        form = CourseForm(instance=course)
-    return render(request, "studio/course_form.html", {"form": form, "action": "edit"})
+        course_form = CourseForm(instance=course)
+        formset = LessonFormSet(prefix="lessons", queryset=course.lessons.all())
+
+    _set_lesson_formset_material_querysets(formset, author)
+
+    context = {
+        "form": course_form,
+        "lesson_formset": formset,
+        "action": "edit",
+        "author_videos": VideoContent.objects.filter(author=author),
+        "author_audios": AudioContent.objects.filter(author=author),
+        "author_texts": TextContent.objects.filter(author=author),
+    }
+    return render(request, "studio/course_form.html", context)
 
 
 @login_required
@@ -311,3 +369,46 @@ def course_delete(request, pk):
     return render(
         request, "studio/confirm_delete.html", {"object": course, "type": "курс"}
     )
+
+
+# ---------- AJAX создание материалов ----------
+@require_POST
+@login_required
+@user_passes_test(is_author)
+def video_create_ajax(request):
+    form = VideoContentForm(request.POST, request.FILES)
+    if form.is_valid():
+        video = form.save(commit=False)
+        video.author = _get_author(request)
+        video.save()
+        return JsonResponse({"success": True, "id": video.id, "title": video.title})
+    else:
+        return JsonResponse({"success": False, "errors": form.errors}, status=400)
+
+
+@require_POST
+@login_required
+@user_passes_test(is_author)
+def audio_create_ajax(request):
+    form = AudioContentForm(request.POST, request.FILES)
+    if form.is_valid():
+        audio = form.save(commit=False)
+        audio.author = _get_author(request)
+        audio.save()
+        return JsonResponse({"success": True, "id": audio.id, "title": audio.title})
+    else:
+        return JsonResponse({"success": False, "errors": form.errors}, status=400)
+
+
+@require_POST
+@login_required
+@user_passes_test(is_author)
+def text_create_ajax(request):
+    form = TextContentForm(request.POST, request.FILES)
+    if form.is_valid():
+        text = form.save(commit=False)
+        text.author = _get_author(request)
+        text.save()
+        return JsonResponse({"success": True, "id": text.id, "title": text.title})
+    else:
+        return JsonResponse({"success": False, "errors": form.errors}, status=400)

@@ -1,0 +1,69 @@
+<div class="lesson-form card mb-3" data-form-index="__prefix__">
+  <div class="card-body">
+    <div class="row">
+      <div class="col-md-6 mb-2">
+        <label>Название урока</label>
+        <input type="text" name="lessons-__prefix__-title" class="form-control" placeholder="Название урока">
+      </div>
+      <div class="col-md-3 mb-2">
+        <label>Порядок</label>
+        <input type="number" name="lessons-__prefix__-order" class="form-control" value="0" min="0">
+      </div>
+      <div class="col-md-3 mb-2 d-flex align-items-end">
+        <button type="button" class="btn btn-sm btn-outline-danger remove-lesson-btn">
+          <i class="fas fa-trash-alt"></i>
+        </button>
+      </div>
+    </div>
+    <div class="mb-2">
+      <label>Описание</label>
+      <textarea name="lessons-__prefix__-description" class="form-control" rows="2" placeholder="Краткое описание"></textarea>
+    </div>
+    <div class="row">
+      <!-- Видео -->
+      <div class="col-md-4 mb-2">
+        <label>Видео</label>
+        <div class="material-picker">
+          <input type="hidden" name="lessons-__prefix__-video" value="">
+          <span class="selected-material-name" data-type="video">Не выбрано</span>
+          <button type="button" class="btn btn-sm btn-outline-secondary pick-material-btn" data-type="video">
+            <i class="fas fa-search"></i> Выбрать
+          </button>
+          <button type="button" class="btn btn-sm btn-outline-secondary create-material-btn" data-type="video">
+            <i class="fas fa-plus-circle"></i> Создать
+          </button>
+        </div>
+      </div>
+      <!-- Аудио -->
+      <div class="col-md-4 mb-2">
+        <label>Аудио</label>
+        <div class="material-picker">
+          <input type="hidden" name="lessons-__prefix__-audio" value="">
+          <span class="selected-material-name" data-type="audio">Не выбрано</span>
+          <button type="button" class="btn btn-sm btn-outline-secondary pick-material-btn" data-type="audio">
+            <i class="fas fa-search"></i> Выбрать
+          </button>
+          <button type="button" class="btn btn-sm btn-outline-secondary create-material-btn" data-type="audio">
+            <i class="fas fa-plus-circle"></i> Создать
+          </button>
+        </div>
+      </div>
+      <!-- Текст -->
+      <div class="col-md-4 mb-2">
+        <label>Текст</label>
+        <div class="material-picker">
+          <input type="hidden" name="lessons-__prefix__-text" value="">
+          <span class="selected-material-name" data-type="text">Не выбрано</span>
+          <button type="button" class="btn btn-sm btn-outline-secondary pick-material-btn" data-type="text">
+            <i class="fas fa-search"></i> Выбрать
+          </button>
+          <button type="button" class="btn btn-sm btn-outline-secondary create-material-btn" data-type="text">
+            <i class="fas fa-plus-circle"></i> Создать
+          </button>
+        </div>
+      </div>
+    </div>
+    <input type="hidden" name="lessons-__prefix__-id" value="">
+    <input type="checkbox" name="lessons-__prefix__-DELETE" style="display:none;">
+  </div>
+</div>
