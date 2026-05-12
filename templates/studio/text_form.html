@@ -2,9 +2,7 @@
 {% load static %}
 
 {% block studio_content %}
-<!-- Абсолютная обёртка на всю высоту рабочей области студии -->
 <div class="text-form-full-height">
-    <!-- Вывод ошибок валидации -->
     {% if form.errors %}
         <div class="alert alert-danger m-3 mb-0">
             <strong>Ошибки в форме:</strong>
@@ -21,11 +19,16 @@
         </div>
     {% endif %}
 
-    <!-- Форма растягивается на всё оставшееся место -->
     <form method="post" enctype="multipart/form-data" novalidate id="content-form" class="flex-grow-1 d-flex flex-column">
         {% csrf_token %}
 
-        <!-- Верхняя панель: Название, Подзаголовок, Категория, Статус -->
+        {% if next_url %}
+          <input type="hidden" name="next" value="{{ next_url }}">
+        {% endif %}
+        {% if lesson_index %}
+          <input type="hidden" name="lesson_index" value="{{ lesson_index }}">
+        {% endif %}
+
         <div class="p-3 bg-white border-bottom">
             <div class="row g-2 align-items-end">
                 <div class="col-md-4">
@@ -45,7 +48,6 @@
                     {{ form.status }}
                 </div>
             </div>
-            <!-- Кнопка загрузки файла -->
             <div class="mt-2">
                 <label class="btn btn-sm btn-outline-secondary mb-0">
                     <i class="fas fa-upload me-1"></i> Загрузить файл (txt, docx)
@@ -55,34 +57,36 @@
             </div>
         </div>
 
-        <!-- Скрытое поле контента -->
         {{ form.content }}
 
-        <!-- Редактор Quill — единственная прокручиваемая область -->
         <div id="quill-editor" class="flex-grow-1"></div>
 
-        <!-- Нижняя панель с кнопками -->
         <div class="p-2 bg-white border-top d-flex justify-content-end gap-2">
-            <button type="submit" class="btn btn-outline-primary">
-                <i class="fas fa-save me-2"></i>Сохранить
-            </button>
-            <button type="button" class="btn btn-primary" id="publish-btn">
-                <i class="fas fa-check-circle me-2"></i>Опубликовать
-            </button>
-            <a href="{% url 'studio_text_list' %}" class="btn btn-light">Отмена</a>
+            {% if next_url %}
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-save me-2"></i>Сохранить
+                </button>
+                <a href="{{ next_url }}" class="btn btn-light">Отмена</a>
+            {% else %}
+                <button type="submit" class="btn btn-outline-primary">
+                    <i class="fas fa-save me-2"></i>Сохранить
+                </button>
+                <button type="button" class="btn btn-primary" id="publish-btn">
+                    <i class="fas fa-check-circle me-2"></i>Опубликовать
+                </button>
+                <a href="{% url 'studio_text_list' %}" class="btn btn-light">Отмена</a>
+            {% endif %}
         </div>
     </form>
 </div>
 {% endblock %}
 
 {% block extra_js %}
-<!-- Quill -->
+{{ block.super }}
 <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
 <script src="https://cdn.quilljs.com/1.3.6/quill.min.js"></script>
-<!-- mammoth.js для docx -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
 
-<!-- Передача настроек редактора -->
 <script>
     window.STUDIO_TEXT_CONFIG = {
         contentFieldId: '{{ form.content.id_for_label }}',
@@ -96,15 +100,11 @@
 <script src="{% static 'js/studio_text_form.js' %}"></script>
 
 <style>
-    /* ====== НАДЁЖНАЯ ФИКСАЦИЯ ПАНЕЛЕЙ И ПРОКРУТКА ТЕКСТА ====== */
-
-    /* Делаем .studio-main контекстом для абсолютного позиционирования */
     .studio-main {
         position: relative;
-        overflow: hidden;            /* убираем скролл всей рабочей области */
+        overflow: hidden;
     }
 
-    /* Обёртка формы — на весь .studio-main */
     .text-form-full-height {
         position: absolute;
         top: 0;
@@ -115,12 +115,10 @@
         flex-direction: column;
     }
 
-    /* Форма внутри тоже flex-колонка, растянутая на всю высоту */
     #content-form {
-        min-height: 0;               /* позволяет сжиматься flex-элементу */
+        min-height: 0;
     }
 
-    /* Редактор занимает оставшееся место, а его контейнер получает скролл */
     #quill-editor {
         flex: 1;
         min-height: 0;
@@ -129,10 +127,9 @@
     }
     #quill-editor .ql-container {
         flex: 1;
-        overflow-y: auto !important; /* <-- вот тут будет скролл текста */
+        overflow-y: auto !important;
     }
 
-    /* Дефолтные стили Quill (можно подправить под себя) */
     .ql-toolbar.ql-snow {
         border: none;
         border-bottom: 1px solid #e2e8f0;

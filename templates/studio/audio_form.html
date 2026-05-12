@@ -9,6 +9,13 @@
       <form method="post" enctype="multipart/form-data" novalidate id="content-form">
         {% csrf_token %}
 
+        {% if next_url %}
+          <input type="hidden" name="next" value="{{ next_url }}">
+        {% endif %}
+        {% if lesson_index %}
+          <input type="hidden" name="lesson_index" value="{{ lesson_index }}">
+        {% endif %}
+
         <!-- === Секция: Основное === -->
         <section class="form-section">
           <div class="section-header">
@@ -89,7 +96,6 @@
 
     <!-- ПРАВАЯ КОЛОНКА: прогресс, действия, превью аудио -->
     <div class="editor-sidebar">
-      <!-- Прогресс заполнения -->
       <div class="progress-card">
         <div class="d-flex justify-content-between mb-2">
           <span class="fw-semibold">Готовность аудио</span>
@@ -106,7 +112,6 @@
         </div>
       </div>
 
-      <!-- Превью аудио -->
       <div class="audio-preview-card">
         <h5><i class="fas fa-eye me-2"></i>Предпрослушивание</h5>
         <div id="sidebarAudioPreview" class="d-flex align-items-center justify-content-center bg-light rounded-3" style="min-height: 120px;">
@@ -116,13 +121,20 @@
 
       <!-- Кнопки действий -->
       <div class="action-buttons">
-        <button type="button" class="btn btn-outline-secondary w-100 mb-2" id="saveDraftBtn">
-          <i class="fas fa-save me-2"></i>Сохранить как черновик
-        </button>
-        <button type="button" class="btn btn-publish w-100" id="publishBtn">
-          <i class="fas fa-check-circle me-2"></i>Опубликовать сейчас
-        </button>
-        <a href="{% url 'studio_audio_list' %}" class="btn btn-link text-muted w-100 mt-2">Отмена</a>
+        {% if next_url %}
+          <button type="submit" class="btn btn-primary w-100 mb-2" id="saveBtn">
+            <i class="fas fa-save me-2"></i>Сохранить
+          </button>
+          <a href="{{ next_url }}" class="btn btn-outline-secondary w-100">Отмена</a>
+        {% else %}
+          <button type="button" class="btn btn-outline-secondary w-100 mb-2" id="saveDraftBtn">
+            <i class="fas fa-save me-2"></i>Сохранить как черновик
+          </button>
+          <button type="button" class="btn btn-publish w-100" id="publishBtn">
+            <i class="fas fa-check-circle me-2"></i>Опубликовать сейчас
+          </button>
+          <a href="{% url 'studio_audio_list' %}" class="btn btn-link text-muted w-100 mt-2">Отмена</a>
+        {% endif %}
       </div>
     </div>
   </div>
@@ -149,7 +161,6 @@
     }
   }
 
-  /* === Секции формы === */
   .form-section {
     background: var(--card-bg);
     border: 1px solid var(--card-border);
@@ -210,7 +221,6 @@
     opacity: 0.7;
   }
 
-  /* Загрузка аудио */
   .audio-uploader {
     position: relative;
   }
@@ -231,7 +241,7 @@
   }
 
   .audio-upload-area .upload-placeholder {
-    pointer-events: none; /* чтобы клик проходил к input */
+    pointer-events: none;
   }
 
   #id_audio_file {
@@ -244,7 +254,6 @@
     cursor: pointer;
   }
 
-  /* Загрузка обложки */
   .thumbnail-uploader {
     position: relative;
   }
@@ -283,7 +292,6 @@
     cursor: pointer;
   }
 
-  /* Правая панель */
   .editor-sidebar {
     position: sticky;
     top: 1rem;
@@ -348,7 +356,6 @@
 {{ block.super }}
 <script>
   (function() {
-    // Элементы формы
     const form = document.getElementById('content-form');
     const statusField = document.getElementById('id_status');
     const titleField = document.getElementById('id_title');
@@ -366,17 +373,15 @@
     const checkItems = document.querySelectorAll('.check-item');
     const saveDraftBtn = document.getElementById('saveDraftBtn');
     const publishBtn = document.getElementById('publishBtn');
+    const saveBtn = document.getElementById('saveBtn');
 
-    // === Предпросмотр аудио ===
     function updateAudioPreview(file) {
       if (file) {
         const url = URL.createObjectURL(file);
         audioPlayer.src = url;
         audioPlayerWrapper.style.display = 'block';
         audioDropArea.querySelector('.upload-placeholder').style.display = 'none';
-        // Обновляем превью в правой колонке
         sidebarAudioPreview.innerHTML = `<audio controls class="w-100"><source src="${url}" type="${file.type}"></audio>`;
-        // Сбрасываем data-URL
         audioFileInput.dataset.audioUrl = url;
       } else {
         audioPlayer.src = '';
@@ -391,7 +396,6 @@
       updateCompletion();
     }
 
-    // Drag & Drop для аудио
     ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
       audioDropArea.addEventListener(eventName, (e) => e.preventDefault());
     });
@@ -406,7 +410,6 @@
       }
     });
     audioDropArea.addEventListener('click', (e) => {
-      // Не даём клику по плейсхолдеру открыть выбор файла дважды
       if (e.target !== audioFileInput) {
         audioFileInput.click();
       }
@@ -416,7 +419,6 @@
       else updateAudioPreview(null);
     });
 
-    // === Предпросмотр обложки ===
     function updateCoverPreview(file) {
       if (file) {
         const reader = new FileReader();
@@ -433,7 +435,6 @@
       }
     }
 
-    // Drag & Drop для обложки
     ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
       coverDropArea.addEventListener(eventName, (e) => e.preventDefault());
     });
@@ -453,7 +454,6 @@
       else updateCoverPreview(null);
     });
 
-    // === Заполненность ===
     function updateCompletion() {
       let filled = 0;
       const total = 4;
@@ -483,34 +483,37 @@
       });
     }
 
-    // События полей
     titleField.addEventListener('input', updateCompletion);
     categoryField.addEventListener('change', updateCompletion);
 
-    // Кнопки действий
-    saveDraftBtn.addEventListener('click', () => {
-      statusField.value = 'draft';
-      form.submit();
-    });
-    publishBtn.addEventListener('click', () => {
-      statusField.value = 'published';
-      form.submit();
-    });
+    if (saveDraftBtn) {
+      saveDraftBtn.addEventListener('click', () => {
+        statusField.value = 'draft';
+        form.submit();
+      });
+    }
+    if (publishBtn) {
+      publishBtn.addEventListener('click', () => {
+        statusField.value = 'published';
+        form.submit();
+      });
+    }
+    if (saveBtn) {
+      saveBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        form.submit();
+      });
+    }
 
-    // Инициализация
     updateCompletion();
-    // Если при редактировании уже есть обложка (показать)
     if (coverInput.dataset.initialUrl) {
       coverPreviewImg.src = coverInput.dataset.initialUrl;
       coverPreviewImg.style.display = 'block';
       coverDropArea.querySelector('.upload-placeholder').style.display = 'none';
     }
-    // Если уже загружен аудиофайл при редактировании, показать его preview
     if (audioFileInput.dataset.initialUrl) {
-      // Элемент audio уже может быть с src? Если нет, можно вставить плейер
       const audioUrl = audioFileInput.dataset.initialUrl;
       sidebarAudioPreview.innerHTML = `<audio controls class="w-100"><source src="${audioUrl}"></audio>`;
-      // В основной зоне тоже покажем плейер
       audioPlayer.src = audioUrl;
       audioPlayerWrapper.style.display = 'block';
       audioDropArea.querySelector('.upload-placeholder').style.display = 'none';

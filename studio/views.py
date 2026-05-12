@@ -2,9 +2,11 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib import messages
 from django.db.models import Q, Sum
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponseRedirect
 from django.views.decorators.http import require_POST
 from django.forms import modelformset_factory
+from django.urls import reverse
+from urllib.parse import urlencode
 
 from accounts.models import Authors
 from courses.models import Course, Lesson
@@ -103,6 +105,10 @@ def video_list(request):
 @login_required
 @user_passes_test(is_author)
 def video_create(request):
+    # Параметры возврата
+    next_url = request.GET.get("next") or request.POST.get("next")
+    lesson_index = request.GET.get("lesson_index") or request.POST.get("lesson_index")
+
     if request.method == "POST":
         form = VideoContentForm(request.POST, request.FILES)
         if form.is_valid():
@@ -110,10 +116,32 @@ def video_create(request):
             video.author = _get_author(request)
             video.save()
             messages.success(request, "Видео успешно создано.")
+            if next_url:
+                redirect_url = next_url
+                params = {}
+                if lesson_index:
+                    params["lesson_index"] = lesson_index
+                params["material_id"] = video.id
+                params["material_type"] = "video"
+                if "?" in redirect_url:
+                    redirect_url += "&" + urlencode(params)
+                else:
+                    redirect_url += "?" + urlencode(params)
+                return HttpResponseRedirect(redirect_url)
             return redirect("studio_video_list")
     else:
         form = VideoContentForm()
-    return render(request, "studio/video_form.html", {"form": form, "action": "create"})
+
+    return render(
+        request,
+        "studio/video_form.html",
+        {
+            "form": form,
+            "action": "create",
+            "next_url": next_url,
+            "lesson_index": lesson_index,
+        },
+    )
 
 
 @login_required
@@ -158,6 +186,9 @@ def audio_list(request):
 @login_required
 @user_passes_test(is_author)
 def audio_create(request):
+    next_url = request.GET.get("next") or request.POST.get("next")
+    lesson_index = request.GET.get("lesson_index") or request.POST.get("lesson_index")
+
     if request.method == "POST":
         form = AudioContentForm(request.POST, request.FILES)
         if form.is_valid():
@@ -165,10 +196,32 @@ def audio_create(request):
             audio.author = _get_author(request)
             audio.save()
             messages.success(request, "Аудио создано.")
+            if next_url:
+                redirect_url = next_url
+                params = {}
+                if lesson_index:
+                    params["lesson_index"] = lesson_index
+                params["material_id"] = audio.id
+                params["material_type"] = "audio"
+                if "?" in redirect_url:
+                    redirect_url += "&" + urlencode(params)
+                else:
+                    redirect_url += "?" + urlencode(params)
+                return HttpResponseRedirect(redirect_url)
             return redirect("studio_audio_list")
     else:
         form = AudioContentForm()
-    return render(request, "studio/audio_form.html", {"form": form, "action": "create"})
+
+    return render(
+        request,
+        "studio/audio_form.html",
+        {
+            "form": form,
+            "action": "create",
+            "next_url": next_url,
+            "lesson_index": lesson_index,
+        },
+    )
 
 
 @login_required
@@ -213,6 +266,9 @@ def text_list(request):
 @login_required
 @user_passes_test(is_author)
 def text_create(request):
+    next_url = request.GET.get("next") or request.POST.get("next")
+    lesson_index = request.GET.get("lesson_index") or request.POST.get("lesson_index")
+
     if request.method == "POST":
         form = TextContentForm(request.POST, request.FILES)
         if form.is_valid():
@@ -220,10 +276,32 @@ def text_create(request):
             text.author = _get_author(request)
             text.save()
             messages.success(request, "Статья создана.")
+            if next_url:
+                redirect_url = next_url
+                params = {}
+                if lesson_index:
+                    params["lesson_index"] = lesson_index
+                params["material_id"] = text.id
+                params["material_type"] = "text"
+                if "?" in redirect_url:
+                    redirect_url += "&" + urlencode(params)
+                else:
+                    redirect_url += "?" + urlencode(params)
+                return HttpResponseRedirect(redirect_url)
             return redirect("studio_text_list")
     else:
         form = TextContentForm()
-    return render(request, "studio/text_form.html", {"form": form, "action": "create"})
+
+    return render(
+        request,
+        "studio/text_form.html",
+        {
+            "form": form,
+            "action": "create",
+            "next_url": next_url,
+            "lesson_index": lesson_index,
+        },
+    )
 
 
 @login_required
@@ -265,6 +343,20 @@ def _set_lesson_formset_material_querysets(formset, author):
         form.fields["text"].queryset = texts
 
 
+def _publish_course_materials(course):
+    """Публикует все материалы, привязанные к урокам курса"""
+    for lesson in course.lessons.all():
+        if lesson.video and lesson.video.status != "published":
+            lesson.video.status = "published"
+            lesson.video.save()
+        if lesson.audio and lesson.audio.status != "published":
+            lesson.audio.status = "published"
+            lesson.audio.save()
+        if lesson.text and lesson.text.status != "published":
+            lesson.text.status = "published"
+            lesson.text.save()
+
+
 @login_required
 @user_passes_test(is_author)
 def course_list_studio(request):
@@ -298,6 +390,10 @@ def course_create(request):
             for obj in formset.deleted_objects:
                 obj.delete()
 
+            # Автопубликация материалов, если курс опубликован
+            if course.status == "published":
+                _publish_course_materials(course)
+
             messages.success(request, "Курс создан.")
             return redirect("studio_course_list")
     else:
@@ -314,6 +410,8 @@ def course_create(request):
         "author_videos": VideoContent.objects.filter(author=author),
         "author_audios": AudioContent.objects.filter(author=author),
         "author_texts": TextContent.objects.filter(author=author),
+        # Передаём текущий URL для формирования return_url
+        "request": request,
     }
     return render(request, "studio/course_form.html", context)
 
@@ -338,6 +436,11 @@ def course_edit(request, pk):
                 lesson.save()
             for obj in formset.deleted_objects:
                 obj.delete()
+
+            # Автопубликация материалов, если курс теперь опубликован
+            if course.status == "published":
+                _publish_course_materials(course)
+
             messages.success(request, "Курс обновлён.")
             return redirect("studio_course_list")
     else:
@@ -353,6 +456,7 @@ def course_edit(request, pk):
         "author_videos": VideoContent.objects.filter(author=author),
         "author_audios": AudioContent.objects.filter(author=author),
         "author_texts": TextContent.objects.filter(author=author),
+        "request": request,
     }
     return render(request, "studio/course_form.html", context)
 
@@ -371,7 +475,7 @@ def course_delete(request, pk):
     )
 
 
-# ---------- AJAX создание материалов ----------
+# ---------- AJAX создание материалов (оставляем, но не используем) ----------
 @require_POST
 @login_required
 @user_passes_test(is_author)

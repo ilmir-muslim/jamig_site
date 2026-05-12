@@ -4,12 +4,11 @@
 {% block studio_content %}
 <div class="course-editor" id="courseEditorApp">
   <div class="editor-layout">
-    <!-- ЛЕВАЯ КОЛОНКА: поля формы -->
     <div class="editor-form">
       <form method="post" novalidate id="content-form">
         {% csrf_token %}
 
-        <!-- === Секция: Основное === -->
+        <!-- === Основное === -->
         <section class="form-section">
           <div class="section-header">
             <i class="fas fa-info-circle"></i>
@@ -29,7 +28,7 @@
           </div>
         </section>
 
-        <!-- === Секция: Публикация === -->
+        <!-- === Публикация === -->
         <section class="form-section">
           <div class="section-header">
             <i class="fas fa-calendar-alt"></i>
@@ -42,16 +41,11 @@
           </div>
         </section>
 
-        <!-- === Секция: Уроки === -->
+        <!-- === Уроки === -->
         <section class="form-section" id="lessons-section">
-          <div class="d-flex justify-content-between align-items-center mb-3">
-            <div class="section-header mb-0">
-              <i class="fas fa-list-ol"></i>
-              <h3>Уроки</h3>
-            </div>
-            <button type="button" class="btn btn-sm btn-primary" id="add-lesson-btn">
-              <i class="fas fa-plus me-1"></i> Добавить урок
-            </button>
+          <div class="section-header mb-3">
+            <i class="fas fa-list-ol"></i>
+            <h3>Уроки</h3>
           </div>
 
           {{ lesson_formset.management_form }}
@@ -91,11 +85,12 @@
                             Не выбрано
                           {% endif %}
                         </span>
+                        <a href="{% url 'studio_video_create' %}?next={{ request.path }}&lesson_index={{ forloop.counter0 }}" 
+                           class="btn btn-sm btn-outline-secondary create-material-link">
+                          <i class="fas fa-plus-circle"></i> Создать
+                        </a>
                         <button type="button" class="btn btn-sm btn-outline-secondary pick-material-btn" data-type="video">
                           <i class="fas fa-search"></i> Выбрать
-                        </button>
-                        <button type="button" class="btn btn-sm btn-outline-secondary create-material-btn" data-type="video">
-                          <i class="fas fa-plus-circle"></i> Создать
                         </button>
                       </div>
                     </div>
@@ -111,11 +106,12 @@
                             Не выбрано
                           {% endif %}
                         </span>
+                        <a href="{% url 'studio_audio_create' %}?next={{ request.path }}&lesson_index={{ forloop.counter0 }}" 
+                           class="btn btn-sm btn-outline-secondary create-material-link">
+                          <i class="fas fa-plus-circle"></i> Создать
+                        </a>
                         <button type="button" class="btn btn-sm btn-outline-secondary pick-material-btn" data-type="audio">
                           <i class="fas fa-search"></i> Выбрать
-                        </button>
-                        <button type="button" class="btn btn-sm btn-outline-secondary create-material-btn" data-type="audio">
-                          <i class="fas fa-plus-circle"></i> Создать
                         </button>
                       </div>
                     </div>
@@ -131,11 +127,12 @@
                             Не выбрано
                           {% endif %}
                         </span>
+                        <a href="{% url 'studio_text_create' %}?next={{ request.path }}&lesson_index={{ forloop.counter0 }}" 
+                           class="btn btn-sm btn-outline-secondary create-material-link">
+                          <i class="fas fa-plus-circle"></i> Создать
+                        </a>
                         <button type="button" class="btn btn-sm btn-outline-secondary pick-material-btn" data-type="text">
                           <i class="fas fa-search"></i> Выбрать
-                        </button>
-                        <button type="button" class="btn btn-sm btn-outline-secondary create-material-btn" data-type="text">
-                          <i class="fas fa-plus-circle"></i> Создать
                         </button>
                       </div>
                     </div>
@@ -146,13 +143,89 @@
               </div>
             {% endfor %}
           </div>
+
+          <!-- Форма нового урока (всегда видна) -->
+          <div class="card new-lesson-form mb-3" id="new-lesson-form">
+            <div class="card-body">
+              <h5 class="mb-3">Новый урок</h5>
+              <div class="row">
+                <div class="col-md-6 mb-2">
+                  <label>Название урока</label>
+                  <input type="text" class="form-control" id="new-lesson-title" placeholder="Название урока">
+                </div>
+                <div class="col-md-3 mb-2">
+                  <label>Порядок</label>
+                  <input type="number" class="form-control" id="new-lesson-order" value="0" min="0">
+                </div>
+              </div>
+              <div class="mb-2">
+                <label>Описание</label>
+                <textarea class="form-control" id="new-lesson-description" rows="2" placeholder="Краткое описание"></textarea>
+              </div>
+              <div class="row">
+                <!-- Видео -->
+                <div class="col-md-4 mb-2">
+                  <label>Видео</label>
+                  <div class="material-picker">
+                    <input type="hidden" id="new-lesson-video" value="">
+                    <span class="selected-material-name" data-type="video">Не выбрано</span>
+                    <a href="{% url 'studio_video_create' %}?next={{ request.path }}&lesson_index=new" 
+                       class="btn btn-sm btn-outline-secondary create-material-link">
+                      <i class="fas fa-plus-circle"></i> Создать
+                    </a>
+                    <button type="button" class="btn btn-sm btn-outline-secondary pick-material-btn" data-type="video">
+                      <i class="fas fa-search"></i> Выбрать
+                    </button>
+                  </div>
+                </div>
+                <!-- Аудио -->
+                <div class="col-md-4 mb-2">
+                  <label>Аудио</label>
+                  <div class="material-picker">
+                    <input type="hidden" id="new-lesson-audio" value="">
+                    <span class="selected-material-name" data-type="audio">Не выбрано</span>
+                    <a href="{% url 'studio_audio_create' %}?next={{ request.path }}&lesson_index=new" 
+                       class="btn btn-sm btn-outline-secondary create-material-link">
+                      <i class="fas fa-plus-circle"></i> Создать
+                    </a>
+                    <button type="button" class="btn btn-sm btn-outline-secondary pick-material-btn" data-type="audio">
+                      <i class="fas fa-search"></i> Выбрать
+                    </button>
+                  </div>
+                </div>
+                <!-- Текст -->
+                <div class="col-md-4 mb-2">
+                  <label>Текст</label>
+                  <div class="material-picker">
+                    <input type="hidden" id="new-lesson-text" value="">
+                    <span class="selected-material-name" data-type="text">Не выбрано</span>
+                    <a href="{% url 'studio_text_create' %}?next={{ request.path }}&lesson_index=new" 
+                       class="btn btn-sm btn-outline-secondary create-material-link">
+                      <i class="fas fa-plus-circle"></i> Создать
+                    </a>
+                    <button type="button" class="btn btn-sm btn-outline-secondary pick-material-btn" data-type="text">
+                      <i class="fas fa-search"></i> Выбрать
+                    </button>
+                  </div>
+                </div>
+              </div>
+              <div class="mt-3 d-flex gap-2">
+                <button type="button" class="btn btn-success btn-sm" id="save-new-lesson-btn">
+                  <i class="fas fa-check"></i> Сохранить урок
+                </button>
+                <button type="button" class="btn btn-outline-secondary btn-sm" id="reset-new-lesson-btn">
+                  <i class="fas fa-undo"></i> Сбросить
+                </button>
+              </div>
+            </div>
+          </div>
         </section>
 
         {{ form.non_field_errors }}
       </form>
     </div>
 
-    <!-- ПРАВАЯ КОЛОНКА: прогресс, действия -->
+    <!-- Правая колонка -->
     <div class="editor-sidebar">
       <div class="progress-card">
         <div class="d-flex justify-content-between mb-2">
@@ -182,7 +255,6 @@
   </div>
 </div>
 
-{% include "studio/includes/material_creation_modals.html" %}
 {% include "studio/includes/material_selection_modals.html" %}
 
 {% endblock %}
@@ -190,158 +262,29 @@
 {% block extra_css %}
 {{ block.super }}
 <style>
-  .course-editor {
-    color: var(--text-main);
-  }
-
-  .editor-layout {
-    display: grid;
-    grid-template-columns: 1fr 340px;
-    gap: 1.5rem;
-    align-items: start;
-  }
-
-  @media (max-width: 992px) {
-    .editor-layout {
-      grid-template-columns: 1fr;
-    }
-  }
-
-  .form-section {
-    background: var(--card-bg);
-    border: 1px solid var(--card-border);
-    border-radius: var(--radius);
-    padding: 1.5rem;
-    margin-bottom: 1.5rem;
-    box-shadow: var(--shadow-sm);
-  }
-
-  .section-header {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    margin-bottom: 1.5rem;
-    padding-bottom: 0.75rem;
-    border-bottom: 1px solid var(--card-border);
-  }
-
-  .section-header i {
-    font-size: 1.2rem;
-    color: var(--accent);
-  }
-
-  .section-header h3 {
-    font-size: 1.1rem;
-    font-weight: 600;
-    margin: 0;
-    color: var(--text-main);
-  }
-
-  .form-label-lg {
-    font-weight: 600;
-    margin-bottom: 0.5rem;
-    display: block;
-    color: var(--text-muted);
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    font-size: 0.8rem;
-  }
-
-  .form-control, .form-select {
-    background-color: #fff;
-    border: 1px solid var(--card-border);
-    color: var(--text-main);
-    border-radius: 10px;
-    padding: 0.65rem 1rem;
-    transition: all 0.2s;
-  }
-
-  .form-control:focus, .form-select:focus {
-    border-color: var(--accent);
-    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
-    background-color: #fff;
-  }
-
-  .form-control::placeholder {
-    color: var(--text-muted);
-    opacity: 0.7;
-  }
-
-  .editor-sidebar {
-    position: sticky;
-    top: 1rem;
-    display: flex;
-    flex-direction: column;
-    gap: 1.5rem;
-  }
-
-  .progress-card {
-    background: var(--card-bg);
-    border: 1px solid var(--card-border);
-    border-radius: var(--radius);
-    padding: 1.2rem;
-    box-shadow: var(--shadow-sm);
-  }
-
-  .check-item {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    margin-bottom: 0.5rem;
-    font-size: 0.9rem;
-    color: var(--text-muted);
-  }
-
-  .check-item.completed {
-    color: var(--success);
-  }
-
-  .check-item i {
-    font-size: 0.6rem;
-  }
-
-  .action-buttons {
-    margin-top: auto;
-  }
-
-  .btn-publish {
-    background: var(--accent);
-    border: none;
-    color: white;
-    font-weight: 600;
-    border-radius: 10px;
-    padding: 0.7rem;
-    transition: 0.2s;
-  }
-
-  .btn-publish:hover {
-    background: #2563eb;
-    transform: translateY(-1px);
-  }
-
-  .material-picker {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: 0.5rem;
-  }
-  .selected-material-name {
-    font-size: 0.9rem;
-    font-weight: 500;
-    color: var(--text-main);
-    max-width: 150px;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    display: inline-block;
-    vertical-align: middle;
-  }
-  .lesson-form .card-body {
-    padding: 1rem;
-  }
-  .btn-sm {
-    border-radius: 8px;
-  }
+  .course-editor { color: var(--text-main); }
+  .editor-layout { display: grid; grid-template-columns: 1fr 340px; gap: 1.5rem; align-items: start; }
+  @media (max-width: 992px) { .editor-layout { grid-template-columns: 1fr; } }
+  .form-section { background: var(--card-bg); border: 1px solid var(--card-border); border-radius: var(--radius); padding: 1.5rem; margin-bottom: 1.5rem; box-shadow: var(--shadow-sm); }
+  .section-header { display: flex; align-items: center; gap: 0.5rem; margin-bottom: 1.5rem; padding-bottom: 0.75rem; border-bottom: 1px solid var(--card-border); }
+  .section-header i { font-size: 1.2rem; color: var(--accent); }
+  .section-header h3 { font-size: 1.1rem; font-weight: 600; margin: 0; color: var(--text-main); }
+  .form-label-lg { font-weight: 600; margin-bottom: 0.5rem; display: block; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; font-size: 0.8rem; }
+  .form-control, .form-select { background-color: #fff; border: 1px solid var(--card-border); color: var(--text-main); border-radius: 10px; padding: 0.65rem 1rem; transition: all 0.2s; }
+  .form-control:focus, .form-select:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15); background-color: #fff; }
+  .editor-sidebar { position: sticky; top: 1rem; display: flex; flex-direction: column; gap: 1.5rem; }
+  .progress-card { background: var(--card-bg); border: 1px solid var(--card-border); border-radius: var(--radius); padding: 1.2rem; box-shadow: var(--shadow-sm); }
+  .check-item { display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem; font-size: 0.9rem; color: var(--text-muted); }
+  .check-item.completed { color: var(--success); }
+  .check-item i { font-size: 0.6rem; }
+  .action-buttons { margin-top: auto; }
+  .btn-publish { background: var(--accent); border: none; color: white; font-weight: 600; border-radius: 10px; padding: 0.7rem; transition: 0.2s; }
+  .btn-publish:hover { background: #2563eb; transform: translateY(-1px); }
+  .material-picker { display: flex; flex-wrap: wrap; align-items: center; gap: 0.5rem; }
+  .selected-material-name { font-size: 0.9rem; font-weight: 500; color: var(--text-main); max-width: 150px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .lesson-form .card-body { padding: 1rem; }
+  .new-lesson-form { background: var(--card-bg); border: 2px dashed var(--card-border); border-radius: var(--radius); }
+  .btn-sm { border-radius: 8px; }
 </style>
 {% endblock %}
 
@@ -349,7 +292,6 @@
 {{ block.super }}
 <script>
   (function() {
-    // ---- Прогресс заполнения ----
     const form = document.getElementById('content-form');
     const statusField = document.getElementById('id_status');
     const titleField = document.getElementById('id_title');
@@ -359,7 +301,10 @@
     const checkItems = document.querySelectorAll('.check-item');
     const saveDraftBtn = document.getElementById('saveDraftBtn');
     const publishBtn = document.getElementById('publishBtn');
+    const totalFormsInput = document.querySelector('#id_lessons-TOTAL_FORMS');
+    const lessonsContainer = document.getElementById('lessons-container');
 
+    // ---------- Прогресс ----------
     function updateCompletion() {
       let filled = 0;
       const total = 3;
@@ -375,189 +320,237 @@
         if (field === 'title') isDone = !!titleField.value.trim();
         if (field === 'description') isDone = !!descriptionField.value.trim();
         if (field === 'status') isDone = !!statusField.value;
-        if (isDone) {
-          item.classList.add('completed');
-          item.querySelector('i').className = 'fas fa-check-circle';
-        } else {
-          item.classList.remove('completed');
-          item.querySelector('i').className = 'fas fa-circle';
-        }
+        if (isDone) { item.classList.add('completed'); item.querySelector('i').className = 'fas fa-check-circle'; }
+        else { item.classList.remove('completed'); item.querySelector('i').className = 'fas fa-circle'; }
       });
     }
-
     titleField.addEventListener('input', updateCompletion);
     descriptionField.addEventListener('input', updateCompletion);
     statusField.addEventListener('change', updateCompletion);
-
-    saveDraftBtn.addEventListener('click', () => {
-      statusField.value = 'draft';
-      form.submit();
-    });
-    publishBtn.addEventListener('click', () => {
-      statusField.value = 'published';
-      form.submit();
-    });
-
     updateCompletion();
 
-    // ---- Управление уроками (formset) ----
-    const lessonsContainer = document.getElementById('lessons-container');
-    const addButton = document.getElementById('add-lesson-btn');
-    const totalFormsInput = document.querySelector('#id_lessons-TOTAL_FORMS');
+    // ---------- Сохранение черновика / публикация ----------
+    saveDraftBtn.addEventListener('click', () => { statusField.value = 'draft'; form.submit(); });
+    publishBtn.addEventListener('click', () => { statusField.value = 'published'; form.submit(); });
 
-    function getEmptyFormHtml() {
-      const template = document.createElement('div');
-      template.innerHTML = `{% filter escapejs %}{% include "studio/includes/lesson_form_template.html" %}{% endfilter %}`;
-      return template.innerHTML.replace(/__prefix__/g, totalFormsInput.value);
-    }
-
-    function addLessonForm() {
-      const newFormHtml = getEmptyFormHtml();
-      const tempDiv = document.createElement('div');
-      tempDiv.innerHTML = newFormHtml;
-      const newForm = tempDiv.firstElementChild;
-      lessonsContainer.appendChild(newForm);
-      totalFormsInput.value = parseInt(totalFormsInput.value) + 1;
-      attachFormEvents(newForm);
-    }
-
-    let currentLessonForm = null;
-
-    function attachFormEvents(formElement) {
-      formElement.querySelector('.remove-lesson-btn').addEventListener('click', function() {
-        const deleteCheckbox = formElement.querySelector('input[type=checkbox][name$="-DELETE"]');
-        if (deleteCheckbox) deleteCheckbox.checked = true;
-        formElement.style.display = 'none';
+    // ---------- Привязка событий к существующим урокам ----------
+    function attachLessonEvents(lessonElement) {
+      lessonElement.querySelector('.remove-lesson-btn').addEventListener('click', function() {
+        const delCheckbox = lessonElement.querySelector('input[type=checkbox][name$="-DELETE"]');
+        if (delCheckbox) delCheckbox.checked = true;
+        lessonElement.style.display = 'none';
       });
-
-      formElement.querySelectorAll('.create-material-btn').forEach(btn => {
+      lessonElement.querySelectorAll('.pick-material-btn').forEach(btn => {
         btn.addEventListener('click', function(e) {
           e.preventDefault();
           const type = this.dataset.type;
-          currentLessonForm = this.closest('.lesson-form');
-          openCreateMaterialModal(type);
-        });
-      });
-
-      formElement.querySelectorAll('.pick-material-btn').forEach(btn => {
-        btn.addEventListener('click', function(e) {
-          e.preventDefault();
-          const type = this.dataset.type;
-          currentLessonForm = this.closest('.lesson-form');
+          window.currentLessonForm = this.closest('.lesson-form');
           openPickMaterialModal(type);
         });
       });
     }
+    document.querySelectorAll('.lesson-form').forEach(el => attachLessonEvents(el));
 
-    document.querySelectorAll('.lesson-form').forEach(formEl => attachFormEvents(formEl));
-    addButton.addEventListener('click', addLessonForm);
-
-    // ---- Создание материала (модалка) ----
-    function openCreateMaterialModal(type) {
-      const modalId = `modal-create-${type}`;
-      const modal = document.getElementById(modalId);
-      if (!modal) return;
-      const bsModal = new bootstrap.Modal(modal);
-      bsModal.show();
-      modal.dataset.lessonFormIndex = currentLessonForm ? currentLessonForm.dataset.formIndex : '';
-      modal.dataset.materialType = type;
-    }
-
-    document.querySelectorAll('.modal-material-form').forEach(modalForm => {
-      modalForm.addEventListener('submit', function(e) {
-        e.preventDefault();
-        const formData = new FormData(this);
-        const url = this.action;
-        const type = this.dataset.materialType;
-        const modal = this.closest('.modal');
-
-        fetch(url, {
-          method: 'POST',
-          body: formData,
-          headers: {
-            'X-Requested-With': 'XMLHttpRequest',
-            'X-CSRFToken': formData.get('csrfmiddlewaretoken') || getCookie('csrftoken')
-          }
-        })
-        .then(response => {
-          if (!response.ok) throw new Error('Ошибка сети');
-          return response.json();
-        })
-        .then(data => {
-          if (data.success) {
-            bootstrap.Modal.getInstance(modal).hide();
-            if (currentLessonForm) {
-              updateMaterialField(currentLessonForm, type, data.id, data.title);
-            } else {
-              document.querySelectorAll('.lesson-form').forEach(form => {
-                updateMaterialField(form, type, data.id, data.title);
-              });
-            }
-            modalForm.reset();
-          } else {
-            let errorMsg = '';
-            for (const [field, msgs] of Object.entries(data.errors)) {
-              errorMsg += `${field}: ${msgs.join(', ')}\n`;
-            }
-            alert('Ошибки формы:\n' + errorMsg);
-          }
-        })
-        .catch(() => alert('Не удалось создать материал.'));
-      });
-    });
-
-    // ---- Выбор существующего материала (ИСПРАВЛЕНО) ----
+    // ---------- Модалки выбора материалов ----------
     function openPickMaterialModal(type) {
       const modalId = `modal-pick-${type}`;
       const modal = document.getElementById(modalId);
       if (!modal) return;
       const bsModal = new bootstrap.Modal(modal);
       bsModal.show();
-
-      // Навешиваем обработчики на все элементы списка
       modal.querySelectorAll('.material-choice').forEach(link => {
         link.onclick = function(e) {
           e.preventDefault();
           const id = this.dataset.id;
-          const title = this.textContent.trim();  // ← БЕРЁМ НАЗВАНИЕ ПРЯМО ИЗ ТЕКСТА
-          if (currentLessonForm) {
-            updateMaterialField(currentLessonForm, type, id, title);
+          const title = this.textContent.trim();
+          if (window.currentLessonForm) {
+            updateMaterialField(window.currentLessonForm, type, id, title);
           }
           bootstrap.Modal.getInstance(modal).hide();
         };
       });
-
       const createLink = modal.querySelector('.create-material-link');
       if (createLink) {
         createLink.onclick = function(e) {
           e.preventDefault();
           bootstrap.Modal.getInstance(modal).hide();
-          openCreateMaterialModal(type);
+          const lessonIndex = window.currentLessonForm ? window.currentLessonForm.dataset.formIndex : 'new';
+          const requestPath = window.location.pathname;
+          window.location.href = this.href + '?next=' + encodeURIComponent(requestPath) + '&lesson_index=' + lessonIndex;
         };
       }
     }
-
-    function updateMaterialField(lessonForm, type, id, title) {
-      const hiddenInput = lessonForm.querySelector(`input[type="hidden"][name*="-${type}"]`);
-      const nameSpan = lessonForm.querySelector(`.selected-material-name[data-type="${type}"]`);
+    function updateMaterialField(lessonElement, type, id, title) {
+      const hiddenInput = lessonElement.querySelector(`input[type="hidden"][name*="-${type}"]`);
+      const nameSpan = lessonElement.querySelector(`.selected-material-name[data-type="${type}"]`);
       if (hiddenInput) hiddenInput.value = id;
       if (nameSpan) nameSpan.textContent = title || 'Не выбрано';
     }
 
-    function getCookie(name) {
-      let cookieValue = null;
-      if (document.cookie && document.cookie !== '') {
-        const cookies = document.cookie.split(';');
-        for (let i = 0; i < cookies.length; i++) {
-          const cookie = cookies[i].trim();
-          if (cookie.substring(0, name.length + 1) === (name + '=')) {
-            cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-            break;
+    // ---------- Обработчики для формы нового урока ----------
+    const newLessonForm = document.getElementById('new-lesson-form');
+    const saveNewBtn = document.getElementById('save-new-lesson-btn');
+    const resetNewBtn = document.getElementById('reset-new-lesson-btn');
+
+    function getNewLessonData() {
+      return {
+        title: document.getElementById('new-lesson-title').value.trim(),
+        order: document.getElementById('new-lesson-order').value || '0',
+        description: document.getElementById('new-lesson-description').value.trim(),
+        video: document.getElementById('new-lesson-video').value,
+        audio: document.getElementById('new-lesson-audio').value,
+        text: document.getElementById('new-lesson-text').value,
+      };
+    }
+
+    function clearNewLessonForm() {
+      document.getElementById('new-lesson-title').value = '';
+      document.getElementById('new-lesson-order').value = '0';
+      document.getElementById('new-lesson-description').value = '';
+      document.getElementById('new-lesson-video').value = '';
+      document.getElementById('new-lesson-audio').value = '';
+      document.getElementById('new-lesson-text').value = '';
+      newLessonForm.querySelectorAll('.selected-material-name').forEach(span => span.textContent = 'Не выбрано');
+    }
+
+    function addSavedLesson(data, index) {
+      // Клонируем шаблон из lesson_form_template.html, подставляя данные
+      const templateHtml = `{% filter escapejs %}{% include "studio/includes/lesson_form_template.html" %}{% endfilter %}`;
+      const newHtml = templateHtml.replace(/__prefix__/g, index);
+      const div = document.createElement('div');
+      div.innerHTML = newHtml;
+      const lessonEl = div.firstElementChild;
+      lessonEl.dataset.formIndex = index;
+
+      // Заполняем поля
+      lessonEl.querySelector('input[name*="-title"]').value = data.title;
+      lessonEl.querySelector('input[name*="-order"]').value = data.order;
+      lessonEl.querySelector('textarea[name*="-description"]').value = data.description;
+      lessonEl.querySelector('input[name*="-video"]').value = data.video;
+      lessonEl.querySelector('input[name*="-audio"]').value = data.audio;
+      lessonEl.querySelector('input[name*="-text"]').value = data.text;
+
+      // Обновляем названия материалов
+      if (data.video) {
+        const span = lessonEl.querySelector('.selected-material-name[data-type="video"]');
+        span.textContent = `Видео #${data.video}`;
+      }
+      if (data.audio) {
+        const span = lessonEl.querySelector('.selected-material-name[data-type="audio"]');
+        span.textContent = `Аудио #${data.audio}`;
+      }
+      if (data.text) {
+        const span = lessonEl.querySelector('.selected-material-name[data-type="text"]');
+        span.textContent = `Текст #${data.text}`;
+      }
+
+      // Обновляем ссылки "Создать" с новым индексом
+      lessonEl.querySelectorAll('.create-material-link').forEach(link => {
+        const href = new URL(link.href, window.location.origin);
+        href.searchParams.set('lesson_index', index);
+        link.href = href.toString();
+      });
+
+      // Вставляем перед формой нового урока
+      lessonsContainer.appendChild(lessonEl);
+      attachLessonEvents(lessonEl);
+
+      // Обновляем total forms
+      totalFormsInput.value = parseInt(totalFormsInput.value) + 1;
+    }
+
+    saveNewBtn.addEventListener('click', function() {
+      const data = getNewLessonData();
+      if (!data.title) {
+        alert('Введите название урока');
+        return;
+      }
+      const newIndex = totalFormsInput.value;
+      addSavedLesson(data, newIndex);
+      clearNewLessonForm();
+    });
+
+    resetNewBtn.addEventListener('click', function() {
+      clearNewLessonForm();
+    });
+
+    // ---------- Кнопки "Создать" в форме нового урока ----------
+    newLessonForm.querySelectorAll('.create-material-link').forEach(link => {
+      link.addEventListener('click', function(e) {
+        // Обновляем href с актуальным lesson_index=new (уже есть)
+        const href = new URL(this.href, window.location.origin);
+        href.searchParams.set('next', window.location.pathname);
+        href.searchParams.set('lesson_index', 'new');
+        this.href = href.toString();
+      });
+    });
+    newLessonForm.querySelectorAll('.pick-material-btn').forEach(btn => {
+      btn.addEventListener('click', function(e) {
+        e.preventDefault();
+        window.currentLessonForm = null; // будем обновлять форму нового урока
+        const type = this.dataset.type;
+        // Модалка выбора будет использовать updateNewLessonMaterialField вместо updateMaterialField
+        openPickMaterialModalForNewLesson(type);
+      });
+    });
+
+    function openPickMaterialModalForNewLesson(type) {
+      const modalId = `modal-pick-${type}`;
+      const modal = document.getElementById(modalId);
+      if (!modal) return;
+      const bsModal = new bootstrap.Modal(modal);
+      bsModal.show();
+      modal.querySelectorAll('.material-choice').forEach(link => {
+        link.onclick = function(e) {
+          e.preventDefault();
+          const id = this.dataset.id;
+          const title = this.textContent.trim();
+          updateNewLessonMaterialField(type, id, title);
+          bootstrap.Modal.getInstance(modal).hide();
+        };
+      });
+      const createLink = modal.querySelector('.create-material-link');
+      if (createLink) {
+        createLink.onclick = function(e) {
+          e.preventDefault();
+          bootstrap.Modal.getInstance(modal).hide();
+          window.location.href = this.href + '?next=' + encodeURIComponent(window.location.pathname) + '&lesson_index=new';
+        };
+      }
+    }
+
+    function updateNewLessonMaterialField(type, id, title) {
+      const hiddenInput = document.getElementById(`new-lesson-${type}`);
+      const nameSpan = newLessonForm.querySelector(`.selected-material-name[data-type="${type}"]`);
+      if (hiddenInput) hiddenInput.value = id;
+      if (nameSpan) nameSpan.textContent = title || 'Не выбрано';
+    }
+
+    // ---------- Обработка возврата с создания материала ----------
+    function handleReturnParams() {
+      const params = new URLSearchParams(window.location.search);
+      const lessonIndex = params.get('lesson_index');
+      const materialId = params.get('material_id');
+      const materialType = params.get('material_type');
+      if (lessonIndex && materialId && materialType) {
+        if (lessonIndex === 'new') {
+          // Обновляем форму нового урока
+          updateNewLessonMaterialField(materialType, materialId, `Материал #${materialId}`);
+        } else {
+          // Обновляем соответствующий существующий урок
+          const lessonForm = document.querySelector(`.lesson-form[data-form-index="${lessonIndex}"]`);
+          if (lessonForm) {
+            updateMaterialField(lessonForm, materialType, materialId, `Материал #${materialId}`);
           }
         }
+        // Убираем параметры из URL
+        if (window.history.replaceState) {
+          window.history.replaceState({}, document.title, window.location.pathname);
+        }
       }
-      return cookieValue;
     }
+    handleReturnParams();
+
   })();
 </script>
 {% endblock %}

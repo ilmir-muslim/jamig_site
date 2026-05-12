@@ -26,11 +26,12 @@
         <div class="material-picker">
           <input type="hidden" name="lessons-__prefix__-video" value="">
           <span class="selected-material-name" data-type="video">Не выбрано</span>
+          <a href="{% url 'studio_video_create' %}?next={{ request.path }}&lesson_index=__prefix__" 
+             class="btn btn-sm btn-outline-secondary create-material-link">
+            <i class="fas fa-plus-circle"></i> Создать
+          </a>
           <button type="button" class="btn btn-sm btn-outline-secondary pick-material-btn" data-type="video">
             <i class="fas fa-search"></i> Выбрать
-          </button>
-          <button type="button" class="btn btn-sm btn-outline-secondary create-material-btn" data-type="video">
-            <i class="fas fa-plus-circle"></i> Создать
           </button>
         </div>
       </div>
@@ -40,11 +41,12 @@
         <div class="material-picker">
           <input type="hidden" name="lessons-__prefix__-audio" value="">
           <span class="selected-material-name" data-type="audio">Не выбрано</span>
+          <a href="{% url 'studio_audio_create' %}?next={{ request.path }}&lesson_index=__prefix__" 
+             class="btn btn-sm btn-outline-secondary create-material-link">
+            <i class="fas fa-plus-circle"></i> Создать
+          </a>
           <button type="button" class="btn btn-sm btn-outline-secondary pick-material-btn" data-type="audio">
             <i class="fas fa-search"></i> Выбрать
-          </button>
-          <button type="button" class="btn btn-sm btn-outline-secondary create-material-btn" data-type="audio">
-            <i class="fas fa-plus-circle"></i> Создать
           </button>
         </div>
       </div>
@@ -54,11 +56,12 @@
         <div class="material-picker">
           <input type="hidden" name="lessons-__prefix__-text" value="">
           <span class="selected-material-name" data-type="text">Не выбрано</span>
+          <a href="{% url 'studio_text_create' %}?next={{ request.path }}&lesson_index=__prefix__" 
+             class="btn btn-sm btn-outline-secondary create-material-link">
+            <i class="fas fa-plus-circle"></i> Создать
+          </a>
           <button type="button" class="btn btn-sm btn-outline-secondary pick-material-btn" data-type="text">
             <i class="fas fa-search"></i> Выбрать
-          </button>
-          <button type="button" class="btn btn-sm btn-outline-secondary create-material-btn" data-type="text">
-            <i class="fas fa-plus-circle"></i> Создать
           </button>
         </div>
       </div>
