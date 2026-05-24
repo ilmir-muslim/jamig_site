@@ -1,3 +1,4 @@
+import re
 import pytils.translit
 
 from django.db import models
@@ -24,8 +25,6 @@ class Category(models.Model):
 
 
 class BaseContent(models.Model):
-    """Абстрактная базовая модель для всего контента"""
-
     STATUS_CHOICES = [
         ("draft", "Черновик"),
         ("published", "Опубликовано"),
@@ -61,35 +60,28 @@ class BaseContent(models.Model):
         abstract = True
         ordering = ["-published_at", "-created_at"]
 
-
     def save(self, *args, **kwargs):
         if not self.slug:
             if self.title:
-                # Транслитерация, затем slugify для чистоты
                 base = pytils.translit.slugify(self.title)
-                # slugify добивает пробелы и спецсимволы
-                from django.utils.text import slugify as django_slugify
-
-                self.slug = django_slugify(base) or base
-            if not self.slug:  # если ничего не вышло
+                self.slug = slugify(base) or base
+            if not self.slug:
                 from django.utils.crypto import get_random_string
 
                 self.slug = f"bez-nazvaniya-{get_random_string(6)}"
-
         if self.status == "published" and not self.published_at:
             from django.utils import timezone
 
             self.published_at = timezone.now()
-
         super().save(*args, **kwargs)
 
 
 class VideoContent(BaseContent):
-    """Модель для видео контента"""
-
     embed_code = models.TextField(
-        verbose_name="Код вставки видео",
-        help_text="Вставьте код iframe для встраивания видео с Rutube",
+        verbose_name="Код вставки или ссылка на видео",
+        help_text="Вставьте iframe-код или прямую ссылку на видео (Rutube, YouTube и др.)",
+        blank=True,
+        default="",
     )
     duration = models.PositiveIntegerField(
         null=True, blank=True, verbose_name="Длительность (секунды)"
@@ -103,15 +95,38 @@ class VideoContent(BaseContent):
         return reverse("video_detail", kwargs={"slug": self.slug})
 
     def get_embed_html(self):
-        """Возвращает код для вставки видео"""
-        if self.embed_code:
+        """Возвращает HTML для встраивания видео."""
+        if not self.embed_code:
+            return '<div class="alert alert-info">Видео недоступно</div>'
+
+        # Если это уже iframe – возвращаем как есть
+        if "<iframe" in self.embed_code:
             return self.embed_code
-        return '<div class="alert alert-info">Видео недоступно</div>'
+
+        # Иначе пытаемся интерпретировать как ссылку
+        embed = self._url_to_iframe(self.embed_code.strip())
+        if embed:
+            return embed
+
+        # Ничего не подошло
+        return '<div class="alert alert-warning">Неверный формат видео</div>'
+
+    @staticmethod
+    def _url_to_iframe(url: str) -> str | None:
+        """Пытается преобразовать ссылку на видео в iframe-код."""
+        # Rutube: https://rutube.ru/video/<id>/...
+        match = re.search(r"rutube\.ru/video/(?P<id>[a-f0-9]+)", url)
+        if match:
+            video_id = match.group("id")
+            return (
+                f'<iframe width="720" height="405" '
+                f'src="https://rutube.ru/play/embed/{video_id}" '
+                f'frameborder="0" allowfullscreen></iframe>'
+            )
+        # Здесь можно добавить YouTube, VK и т.д.
+        return None
 
     def extract_video_id(self):
-        """
-        Извлекает ID видео из кода вставки для использования в превью
-        """
         import re
 
         if self.embed_code:
@@ -128,18 +143,13 @@ class VideoContent(BaseContent):
 
 
 class AudioContent(BaseContent):
-    """Модель для аудио контента"""
-
     audio_file = models.FileField(
         upload_to="audio/%Y/%m/%d/",
         verbose_name="Аудиофайл",
         help_text="Загрузите аудиофайл в формате MP3, WAV, OGG",
     )
     duration = models.PositiveIntegerField(
-        null=True,
-        blank=True,
-        verbose_name="Длительность (секунды)",
-        help_text="Длительность аудио в секундах",
+        null=True, blank=True, verbose_name="Длительность (секунды)"
     )
     cover_image = models.ImageField(
         upload_to="audio_covers/%Y/%m/%d/", blank=True, verbose_name="Обложка аудио"
@@ -152,7 +162,6 @@ class AudioContent(BaseContent):
         return reverse("audio_detail", kwargs={"slug": self.slug})
 
     def get_duration_display(self):
-        """Возвращает длительность в формате MM:SS"""
         if self.duration:
             minutes = self.duration // 60
             seconds = self.duration % 60
@@ -160,10 +169,9 @@ class AudioContent(BaseContent):
         return "00:00"
 
     def get_file_size(self):
-        """Возвращает размер файла в читаемом формате"""
         if self.audio_file:
             size = self.audio_file.size
-            if size < 1024 * 1024:  # Меньше 1 MB
+            if size < 1024 * 1024:
                 return f"{size / 1024:.1f} KB"
             else:
                 return f"{size / (1024 * 1024):.1f} MB"
@@ -175,33 +183,23 @@ class AudioContent(BaseContent):
 
 
 class TextContent(BaseContent):
-    """Модель для текстового контента"""
-
     subtitle = models.CharField(max_length=300, blank=True, verbose_name="Подзаголовок")
     content = models.TextField(verbose_name="Содержание", blank=True, null=True)
     cover_image = models.ImageField(
         upload_to="text_covers/%Y/%m/%d/", blank=True, verbose_name="Обложка статьи"
     )
     reading_time = models.PositiveIntegerField(
-        null=True,
-        blank=True,
-        verbose_name="Время чтения (минуты)",
-        help_text="Примерное время чтения статьи в минутах",
+        null=True, blank=True, verbose_name="Время чтения (минуты)"
     )
 
     def save(self, *args, **kwargs):
-        # Автоматически рассчитываем время чтения если не указано
         if not self.reading_time and self.content:
-            # Примерная формула: 200 слов в минуту
             word_count = len(self.content.split())
             self.reading_time = max(1, word_count // 200)
-
         super().save(*args, **kwargs)
 
     def get_absolute_url(self):
-        return reverse(
-            "text_reader", kwargs={"slug": self.slug}
-        )  
+        return reverse("text_reader", kwargs={"slug": self.slug})
 
     class Meta:
         verbose_name = "Текстовая статья"
@@ -209,8 +207,6 @@ class TextContent(BaseContent):
 
 
 class ReadingProgress(models.Model):
-    """Прогресс чтения статьи (без глав)"""
-
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL, on_delete=models.CASCADE, verbose_name="Пользователь"
     )

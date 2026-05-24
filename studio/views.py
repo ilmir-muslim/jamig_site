@@ -105,7 +105,6 @@ def video_list(request):
 @login_required
 @user_passes_test(is_author)
 def video_create(request):
-    # Параметры возврата
     next_url = request.GET.get("next") or request.POST.get("next")
     lesson_index = request.GET.get("lesson_index") or request.POST.get("lesson_index")
 
@@ -372,6 +371,9 @@ def course_create(request):
     if request.method == "POST":
         course_form = CourseForm(request.POST)
         formset = LessonFormSet(request.POST, prefix="lessons")
+        # Устанавливаем queryset для материальных полей до валидации
+        _set_lesson_formset_material_querysets(formset, author)
+
         if course_form.is_valid() and formset.is_valid():
             course = course_form.save(commit=False)
             course.author = author
@@ -390,7 +392,6 @@ def course_create(request):
             for obj in formset.deleted_objects:
                 obj.delete()
 
-            # Автопубликация материалов, если курс опубликован
             if course.status == "published":
                 _publish_course_materials(course)
 
@@ -399,10 +400,9 @@ def course_create(request):
     else:
         course_form = CourseForm()
         formset = LessonFormSet(prefix="lessons", queryset=Lesson.objects.none())
+        _set_lesson_formset_material_querysets(formset, author)
 
-    _set_lesson_formset_material_querysets(formset, author)
-
-    # Загружаем материалы автора для модальных окон выбора
+    # Контекст с материалами для модалок
     context = {
         "form": course_form,
         "lesson_formset": formset,
@@ -410,7 +410,6 @@ def course_create(request):
         "author_videos": VideoContent.objects.filter(author=author),
         "author_audios": AudioContent.objects.filter(author=author),
         "author_texts": TextContent.objects.filter(author=author),
-        # Передаём текущий URL для формирования return_url
         "request": request,
     }
     return render(request, "studio/course_form.html", context)
@@ -426,6 +425,8 @@ def course_edit(request, pk):
         formset = LessonFormSet(
             request.POST, prefix="lessons", queryset=course.lessons.all()
         )
+        _set_lesson_formset_material_querysets(formset, author)
+
         if course_form.is_valid() and formset.is_valid():
             course_form.save()
             lessons = formset.save(commit=False)
@@ -437,7 +438,6 @@ def course_edit(request, pk):
             for obj in formset.deleted_objects:
                 obj.delete()
 
-            # Автопубликация материалов, если курс теперь опубликован
             if course.status == "published":
                 _publish_course_materials(course)
 
@@ -446,8 +446,7 @@ def course_edit(request, pk):
     else:
         course_form = CourseForm(instance=course)
         formset = LessonFormSet(prefix="lessons", queryset=course.lessons.all())
-
-    _set_lesson_formset_material_querysets(formset, author)
+        _set_lesson_formset_material_querysets(formset, author)
 
     context = {
         "form": course_form,
@@ -475,7 +474,7 @@ def course_delete(request, pk):
     )
 
 
-# ---------- AJAX создание материалов (оставляем, но не используем) ----------
+# ---------- AJAX создание материалов ----------
 @require_POST
 @login_required
 @user_passes_test(is_author)

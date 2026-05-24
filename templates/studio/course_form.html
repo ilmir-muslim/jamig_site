@@ -8,7 +8,12 @@
       <form method="post" novalidate id="content-form">
         {% csrf_token %}
 
-        <!-- === Основное === -->
+        {% if form.non_field_errors %}
+          <div class="alert alert-danger">
+            {{ form.non_field_errors }}
+          </div>
+        {% endif %}
+
         <section class="form-section">
           <div class="section-header">
             <i class="fas fa-info-circle"></i>
@@ -17,18 +22,26 @@
           <div class="mb-4">
             <label class="form-label-lg">Название курса</label>
             {{ form.title }}
+            {% if form.title.errors %}
+              <div class="text-danger small mt-1">{{ form.title.errors }}</div>
+            {% endif %}
           </div>
           <div class="mb-4">
             <label class="form-label-lg">Описание</label>
             {{ form.description }}
+            {% if form.description.errors %}
+              <div class="text-danger small mt-1">{{ form.description.errors }}</div>
+            {% endif %}
           </div>
           <div class="mb-3">
             <label class="form-label-lg">Статус</label>
             {{ form.status }}
+            {% if form.status.errors %}
+              <div class="text-danger small mt-1">{{ form.status.errors }}</div>
+            {% endif %}
           </div>
         </section>
 
-        <!-- === Публикация === -->
         <section class="form-section">
           <div class="section-header">
             <i class="fas fa-calendar-alt"></i>
@@ -37,11 +50,13 @@
           <div class="mb-3">
             <label class="form-label-lg">Дата публикации</label>
             {{ form.published_at }}
+            {% if form.published_at.errors %}
+              <div class="text-danger small mt-1">{{ form.published_at.errors }}</div>
+            {% endif %}
             <small class="text-muted">Оставьте пустым для немедленной публикации при выборе статуса «Опубликовано»</small>
           </div>
         </section>
 
-        <!-- === Уроки === -->
         <section class="form-section" id="lessons-section">
           <div class="section-header mb-3">
             <i class="fas fa-list-ol"></i>
@@ -57,6 +72,9 @@
                     <div class="col-md-6 mb-2">
                       <label>{{ lesson_form.title.label }}</label>
                       {{ lesson_form.title }}
+                      {% if lesson_form.title.errors %}
+                        <div class="text-danger small">{{ lesson_form.title.errors }}</div>
+                      {% endif %}
                     </div>
                     <div class="col-md-3 mb-2">
                       <label>Порядок</label>
@@ -71,13 +89,18 @@
                   <div class="mb-2">
                     <label>{{ lesson_form.description.label }}</label>
                     {{ lesson_form.description }}
+                    {% if lesson_form.description.errors %}
+                      <div class="text-danger small">{{ lesson_form.description.errors }}</div>
+                    {% endif %}
                   </div>
                   <div class="row">
-                    <!-- Видео -->
                     <div class="col-md-4 mb-2">
                       <label class="form-label-lg">Видео</label>
                       <div class="material-picker">
                         {{ lesson_form.video }}
+                        {% if lesson_form.video.errors %}
+                          <div class="text-danger small">{{ lesson_form.video.errors }}</div>
+                        {% endif %}
                         <span class="selected-material-name" data-type="video">
                           {% if lesson_form.instance.video %}
                             {{ lesson_form.instance.video.title }}
@@ -94,11 +117,13 @@
                         </button>
                       </div>
                     </div>
-                    <!-- Аудио -->
                     <div class="col-md-4 mb-2">
                       <label class="form-label-lg">Аудио</label>
                       <div class="material-picker">
                         {{ lesson_form.audio }}
+                        {% if lesson_form.audio.errors %}
+                          <div class="text-danger small">{{ lesson_form.audio.errors }}</div>
+                        {% endif %}
                         <span class="selected-material-name" data-type="audio">
                           {% if lesson_form.instance.audio %}
                             {{ lesson_form.instance.audio.title }}
@@ -115,11 +140,13 @@
                         </button>
                       </div>
                     </div>
-                    <!-- Текст -->
                     <div class="col-md-4 mb-2">
                       <label class="form-label-lg">Текст</label>
                       <div class="material-picker">
                         {{ lesson_form.text }}
+                        {% if lesson_form.text.errors %}
+                          <div class="text-danger small">{{ lesson_form.text.errors }}</div>
+                        {% endif %}
                         <span class="selected-material-name" data-type="text">
                           {% if lesson_form.instance.text %}
                             {{ lesson_form.instance.text.title }}
@@ -137,14 +164,13 @@
                       </div>
                     </div>
                   </div>
-                  <div class="text-danger small">{{ lesson_form.non_field_errors }}</div>
+                  {{ lesson_form.non_field_errors }}
                   {% for hidden in lesson_form.hidden_fields %}{{ hidden }}{% endfor %}
                 </div>
               </div>
             {% endfor %}
           </div>
 
-          <!-- Форма нового урока (всегда видна) -->
           <div class="card new-lesson-form mb-3" id="new-lesson-form">
             <div class="card-body">
               <h5 class="mb-3">Новый урок</h5>
@@ -163,7 +189,6 @@
                 <textarea class="form-control" id="new-lesson-description" rows="2" placeholder="Краткое описание"></textarea>
               </div>
               <div class="row">
-                <!-- Видео -->
                 <div class="col-md-4 mb-2">
                   <label>Видео</label>
                   <div class="material-picker">
@@ -178,7 +203,6 @@
                     </button>
                   </div>
                 </div>
-                <!-- Аудио -->
                 <div class="col-md-4 mb-2">
                   <label>Аудио</label>
                   <div class="material-picker">
@@ -193,7 +217,6 @@
                     </button>
                   </div>
                 </div>
-                <!-- Текст -->
                 <div class="col-md-4 mb-2">
                   <label>Текст</label>
                   <div class="material-picker">
@@ -210,7 +233,7 @@
                 </div>
               </div>
               <div class="mt-3 d-flex gap-2">
-                <button type="button" class="btn btn-success btn-sm" id="save-new-lesson-btn">
+                <button type="button" class="btn btn-primary btn-sm" id="save-new-lesson-btn">
                   <i class="fas fa-check"></i> Сохранить урок
                 </button>
                 <button type="button" class="btn btn-outline-secondary btn-sm" id="reset-new-lesson-btn">
@@ -220,12 +243,9 @@
             </div>
           </div>
         </section>
-
-        {{ form.non_field_errors }}
       </form>
     </div>
 
-    <!-- Правая колонка -->
     <div class="editor-sidebar">
       <div class="progress-card">
         <div class="d-flex justify-content-between mb-2">
@@ -249,14 +269,19 @@
         <button type="button" class="btn btn-publish w-100" id="publishBtn">
           <i class="fas fa-check-circle me-2"></i>Опубликовать сейчас
         </button>
-        <a href="{% url 'studio_course_list' %}" class="btn btn-link text-muted w-100 mt-2">Отмена</a>
+        <a href="{% url 'studio_course_list' %}" class="btn btn-link text-muted w-100 mt-2" id="cancelBtn">Отмена</a>
+      </div>
+      <div class="text-center mt-2">
+        <small class="text-muted" id="draftStatus"></small>
+        <button type="button" class="btn btn-link btn-sm text-decoration-none" id="clearDraftBtn" style="display:none;">
+          <i class="fas fa-trash-alt me-1"></i>Очистить локальный черновик
+        </button>
       </div>
     </div>
   </div>
 </div>
 
 {% include "studio/includes/material_selection_modals.html" %}
-
 {% endblock %}
 
 {% block extra_css %}
@@ -285,272 +310,421 @@
   .lesson-form .card-body { padding: 1rem; }
   .new-lesson-form { background: var(--card-bg); border: 2px dashed var(--card-border); border-radius: var(--radius); }
   .btn-sm { border-radius: 8px; }
+  .alert-danger { background-color: #f8d7da; border-color: #f5c6cb; color: #721c24; padding: 0.75rem 1.25rem; border-radius: 10px; margin-bottom: 1rem; }
 </style>
 {% endblock %}
 
 {% block extra_js %}
 {{ block.super }}
 <script>
-  (function() {
-    const form = document.getElementById('content-form');
-    const statusField = document.getElementById('id_status');
-    const titleField = document.getElementById('id_title');
-    const descriptionField = document.getElementById('id_description');
-    const completionBar = document.getElementById('completionBar');
-    const completionPercent = document.getElementById('completionPercent');
-    const checkItems = document.querySelectorAll('.check-item');
-    const saveDraftBtn = document.getElementById('saveDraftBtn');
-    const publishBtn = document.getElementById('publishBtn');
-    const totalFormsInput = document.querySelector('#id_lessons-TOTAL_FORMS');
-    const lessonsContainer = document.getElementById('lessons-container');
+document.addEventListener('DOMContentLoaded', function() {
+  console.log('Course form script initialized');
 
-    // ---------- Прогресс ----------
-    function updateCompletion() {
-      let filled = 0;
-      const total = 3;
-      if (titleField.value.trim()) filled++;
-      if (descriptionField.value.trim()) filled++;
-      if (statusField.value) filled++;
-      const percent = Math.round((filled / total) * 100);
-      completionBar.style.width = percent + '%';
-      completionPercent.textContent = percent + '%';
-      checkItems.forEach(item => {
-        const field = item.dataset.field;
-        let isDone = false;
-        if (field === 'title') isDone = !!titleField.value.trim();
-        if (field === 'description') isDone = !!descriptionField.value.trim();
-        if (field === 'status') isDone = !!statusField.value;
-        if (isDone) { item.classList.add('completed'); item.querySelector('i').className = 'fas fa-check-circle'; }
-        else { item.classList.remove('completed'); item.querySelector('i').className = 'fas fa-circle'; }
+  const STORAGE_KEY = 'courseFormDraft';
+  const form = document.getElementById('content-form');
+  if (!form) {
+    console.warn('Form #content-form not found');
+    return;
+  }
+
+  const statusField = document.getElementById('id_status');
+  const titleField = document.getElementById('id_title');
+  const descriptionField = document.getElementById('id_description');
+  const completionBar = document.getElementById('completionBar');
+  const completionPercent = document.getElementById('completionPercent');
+  const checkItems = document.querySelectorAll('.check-item');
+  const totalFormsInput = document.querySelector('#id_lessons-TOTAL_FORMS');
+  const lessonsContainer = document.getElementById('lessons-container');
+  const newLessonForm = document.getElementById('new-lesson-form');
+  const draftStatusEl = document.getElementById('draftStatus');
+  const clearDraftBtn = document.getElementById('clearDraftBtn');
+  const cancelBtn = document.getElementById('cancelBtn');
+  const saveDraftBtn = document.getElementById('saveDraftBtn');
+  const publishBtn = document.getElementById('publishBtn');
+
+  function hasServerErrors() {
+    return document.querySelector('.alert-danger, .errorlist, .text-danger') !== null;
+  }
+
+  function collectFormData() {
+    const data = {
+      course: {
+        title: titleField ? titleField.value : '',
+        description: descriptionField ? descriptionField.value : '',
+        status: statusField ? statusField.value : '',
+        published_at: document.getElementById('id_published_at')?.value || ''
+      },
+      lessons: [],
+      newLesson: getNewLessonData()
+    };
+    document.querySelectorAll('.lesson-form:not([style*="display: none"])').forEach(el => {
+      const index = el.dataset.formIndex;
+      if (!index) return;
+      data.lessons.push({
+        id: (document.querySelector('input[name="lessons-' + index + '-id"]') || {value:''}).value || '',
+        title: (document.querySelector('input[name="lessons-' + index + '-title"]') || {value:''}).value || '',
+        description: (document.querySelector('textarea[name="lessons-' + index + '-description"]') || {value:''}).value || '',
+        order: (document.querySelector('input[name="lessons-' + index + '-order"]') || {value:'0'}).value || '0',
+        video: (document.querySelector('input[name="lessons-' + index + '-video"]') || {value:''}).value || '',
+        audio: (document.querySelector('input[name="lessons-' + index + '-audio"]') || {value:''}).value || '',
+        text: (document.querySelector('input[name="lessons-' + index + '-text"]') || {value:''}).value || '',
+        DELETE: (document.querySelector('input[name="lessons-' + index + '-DELETE"]') || {checked:false}).checked || false
       });
+    });
+    return data;
+  }
+
+  function saveFormToStorage() {
+    try {
+      const data = collectFormData();
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+      showDraftStatus(true);
+    } catch (e) {
+      console.warn('Draft save failed', e);
     }
-    titleField.addEventListener('input', updateCompletion);
-    descriptionField.addEventListener('input', updateCompletion);
-    statusField.addEventListener('change', updateCompletion);
+  }
+
+  function restoreFormFromStorage() {
+    if (hasServerErrors()) {
+      console.log('Server errors detected, skipping localStorage restore');
+      clearDraft();
+      return false;
+    }
+
+    const saved = localStorage.getItem(STORAGE_KEY);
+    if (!saved) return false;
+    let data;
+    try { data = JSON.parse(saved); } catch (e) { return false; }
+    if ((titleField && titleField.value.trim() !== '') || (descriptionField && descriptionField.value.trim() !== '')) return false;
+
+    if (data.course) {
+      if (titleField) titleField.value = data.course.title || '';
+      if (descriptionField) descriptionField.value = data.course.description || '';
+      if (statusField) statusField.value = data.course.status || 'draft';
+      const pubField = document.getElementById('id_published_at');
+      if (pubField && data.course.published_at) pubField.value = data.course.published_at;
+    }
+
+    document.querySelectorAll('.lesson-form').forEach(el => el.remove());
+    if (Array.isArray(data.lessons)) {
+      data.lessons.forEach((lesson, idx) => addSavedLesson(lesson, idx));
+    }
+
+    if (newLessonForm && data.newLesson) {
+      document.getElementById('new-lesson-title').value = data.newLesson.title || '';
+      document.getElementById('new-lesson-order').value = data.newLesson.order || '0';
+      document.getElementById('new-lesson-description').value = data.newLesson.description || '';
+      document.getElementById('new-lesson-video').value = data.newLesson.video || '';
+      document.getElementById('new-lesson-audio').value = data.newLesson.audio || '';
+      document.getElementById('new-lesson-text').value = data.newLesson.text || '';
+      updateNewLessonMaterialLabels();
+    }
+
+    if (totalFormsInput) totalFormsInput.value = document.querySelectorAll('.lesson-form').length;
     updateCompletion();
+    showDraftStatus(true);
+    return true;
+  }
 
-    // ---------- Сохранение черновика / публикация ----------
-    saveDraftBtn.addEventListener('click', () => { statusField.value = 'draft'; form.submit(); });
-    publishBtn.addEventListener('click', () => { statusField.value = 'published'; form.submit(); });
+  function clearDraft() {
+    localStorage.removeItem(STORAGE_KEY);
+    showDraftStatus(false);
+  }
 
-    // ---------- Привязка событий к существующим урокам ----------
-    function attachLessonEvents(lessonElement) {
-      lessonElement.querySelector('.remove-lesson-btn').addEventListener('click', function() {
-        const delCheckbox = lessonElement.querySelector('input[type=checkbox][name$="-DELETE"]');
-        if (delCheckbox) delCheckbox.checked = true;
-        lessonElement.style.display = 'none';
-      });
-      lessonElement.querySelectorAll('.pick-material-btn').forEach(btn => {
-        btn.addEventListener('click', function(e) {
-          e.preventDefault();
-          const type = this.dataset.type;
-          window.currentLessonForm = this.closest('.lesson-form');
-          openPickMaterialModal(type);
-        });
-      });
+  function showDraftStatus(exists) {
+    if (draftStatusEl) {
+      draftStatusEl.textContent = exists ? 'Локальный черновик сохранён' : '';
     }
-    document.querySelectorAll('.lesson-form').forEach(el => attachLessonEvents(el));
+    if (clearDraftBtn) {
+      clearDraftBtn.style.display = exists ? 'inline-block' : 'none';
+    }
+  }
 
-    // ---------- Модалки выбора материалов ----------
-    function openPickMaterialModal(type) {
-      const modalId = `modal-pick-${type}`;
-      const modal = document.getElementById(modalId);
-      if (!modal) return;
-      const bsModal = new bootstrap.Modal(modal);
-      bsModal.show();
-      modal.querySelectorAll('.material-choice').forEach(link => {
-        link.onclick = function(e) {
-          e.preventDefault();
-          const id = this.dataset.id;
-          const title = this.textContent.trim();
-          if (window.currentLessonForm) {
-            updateMaterialField(window.currentLessonForm, type, id, title);
-          }
-          bootstrap.Modal.getInstance(modal).hide();
-        };
-      });
-      const createLink = modal.querySelector('.create-material-link');
-      if (createLink) {
-        createLink.onclick = function(e) {
-          e.preventDefault();
-          bootstrap.Modal.getInstance(modal).hide();
-          const lessonIndex = window.currentLessonForm ? window.currentLessonForm.dataset.formIndex : 'new';
-          const requestPath = window.location.pathname;
-          window.location.href = this.href + '?next=' + encodeURIComponent(requestPath) + '&lesson_index=' + lessonIndex;
-        };
+  function updateNewLessonMaterialLabels() {
+    if (!newLessonForm) return;
+    ['video', 'audio', 'text'].forEach(type => {
+      const idVal = document.getElementById('new-lesson-' + type)?.value || '';
+      const span = newLessonForm.querySelector('.selected-material-name[data-type="' + type + '"]');
+      if (span) span.textContent = idVal ? 'Материал #' + idVal : 'Не выбрано';
+    });
+  }
+
+  function updateCompletion() {
+    if (!completionBar || !completionPercent) return;
+    let filled = 0;
+    if (titleField && titleField.value.trim()) filled++;
+    if (descriptionField && descriptionField.value.trim()) filled++;
+    if (statusField && statusField.value) filled++;
+    const percent = Math.round((filled / 3) * 100);
+    completionBar.style.width = percent + '%';
+    completionPercent.textContent = percent + '%';
+    checkItems.forEach(item => {
+      const field = item.dataset.field;
+      let isDone = false;
+      if (field === 'title') isDone = titleField && !!titleField.value.trim();
+      if (field === 'description') isDone = descriptionField && !!descriptionField.value.trim();
+      if (field === 'status') isDone = statusField && !!statusField.value;
+      const icon = item.querySelector('i');
+      if (isDone) {
+        item.classList.add('completed');
+        if (icon) icon.className = 'fas fa-check-circle';
+      } else {
+        item.classList.remove('completed');
+        if (icon) icon.className = 'fas fa-circle';
       }
-    }
-    function updateMaterialField(lessonElement, type, id, title) {
-      const hiddenInput = lessonElement.querySelector(`input[type="hidden"][name*="-${type}"]`);
-      const nameSpan = lessonElement.querySelector(`.selected-material-name[data-type="${type}"]`);
-      if (hiddenInput) hiddenInput.value = id;
-      if (nameSpan) nameSpan.textContent = title || 'Не выбрано';
-    }
+    });
+  }
 
-    // ---------- Обработчики для формы нового урока ----------
-    const newLessonForm = document.getElementById('new-lesson-form');
-    const saveNewBtn = document.getElementById('save-new-lesson-btn');
-    const resetNewBtn = document.getElementById('reset-new-lesson-btn');
+  if (titleField) titleField.addEventListener('input', updateCompletion);
+  if (descriptionField) descriptionField.addEventListener('input', updateCompletion);
+  if (statusField) statusField.addEventListener('change', updateCompletion);
 
-    function getNewLessonData() {
-      return {
-        title: document.getElementById('new-lesson-title').value.trim(),
-        order: document.getElementById('new-lesson-order').value || '0',
-        description: document.getElementById('new-lesson-description').value.trim(),
-        video: document.getElementById('new-lesson-video').value,
-        audio: document.getElementById('new-lesson-audio').value,
-        text: document.getElementById('new-lesson-text').value,
+  function attachLessonEvents(lessonElement) {
+    const removeBtn = lessonElement.querySelector('.remove-lesson-btn');
+    if (removeBtn) {
+      removeBtn.addEventListener('click', () => {
+        const delCheck = lessonElement.querySelector('input[type=checkbox][name$="-DELETE"]');
+        if (delCheck) delCheck.checked = true;
+        lessonElement.style.display = 'none';
+        saveFormToStorage();
+      });
+    }
+    lessonElement.querySelectorAll('.pick-material-btn').forEach(btn => {
+      btn.addEventListener('click', function(e) {
+        e.preventDefault();
+        window.currentLessonForm = this.closest('.lesson-form');
+        openPickMaterialModal(this.dataset.type);
+      });
+    });
+  }
+
+  document.querySelectorAll('.lesson-form').forEach(el => attachLessonEvents(el));
+
+  function openPickMaterialModal(type) {
+    const modal = document.getElementById('modal-pick-' + type);
+    if (!modal) return;
+    const bsModal = new bootstrap.Modal(modal);
+    bsModal.show();
+    modal.querySelectorAll('.material-choice').forEach(link => {
+      link.onclick = function(e) {
+        e.preventDefault();
+        const id = this.dataset.id;
+        const title = this.textContent.trim();
+        if (window.currentLessonForm) {
+          updateMaterialField(window.currentLessonForm, type, id, title);
+          saveFormToStorage();
+        }
+        bootstrap.Modal.getInstance(modal).hide();
+      };
+    });
+    const createLink = modal.querySelector('.create-material-link');
+    if (createLink) {
+      createLink.onclick = function(e) {
+        e.preventDefault();
+        bootstrap.Modal.getInstance(modal).hide();
+        const lessonIndex = window.currentLessonForm ? window.currentLessonForm.dataset.formIndex : 'new';
+        window.location.href = this.href + '?next=' + encodeURIComponent(window.location.pathname) + '&lesson_index=' + lessonIndex;
       };
     }
+  }
 
-    function clearNewLessonForm() {
-      document.getElementById('new-lesson-title').value = '';
-      document.getElementById('new-lesson-order').value = '0';
-      document.getElementById('new-lesson-description').value = '';
-      document.getElementById('new-lesson-video').value = '';
-      document.getElementById('new-lesson-audio').value = '';
-      document.getElementById('new-lesson-text').value = '';
-      newLessonForm.querySelectorAll('.selected-material-name').forEach(span => span.textContent = 'Не выбрано');
+  function updateMaterialField(lessonElement, type, id, title) {
+    const hidden = lessonElement.querySelector('input[type="hidden"][name*="-' + type + '"]');
+    const span = lessonElement.querySelector('.selected-material-name[data-type="' + type + '"]');
+    if (hidden) hidden.value = id;
+    if (span) span.textContent = title || 'Не выбрано';
+    saveFormToStorage();
+  }
+
+  function getNewLessonData() {
+    return {
+      title: document.getElementById('new-lesson-title')?.value?.trim() || '',
+      order: document.getElementById('new-lesson-order')?.value || '0',
+      description: document.getElementById('new-lesson-description')?.value?.trim() || '',
+      video: document.getElementById('new-lesson-video')?.value || '',
+      audio: document.getElementById('new-lesson-audio')?.value || '',
+      text: document.getElementById('new-lesson-text')?.value || '',
+    };
+  }
+
+  function clearNewLessonForm() {
+    document.getElementById('new-lesson-title').value = '';
+    document.getElementById('new-lesson-order').value = '0';
+    document.getElementById('new-lesson-description').value = '';
+    document.getElementById('new-lesson-video').value = '';
+    document.getElementById('new-lesson-audio').value = '';
+    document.getElementById('new-lesson-text').value = '';
+    if (newLessonForm) {
+      newLessonForm.querySelectorAll('.selected-material-name').forEach(span => {
+        span.textContent = 'Не выбрано';
+      });
+    }
+    saveFormToStorage();
+  }
+
+  function addSavedLesson(data, index) {
+    const templateHtml = `{% filter escapejs %}{% include "studio/includes/lesson_form_template.html" %}{% endfilter %}`;
+    const newHtml = templateHtml.replace(/__prefix__/g, index);
+    const div = document.createElement('div');
+    div.innerHTML = newHtml;
+    const lessonEl = div.firstElementChild;
+    if (!lessonEl) return;
+    lessonEl.dataset.formIndex = index;
+
+    const setVal = (selector, value) => {
+      const el = lessonEl.querySelector(selector);
+      if (el) el.value = value || '';
+    };
+    setVal('input[name*="-title"]', data.title);
+    setVal('input[name*="-order"]', data.order || '0');
+    setVal('textarea[name*="-description"]', data.description);
+    setVal('input[name*="-video"]', data.video);
+    setVal('input[name*="-audio"]', data.audio);
+    setVal('input[name*="-text"]', data.text);
+    if (data.id) {
+      setVal('input[name*="-id"]', data.id);
+    }
+    if (data.DELETE) {
+      const delCheck = lessonEl.querySelector('input[name*="-DELETE"]');
+      if (delCheck) delCheck.checked = true;
+      lessonEl.style.display = 'none'; // скрываем удалённый урок
     }
 
-    function addSavedLesson(data, index) {
-      // Клонируем шаблон из lesson_form_template.html, подставляя данные
-      const templateHtml = `{% filter escapejs %}{% include "studio/includes/lesson_form_template.html" %}{% endfilter %}`;
-      const newHtml = templateHtml.replace(/__prefix__/g, index);
-      const div = document.createElement('div');
-      div.innerHTML = newHtml;
-      const lessonEl = div.firstElementChild;
-      lessonEl.dataset.formIndex = index;
-
-      // Заполняем поля
-      lessonEl.querySelector('input[name*="-title"]').value = data.title;
-      lessonEl.querySelector('input[name*="-order"]').value = data.order;
-      lessonEl.querySelector('textarea[name*="-description"]').value = data.description;
-      lessonEl.querySelector('input[name*="-video"]').value = data.video;
-      lessonEl.querySelector('input[name*="-audio"]').value = data.audio;
-      lessonEl.querySelector('input[name*="-text"]').value = data.text;
-
-      // Обновляем названия материалов
-      if (data.video) {
-        const span = lessonEl.querySelector('.selected-material-name[data-type="video"]');
-        span.textContent = `Видео #${data.video}`;
+    ['video', 'audio', 'text'].forEach(type => {
+      if (data[type]) {
+        const span = lessonEl.querySelector('.selected-material-name[data-type="' + type + '"]');
+        if (span) span.textContent = 'Материал #' + data[type];
       }
-      if (data.audio) {
-        const span = lessonEl.querySelector('.selected-material-name[data-type="audio"]');
-        span.textContent = `Аудио #${data.audio}`;
+    });
+
+    lessonEl.querySelectorAll('.create-material-link').forEach(link => {
+      const href = new URL(link.href, window.location.origin);
+      href.searchParams.set('lesson_index', index);
+      link.href = href.toString();
+    });
+
+    if (lessonsContainer) lessonsContainer.appendChild(lessonEl);
+    attachLessonEvents(lessonEl);
+    if (totalFormsInput) totalFormsInput.value = parseInt(totalFormsInput.value) + 1;
+    saveFormToStorage();
+  }
+
+  document.getElementById('save-new-lesson-btn')?.addEventListener('click', function() {
+    const data = getNewLessonData();
+    if (!data.title) { alert('Введите название урока'); return; }
+    const newIndex = totalFormsInput ? totalFormsInput.value : 0;
+    addSavedLesson(data, newIndex);
+    clearNewLessonForm();
+  });
+
+  document.getElementById('reset-new-lesson-btn')?.addEventListener('click', clearNewLessonForm);
+
+  if (saveDraftBtn) {
+    saveDraftBtn.addEventListener('click', function() {
+      if (statusField) statusField.value = 'draft';
+      form.submit();
+    });
+  }
+
+  if (publishBtn) {
+    publishBtn.addEventListener('click', function() {
+      if (statusField) statusField.value = 'published';
+      form.submit();
+    });
+  }
+
+  form.addEventListener('submit', clearDraft);
+
+  if (cancelBtn) {
+    cancelBtn.addEventListener('click', function(e) {
+      e.preventDefault();
+      clearDraft();
+      window.location.href = this.href;
+    });
+  }
+
+  if (clearDraftBtn) {
+    clearDraftBtn.addEventListener('click', function() {
+      if (confirm('Удалить локальный черновик? Все несохранённые данные будут потеряны.')) {
+        clearDraft();
       }
-      if (data.text) {
-        const span = lessonEl.querySelector('.selected-material-name[data-type="text"]');
-        span.textContent = `Текст #${data.text}`;
+    });
+  }
+
+  form.addEventListener('input', function(e) {
+    if (e.target.matches('input, textarea, select')) saveFormToStorage();
+  });
+  form.addEventListener('change', function(e) {
+    if (e.target.matches('input, textarea, select')) saveFormToStorage();
+  });
+
+  const restored = restoreFormFromStorage();
+  if (!restored) showDraftStatus(false);
+  updateCompletion();
+
+  function handleReturnParams() {
+    const params = new URLSearchParams(window.location.search);
+    const lessonIndex = params.get('lesson_index');
+    const materialId = params.get('material_id');
+    const materialType = params.get('material_type');
+    if (lessonIndex && materialId && materialType) {
+      if (lessonIndex === 'new') {
+        const input = document.getElementById('new-lesson-' + materialType);
+        if (input) input.value = materialId;
+        updateNewLessonMaterialLabels();
+      } else {
+        const lessonForm = document.querySelector('.lesson-form[data-form-index="' + lessonIndex + '"]');
+        if (lessonForm) updateMaterialField(lessonForm, materialType, materialId, 'Материал #' + materialId);
       }
-
-      // Обновляем ссылки "Создать" с новым индексом
-      lessonEl.querySelectorAll('.create-material-link').forEach(link => {
-        const href = new URL(link.href, window.location.origin);
-        href.searchParams.set('lesson_index', index);
-        link.href = href.toString();
-      });
-
-      // Вставляем перед формой нового урока
-      lessonsContainer.appendChild(lessonEl);
-      attachLessonEvents(lessonEl);
-
-      // Обновляем total forms
-      totalFormsInput.value = parseInt(totalFormsInput.value) + 1;
+      saveFormToStorage();
+      if (window.history.replaceState) window.history.replaceState({}, document.title, window.location.pathname);
     }
+  }
+  handleReturnParams();
 
-    saveNewBtn.addEventListener('click', function() {
-      const data = getNewLessonData();
-      if (!data.title) {
-        alert('Введите название урока');
-        return;
-      }
-      const newIndex = totalFormsInput.value;
-      addSavedLesson(data, newIndex);
-      clearNewLessonForm();
-    });
-
-    resetNewBtn.addEventListener('click', function() {
-      clearNewLessonForm();
-    });
-
-    // ---------- Кнопки "Создать" в форме нового урока ----------
-    newLessonForm.querySelectorAll('.create-material-link').forEach(link => {
-      link.addEventListener('click', function(e) {
-        // Обновляем href с актуальным lesson_index=new (уже есть)
-        const href = new URL(this.href, window.location.origin);
-        href.searchParams.set('next', window.location.pathname);
-        href.searchParams.set('lesson_index', 'new');
-        this.href = href.toString();
-      });
-    });
+  if (newLessonForm) {
     newLessonForm.querySelectorAll('.pick-material-btn').forEach(btn => {
       btn.addEventListener('click', function(e) {
         e.preventDefault();
-        window.currentLessonForm = null; // будем обновлять форму нового урока
-        const type = this.dataset.type;
-        // Модалка выбора будет использовать updateNewLessonMaterialField вместо updateMaterialField
-        openPickMaterialModalForNewLesson(type);
+        window.currentLessonForm = null;
+        openPickMaterialModalForNewLesson(this.dataset.type);
       });
     });
+  }
 
-    function openPickMaterialModalForNewLesson(type) {
-      const modalId = `modal-pick-${type}`;
-      const modal = document.getElementById(modalId);
-      if (!modal) return;
-      const bsModal = new bootstrap.Modal(modal);
-      bsModal.show();
-      modal.querySelectorAll('.material-choice').forEach(link => {
-        link.onclick = function(e) {
-          e.preventDefault();
-          const id = this.dataset.id;
-          const title = this.textContent.trim();
-          updateNewLessonMaterialField(type, id, title);
-          bootstrap.Modal.getInstance(modal).hide();
-        };
-      });
-      const createLink = modal.querySelector('.create-material-link');
-      if (createLink) {
-        createLink.onclick = function(e) {
-          e.preventDefault();
-          bootstrap.Modal.getInstance(modal).hide();
-          window.location.href = this.href + '?next=' + encodeURIComponent(window.location.pathname) + '&lesson_index=new';
-        };
-      }
+  function openPickMaterialModalForNewLesson(type) {
+    const modal = document.getElementById('modal-pick-' + type);
+    if (!modal) return;
+    const bsModal = new bootstrap.Modal(modal);
+    bsModal.show();
+    modal.querySelectorAll('.material-choice').forEach(link => {
+      link.onclick = function(e) {
+        e.preventDefault();
+        const id = this.dataset.id;
+        const title = this.textContent.trim();
+        updateNewLessonMaterialField(type, id, title);
+        bootstrap.Modal.getInstance(modal).hide();
+      };
+    });
+    const createLink = modal.querySelector('.create-material-link');
+    if (createLink) {
+      createLink.onclick = function(e) {
+        e.preventDefault();
+        bootstrap.Modal.getInstance(modal).hide();
+        window.location.href = this.href + '?next=' + encodeURIComponent(window.location.pathname) + '&lesson_index=new';
+      };
     }
+  }
 
-    function updateNewLessonMaterialField(type, id, title) {
-      const hiddenInput = document.getElementById(`new-lesson-${type}`);
-      const nameSpan = newLessonForm.querySelector(`.selected-material-name[data-type="${type}"]`);
-      if (hiddenInput) hiddenInput.value = id;
-      if (nameSpan) nameSpan.textContent = title || 'Не выбрано';
+  function updateNewLessonMaterialField(type, id, title) {
+    const hidden = document.getElementById('new-lesson-' + type);
+    if (hidden) hidden.value = id;
+    if (newLessonForm) {
+      const span = newLessonForm.querySelector('.selected-material-name[data-type="' + type + '"]');
+      if (span) span.textContent = title || 'Не выбрано';
     }
-
-    // ---------- Обработка возврата с создания материала ----------
-    function handleReturnParams() {
-      const params = new URLSearchParams(window.location.search);
-      const lessonIndex = params.get('lesson_index');
-      const materialId = params.get('material_id');
-      const materialType = params.get('material_type');
-      if (lessonIndex && materialId && materialType) {
-        if (lessonIndex === 'new') {
-          // Обновляем форму нового урока
-          updateNewLessonMaterialField(materialType, materialId, `Материал #${materialId}`);
-        } else {
-          // Обновляем соответствующий существующий урок
-          const lessonForm = document.querySelector(`.lesson-form[data-form-index="${lessonIndex}"]`);
-          if (lessonForm) {
-            updateMaterialField(lessonForm, materialType, materialId, `Материал #${materialId}`);
-          }
-        }
-        // Убираем параметры из URL
-        if (window.history.replaceState) {
-          window.history.replaceState({}, document.title, window.location.pathname);
-        }
-      }
-    }
-    handleReturnParams();
-
-  })();
+    saveFormToStorage();
+  }
+});
 </script>
 {% endblock %}

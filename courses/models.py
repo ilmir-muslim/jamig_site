@@ -1,4 +1,5 @@
 from django.db import models
+from django.utils.text import slugify
 from accounts.models import Authors
 from materials.models import VideoContent, AudioContent, TextContent
 
@@ -11,7 +12,7 @@ class Course(models.Model):
     ]
     title = models.CharField(max_length=200, verbose_name="Название курса")
     slug = models.SlugField(max_length=200, unique=True, verbose_name="URL-адрес")
-    description = models.TextField(verbose_name="Описание курса")
+    description = models.TextField(verbose_name="Описание курса", blank=True, null=True)
     author = models.ForeignKey(
         Authors,
         on_delete=models.SET_NULL,
@@ -32,6 +33,18 @@ class Course(models.Model):
         verbose_name = "Курс"
         verbose_name_plural = "Курсы"
         ordering = ["-published_at", "-created_at"]
+
+    
+    def save(self, *args, **kwargs):
+        if not self.slug and self.title:
+            self.slug = slugify(self.title)
+            # Если slug уже существует, добавим уникальный суффикс
+            original_slug = self.slug
+            counter = 1
+            while Course.objects.filter(slug=self.slug).exists():
+                self.slug = f"{original_slug}-{counter}"
+                counter += 1
+        super().save(*args, **kwargs)
 
     def __str__(self):
         return self.title

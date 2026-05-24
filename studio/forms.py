@@ -1,4 +1,6 @@
 from django import forms
+from django.core.exceptions import ValidationError
+import re
 from courses.models import Course, Lesson
 from materials.models import VideoContent, AudioContent, TextContent
 
@@ -23,13 +25,42 @@ class VideoContentForm(forms.ModelForm):
                 attrs={"class": "form-control", "placeholder": "Описание", "rows": 3}
             ),
             "embed_code": forms.Textarea(
-                attrs={"class": "form-control", "placeholder": "Код вставки", "rows": 3}
+                attrs={
+                    "class": "form-control",
+                    "placeholder": "Код iframe или ссылка (rutube.ru/video/...)",
+                    "rows": 3,
+                }
             ),
             "category": forms.Select(attrs={"class": "form-select"}),
             "thumbnail": forms.ClearableFileInput(attrs={"class": "form-control"}),
             "is_live": forms.CheckboxInput(attrs={"class": "form-check-input"}),
             "status": forms.Select(attrs={"class": "form-select"}),
         }
+
+    def clean_embed_code(self):
+        code = self.cleaned_data.get("embed_code", "").strip()
+        if not code:
+            raise ValidationError("Необходимо вставить код или ссылку на видео.")
+
+        if "<iframe" in code:
+            if not re.search(
+                r'<\s*iframe\s[^>]*src\s*=\s*["\']https?://', code, re.IGNORECASE
+            ):
+                raise ValidationError("Неверный формат iframe.")
+            return code
+
+        if self._is_valid_video_url(code):
+            return code
+
+        raise ValidationError(
+            "Введите корректный iframe-код или ссылку на видео (например, rutube.ru/video/...)"
+        )
+
+    @staticmethod
+    def _is_valid_video_url(url):
+        if re.search(r"rutube\.ru/video/[a-f0-9]+", url):
+            return True
+        return False
 
 
 class AudioContentForm(forms.ModelForm):
@@ -133,8 +164,3 @@ class LessonForm(forms.ModelForm):
             "text": forms.HiddenInput(),
         }
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.fields["video"].queryset = VideoContent.objects.none()
-        self.fields["audio"].queryset = AudioContent.objects.none()
-        self.fields["text"].queryset = TextContent.objects.none()

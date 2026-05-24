@@ -57,10 +57,10 @@ class VideoContentAdmin(BaseContentAdmin):
             return mark_safe(
                 f'<div style="margin-top: 10px;">'
                 f"<h4>Предпросмотр:</h4>"
-                f'<div style="max-width: 400px;">{obj.embed_code}</div>'
+                f'<div style="max-width: 400px;">{obj.get_embed_html()}</div>'
                 f"</div>"
             )
-        return "Добавьте код вставки для предпросмотра"
+        return "Добавьте код вставки или ссылку для предпросмотра"
 
     video_preview.short_description = "Предпросмотр видео"
 

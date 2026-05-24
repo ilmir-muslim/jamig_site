@@ -40,10 +40,11 @@
             <h3>Видео</h3>
           </div>
           <div class="mb-4">
-            <label class="form-label-lg">Код вставки (iframe)</label>
+            <label class="form-label-lg">Код вставки (iframe) или ссылка на видео</label>
             <div class="embed-input-group">
               {{ form.embed_code }}
             </div>
+            <small class="text-muted">Поддерживаются iframe-коды и ссылки rutube.ru/video/... . Ссылка будет автоматически преобразована в плеер.</small>
           </div>
         </section>
 
@@ -364,12 +365,35 @@
     // Кнопки в зависимости от режима
     const saveDraftBtn = document.getElementById('saveDraftBtn');
     const publishBtn = document.getElementById('publishBtn');
-    const saveBtn = document.getElementById('saveBtn'); // новая кнопка "Сохранить"
+    const saveBtn = document.getElementById('saveBtn');
+
+    /**
+     * Функция для преобразования содержимого поля embed_code в HTML предпросмотра.
+     * Если это iframe – возвращает как есть, если ссылка – генерирует iframe.
+     */
+    function embedCodeToPreviewHTML(code) {
+      if (!code) return null;
+      code = code.trim();
+      // Если содержит тег iframe
+      if (/<iframe\s/i.test(code)) {
+        return code;
+      }
+      // Иначе пытаемся распарсить ссылку (пока поддерживаем только rutube)
+      const rutubeMatch = code.match(/rutube\.ru\/video\/([a-f0-9]+)/i);
+      if (rutubeMatch) {
+        const videoId = rutubeMatch[1];
+        return `<iframe width="720" height="405" src="https://rutube.ru/play/embed/${videoId}" frameborder="0" allowfullscreen></iframe>`;
+      }
+      // Можно добавить другие сервисы
+      return null;
+    }
 
     function updateEmbedPreview() {
-      const code = embedField.value.trim();
-      if (code) {
-        sidebarPreview.innerHTML = code;
+      const code = embedField.value;
+      const html = embedCodeToPreviewHTML(code);
+
+      if (html) {
+        sidebarPreview.innerHTML = html;
       } else {
         sidebarPreview.innerHTML = `<div class="d-flex align-items-center justify-content-center bg-dark text-white-50" style="height:100%;"><i class="fas fa-play-circle fa-3x"></i></div>`;
       }
