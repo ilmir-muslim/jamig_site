@@ -2,146 +2,168 @@
 {% load static %}
 
 {% block content %}
-<!-- HERO -->
-<section class="hero">
-    <div class="hero-mosque-silhouette">
-        <svg viewBox="0 0 400 200" xmlns="http://www.w3.org/2000/svg">
-            <polygon points="200,10 230,80 260,80 260,160 140,160 140,80 170,80"/>
-            <rect x="170" y="120" width="60" height="40"/>
-            <circle cx="200" cy="50" r="12"/>
-            <polygon points="200,18 208,45 200,38 192,45"/>
-        </svg>
-    </div>
-    <div class="hero-content">
-        <span class="hero-badge">🕌 Добро пожаловать</span>
-        <h1>Мечеть <span class="accent">«Джамиг»</span> —<br>свет веры в твоём сердце</h1>
-        <p class="hero-subtitle">Духовное просвещение, единство и добро. Присоединяйтесь к нашим урокам, слушайте проповеди и следите за новостями.</p>
-        <div class="hero-buttons">
-            <a href="#video-section" class="btn btn-primary"><i class="fas fa-play"></i> Смотреть видео</a>
-            <a href="#news-section" class="btn btn-outline">Последние новости</a>
+<div class="pb-8">
+
+    <!-- Hero Секция: Элегантная и чистая -->
+    <div class="relative max-w-4xl mx-auto px-4 py-16 lg:py-24 flex flex-col items-center text-center">
+        <!-- 1. Аккуратный бейдж (надзаголовок) -->
+        <div class="inline-block px-4 py-1.5 mb-6 rounded-full bg-blue-50 border border-blue-100 text-blue-700 text-xs md:text-sm font-bold tracking-widest uppercase shadow-sm">
+            Духовно-просветительский портал
+        </div>
+
+        <!-- 2. Массивный, но строгий главный заголовок -->
+        <h1 class="text-5xl md:text-6xl lg:text-7xl font-bold text-slate-900 tracking-tight mb-8">
+            Мечеть <span class="text-blue-700">«Джамиг»</span>
+        </h1>
+
+        <!-- 3. Спокойное, легко читаемое описание -->
+        <p class="text-lg md:text-xl text-slate-500 max-w-2xl mb-10 leading-relaxed">
+            Изучайте ислам через качественные статьи, достоверные курсы и лекции от проверенных преподавателей.
+        </p>
+
+        <!-- Кнопки -->
+        <div class="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
+            <a href="{% url 'course_list' %}" class="w-full sm:w-auto px-8 py-3.5 bg-blue-700 hover:bg-blue-800 text-white font-semibold rounded-full shadow-md hover:shadow-lg transition-all transform hover:-translate-y-0.5 text-center" style="text-decoration: none;">
+                Начать обучение
+            </a>
+            <a href="{% url 'text_list' %}" class="w-full sm:w-auto px-8 py-3.5 bg-white hover:bg-slate-50 border border-slate-200 text-slate-700 font-semibold rounded-full shadow-sm transition-all hover:text-blue-700 text-center" style="text-decoration: none;">
+                Читать статьи
+            </a>
         </div>
     </div>
-</section>
 
-<div class="main-container">
+    <div class="max-w-6xl mx-auto px-4 relative z-10">
+        <div class="space-y-16">
 
-    <!-- ВИДЕО -->
-    <section class="section" id="video-section">
-        <div class="section-header">
-            <span class="section-tag">🎥 Медиа</span>
-            <h2 class="section-title">Актуальное видео</h2>
-            <p class="section-desc">Проповеди, лекции и прямые эфиры от наших авторов.</p>
-            <div class="divider"></div>
-        </div>
-        {% if current_video %}
-        <div class="video-card">
-            <div class="video-wrapper">
-                {{ current_video.get_embed_html|safe }}
-            </div>
-            <div class="video-info">
-                <div style="display:flex; justify-content:space-between; align-items:flex-start;">
-                    <div>
-                        <h3 style="margin-bottom:0.2rem;">{{ current_video.title }}</h3>
-                        <p style="font-size:0.9rem; color:var(--text-medium);">
-                            <i class="fas fa-user me-1"></i> {{ current_video.author.user.get_full_name|default:"Автор" }}
-                            {% if current_video.duration %} · <i class="fas fa-clock me-1"></i> {{ current_video.duration|time:"H:i" }}{% endif %}
-                        </p>
-                    </div>
-                    {% if current_video.is_live %}
-                        <span style="display:inline-block; background:#e8f5e9; color:#2e7d32; border:1px solid #c8e6c9; padding:6px 18px; border-radius:50px; font-size:0.85rem; font-weight:600;">🔴 LIVE</span>
+            <!-- Актуальное видео -->
+            {% if current_video %}
+            <div class="bg-white/80 backdrop-blur-md rounded-2xl shadow-xl shadow-slate-200/50 border border-white overflow-hidden flex flex-col md:flex-row">
+                <a href="{% url 'video_detail' current_video.slug %}" class="md:w-2/5 bg-slate-900 relative group cursor-pointer flex items-center justify-center min-h-[250px] overflow-hidden">
+                    {% if current_video.thumbnail %}
+                        <img src="{{ current_video.thumbnail.url }}" alt="{{ current_video.title }}" class="absolute inset-0 w-full h-full object-cover opacity-60 group-hover:opacity-40 transition-opacity">
+                    {% else %}
+                        <div class="absolute inset-0 opacity-50 group-hover:opacity-40 transition-opacity bg-linear-to-br from-blue-900 to-slate-900"></div>
                     {% endif %}
-                </div>
-                <p style="margin-top:12px;">{{ current_video.description|truncatechars:120 }}</p>
-            </div>
-        </div>
-        {% else %}
-        <div class="card" style="text-align:center; padding:3rem;">
-            <i class="fas fa-video fa-3x" style="color:var(--blue-pale);"></i>
-            <p style="margin-top:1rem;">Видео скоро появится</p>
-        </div>
-        {% endif %}
-    </section>
-
-    <!-- НОВОСТИ -->
-    <section class="section" id="news-section">
-        <div class="section-header">
-            <span class="section-tag">📰 Новости</span>
-            <h2 class="section-title">События и объявления</h2>
-            <p class="section-desc">Будьте в курсе жизни мечети и предстоящих мероприятий.</p>
-            <div class="divider"></div>
-        </div>
-        <div class="news-grid">
-            {% for post in recent_posts %}
-            <div class="news-card">
-                <div class="news-card-img">
-                    <span class="news-date-badge">{{ post.created_at|date:"d M" }}</span>
-                    <i class="fas fa-newspaper"></i>
-                </div>
-                <div class="news-card-body">
-                    <h4>{{ post.title }}</h4>
-                    <p>{{ post.content|truncatewords:15 }}</p>
-                    <span style="display:inline-block; background:var(--blue-ice); color:var(--blue-mid); font-size:0.75rem; padding:3px 10px; border-radius:20px;">{{ post.get_post_type_display }}</span>
+                    <svg class="w-16 h-16 text-white relative z-10 opacity-80 group-hover:scale-110 transition-transform" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clip-rule="evenodd"></path>
+                    </svg>
+                </a>
+                <div class="p-8 md:w-3/5 flex flex-col justify-center">
+                    <div class="flex items-center gap-2 mb-3">
+                        <span class="px-3 py-1 text-xs font-bold uppercase tracking-wider text-red-600 bg-red-50 rounded-full border border-red-100">Новое видео</span>
+                        <span class="text-sm text-slate-500">{{ current_video.published_at|date:"d M Y г." }}</span>
+                    </div>
+                    <a href="{% url 'video_detail' current_video.slug %}" style="text-decoration: none;">
+                        <h2 class="text-2xl font-bold text-slate-800 mb-4 line-clamp-2 hover:text-blue-600 transition-colors cursor-pointer">
+                            {{ current_video.title }}
+                        </h2>
+                    </a>
+                    <p class="text-slate-600 line-clamp-3 mb-6">
+                        {{ current_video.description|default:'Смотрите новую лекцию на нашем портале.' }}
+                    </p>
+                    <div class="flex items-center gap-3 mt-auto">
+                        <div class="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-blue-700 font-bold text-sm uppercase">
+                            {{ current_video.author.user.first_name|first|default:"А" }}
+                        </div>
+                        <span class="text-sm font-medium text-slate-700">{{ current_video.author.user.get_full_name|default:'Редакция' }}</span>
+                    </div>
                 </div>
             </div>
-            {% empty %}
-            <div class="card" style="text-align:center; padding:2rem; grid-column:1/-1;">
-                <p>Новостей пока нет</p>
+            {% endif %}
+
+            <!-- Последние публикации -->
+            <section>
+                <div class="flex items-center justify-between mb-8">
+                    <h2 class="text-3xl font-bold text-slate-800 tracking-tight">Свежие материалы</h2>
+                    <a href="{% url 'text_list' %}" class="text-blue-600 font-semibold hover:text-blue-700 flex items-center gap-1" style="text-decoration: none;">
+                        Смотреть все <span aria-hidden="true">&rarr;</span>
+                    </a>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                    {% for post in recent_posts %}
+                    <article class="group bg-white/80 backdrop-blur-md rounded-2xl shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 border border-white flex flex-col overflow-hidden">
+                        <div class="p-6 flex flex-col grow">
+                            <div class="flex justify-between items-start mb-4">
+                                {% if post.post_type == 'news' %}
+                                    <span class="px-3 py-1 text-xs font-bold uppercase tracking-wider border rounded-full bg-cyan-50 text-cyan-700 border-cyan-200">Новость</span>
+                                {% elif post.post_type == 'article' %}
+                                    <span class="px-3 py-1 text-xs font-bold uppercase tracking-wider border rounded-full bg-blue-50 text-blue-700 border-blue-200">Статья</span>
+                                {% else %}
+                                    <span class="px-3 py-1 text-xs font-bold uppercase tracking-wider border rounded-full bg-indigo-50 text-indigo-700 border-indigo-200">Урок</span>
+                                {% endif %}
+                                <span class="text-xs text-slate-400 font-medium">{{ post.created_at|date:"d M Y г." }}</span>
+                            </div>
+                            <h3 class="text-xl font-bold text-slate-800 mb-3 group-hover:text-blue-600 transition-colors line-clamp-2">
+                                {{ post.title }}
+                            </h3>
+                            <p class="text-slate-600 text-sm line-clamp-3 mb-6 grow">
+                                {{ post.content|striptags }}
+                            </p>
+                            <div class="mt-auto pt-4 border-t border-slate-100 text-sm font-medium text-blue-600 flex items-center opacity-0 group-hover:opacity-100 transition-opacity">
+                                Читать полностью <span class="ml-2 group-hover:translate-x-1 transition-transform">&rarr;</span>
+                            </div>
+                        </div>
+                    </article>
+                    {% empty %}
+                        <p class="text-slate-500">Материалов пока нет.</p>
+                    {% endfor %}
+                </div>
+            </section>
+
+            <!-- Блок авторов и курсов -->
+            <div class="grid lg:grid-cols-3 gap-8">
+                <!-- Авторы -->
+                <div class="lg:col-span-1 bg-white/80 backdrop-blur-md rounded-2xl p-8 shadow-sm border border-white">
+                    <h3 class="text-xl font-bold text-slate-800 mb-6">Наши преподаватели</h3>
+                    <div class="space-y-6">
+                        {% for author in authors %}
+                        <a href="{% url 'author_detail' author.pk %}" class="flex items-center gap-4 group cursor-pointer" style="text-decoration: none;">
+                            <div class="w-12 h-12 rounded-full bg-linear-to-tr from-blue-600 to-cyan-400 flex items-center justify-center text-white font-bold text-lg shadow-md group-hover:scale-110 transition-transform">
+                                {{ author.user.first_name|first|default:"A" }}
+                            </div>
+                            <div>
+                                <h4 class="font-bold text-slate-800 group-hover:text-blue-600 transition-colors">
+                                    {{ author.user.get_full_name }}
+                                </h4>
+                                <p class="text-xs text-slate-500 mt-0.5 line-clamp-1">{{ author.specialization|default:'Преподаватель' }}</p>
+                            </div>
+                        </a>
+                        {% empty %}
+                            <p class="text-slate-500 text-sm">Список авторов пуст.</p>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <!-- Активные курсы -->
+                <div class="lg:col-span-2 bg-linear-to-br from-blue-900 to-indigo-950 rounded-2xl p-8 shadow-lg relative overflow-hidden border border-blue-800/50">
+                    <div class="absolute top-0 right-0 w-64 h-64 bg-cyan-600 rounded-full mix-blend-multiply filter blur-3xl opacity-30 translate-x-1/2 -translate-y-1/2"></div>
+                    
+                    <div class="relative z-10">
+                        <h3 class="text-2xl font-bold text-white mb-6">Доступные курсы</h3>
+                        {% if not active_courses %}
+                            <div class="text-slate-400 italic">Новые курсы находятся в разработке.</div>
+                        {% else %}
+                            <div class="grid sm:grid-cols-2 gap-4">
+                                {% for course in active_courses %}
+                                <a href="{% url 'course_detail' course.slug %}" class="bg-white/10 backdrop-blur-md border border-white/10 rounded-xl p-5 hover:bg-white/20 transition-colors cursor-pointer group" style="text-decoration: none;">
+                                    <h4 class="font-bold text-white text-lg mb-2 group-hover:text-cyan-300 transition-colors">{{ course.title }}</h4>
+                                    <p class="text-sm text-slate-300 line-clamp-2 mb-4">{{ course.description|default:'Курс без описания' }}</p>
+                                    <div class="flex items-center gap-2 text-xs text-cyan-400 font-medium mt-auto">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                                        </svg>
+                                        <span>Автор: {{ course.author.user.get_full_name|default:'Не указан' }}</span>
+                                    </div>
+                                </a>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
             </div>
-            {% endfor %}
-        </div>
-    </section>
 
-    <!-- АВТОРЫ -->
-    {% if authors %}
-    <section class="section">
-        <div class="section-header">
-            <span class="section-tag">👥 Наши авторы</span>
-            <h2 class="section-title">Познакомьтесь с наставниками</h2>
-            <div class="divider"></div>
         </div>
-        <div class="cards-grid">
-            {% for author in authors %}
-            <a href="{% url 'author_detail' author.id %}" style="text-decoration:none;">
-                <div class="compact-card">
-                    <div class="card-icon" style="margin-bottom:12px;"><i class="fas fa-user"></i></div>
-                    <h4 style="color:var(--blue-deep); font-weight:700;">{{ author.user.get_full_name }}</h4>
-                    <p style="font-size:0.85rem; color:var(--text-medium);">{{ author.specialization|truncatechars:30 }}</p>
-                </div>
-            </a>
-            {% endfor %}
-        </div>
-        <div style="text-align:center; margin-top:2rem;">
-            <a href="{% url 'author_list' %}" class="btn btn-outline" style="color:var(--blue-mid); border-color:var(--blue-mid);">Все авторы</a>
-        </div>
-    </section>
-    {% endif %}
-
-    <!-- КУРСЫ -->
-    {% if active_courses %}
-    <section class="section">
-        <div class="section-header">
-            <span class="section-tag">🎓 Обучение</span>
-            <h2 class="section-title">Учебные программы</h2>
-            <p class="section-desc">Систематизированные курсы для глубокого изучения.</p>
-            <div class="divider"></div>
-        </div>
-        <div class="cards-grid">
-            {% for course in active_courses %}
-            <a href="{% url 'course_detail' course.slug %}" style="text-decoration:none;">
-                <div class="compact-card">
-                    <div class="card-icon" style="margin-bottom:12px;"><i class="fas fa-graduation-cap"></i></div>
-                    <h4 style="color:var(--blue-deep); font-weight:700;">{{ course.title }}</h4>
-                    <p style="font-size:0.85rem; color:var(--text-medium);">{{ course.description|truncatewords:10 }}</p>
-                    <small>{{ course.lessons.count }} уроков</small>
-                </div>
-            </a>
-            {% endfor %}
-        </div>
-        <div style="text-align:center; margin-top:2rem;">
-            <a href="{% url 'course_list' %}" class="btn btn-outline" style="color:var(--blue-mid); border-color:var(--blue-mid);">Все курсы</a>
-        </div>
-    </section>
-    {% endif %}
-
+    </div>
 </div>
 {% endblock %}

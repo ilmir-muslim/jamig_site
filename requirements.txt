@@ -7,3 +7,6 @@ openpyxl==3.1.2
 weasyprint==68.1
 EbookLib==0.20
 pytils==0.4.4
+django-cors-headers==4.9.0
+django-ninja==1.6.2
+django-tailwind==4.5.0
