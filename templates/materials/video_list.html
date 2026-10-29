@@ -1,60 +1,6 @@
 {% extends 'base.html' %}
 {% load static %}
+
 {% block content %}
-<div class="container py-4">
-    <h1 class="mb-4 fw-bold">Видео</h1>
-    {% if categories %}
-    <div class="mb-4">
-        <a href="{% url 'video_list' %}" class="btn btn-sm btn-outline-secondary me-2">Все</a>
-        {% for cat in categories %}
-            <a href="?category={{ cat.slug }}" class="btn btn-sm btn-outline-secondary me-2">{{ cat.title }}</a>
-        {% endfor %}
-    </div>
-    {% endif %}
-    <div class="row">
-        {% for video in videos %}
-        <div class="col-md-6 col-lg-4 mb-4">
-            <div class="card h-100 shadow-sm border-0 rounded-4 overflow-hidden">
-                <div class="video-card-preview">
-                    {% if video.embed_code %}
-                        {{ video.get_embed_html|safe }}
-                    {% else %}
-                        <div class="d-flex align-items-center justify-content-center h-100 bg-light">
-                            <i class="fas fa-video fa-3x text-secondary"></i>
-                        </div>
-                    {% endif %}
-                </div>
-                <div class="card-body">
-                    <h5 class="card-title fw-bold">{{ video.title }}</h5>
-                </div>
-            </div>
-        </div>
-        {% empty %}
-        <div class="col-12">
-            <div class="alert alert-info rounded-4">Видео пока нет.</div>
-        </div>
-        {% endfor %}
-    </div>
-</div>
-{% endblock %}
-{% block extra_css %}
-<style>
-    .video-card-preview {
-        position: relative;
-        padding-bottom: 56.25%;
-        height: 0;
-        overflow: hidden;
-        background: #000;
-    }
-    .video-card-preview iframe {
-        position: absolute !important;
-        top: 0 !important;
-        left: 0 !important;
-        width: 100% !important;
-        height: 100% !important;
-        max-width: 100% !important;
-        max-height: 100% !important;
-        border: none !important;
-    }
-</style>
+    {% include 'includes/material_list.html' with eyebrow="Видеотека" title="Видео" subtitle="Лекции, хутбы и уроки в видеоформате." items=videos card_type='video' filter_url=filter_url empty_text="Видео пока нет." %}
 {% endblock %}

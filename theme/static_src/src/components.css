@@ -1,0 +1,436 @@
+/* ============================================================
+   Компонентный слой — переопределяет Bootstrap-классы в стиле
+   дизайн-системы «Джамиг». Это позволяет не переписывать все
+   шаблоны: они остаются на привычных container/card/btn, но
+   выглядят по-современному.
+   ============================================================ */
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    font-family: var(--font-body);
+    color: var(--color-sand-900);
+    background-color: var(--color-sand-50);
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  ::selection {
+    background-color: var(--color-brand-200);
+    color: var(--color-brand-950);
+  }
+
+  h1, h2, h3, .display-title {
+    font-family: var(--font-display);
+    letter-spacing: -0.01em;
+  }
+
+  a {
+    transition: color 0.2s ease;
+  }
+
+  /* Аккуратные тонкие скроллбары */
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: var(--color-sand-300) transparent;
+  }
+}
+
+@layer components {
+  /* ---------- Отступы страниц ---------- */
+  .page-section {
+    padding-block: clamp(2rem, 5vw, 3.5rem);
+    width: 100%;
+  }
+
+  /* ---------- Заголовки страниц ---------- */
+  .page-title {
+    font-family: var(--font-display);
+    font-size: clamp(2rem, 4vw, 2.9rem);
+    font-weight: 700;
+    color: var(--color-sand-950);
+    line-height: 1.12;
+    letter-spacing: -0.015em;
+    margin: 0 0 0.6rem;
+  }
+
+  .page-subtitle {
+    color: var(--color-sand-600);
+    font-size: 1.05rem;
+    line-height: 1.7;
+    max-width: 46rem;
+    margin: 0;
+  }
+
+  /* ---------- Сетка карточек (заменяет bootstrap row/col) ---------- */
+  .cards-grid {
+    display: grid;
+    gap: 1.75rem;
+    grid-template-columns: repeat(1, minmax(0, 1fr));
+  }
+  @media (min-width: 48rem) {
+    .cards-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  }
+  @media (min-width: 64rem) {
+    .cards-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  }
+
+  .cards-grid.cols-2 { grid-template-columns: repeat(1, minmax(0, 1fr)); }
+  @media (min-width: 48rem) {
+    .cards-grid.cols-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  }
+
+  /* Двухколоночный макет «контент + сайдбар» (видео/аудио страницы) */
+  .content-sidebar {
+    display: grid;
+    gap: 2rem;
+    grid-template-columns: 1fr;
+  }
+  @media (min-width: 64rem) {
+    .content-sidebar { grid-template-columns: minmax(0, 2fr) minmax(0, 1fr); align-items: start; }
+  }
+
+  /* Адаптивное видео 16:9 */
+  .video-frame {
+    position: relative;
+    aspect-ratio: 16 / 9;
+    border-radius: 1.25rem;
+    overflow: hidden;
+    background: var(--color-sand-950);
+    box-shadow: var(--shadow-soft);
+  }
+  .video-frame iframe,
+  .video-frame video,
+  .video-frame > [class*="embed"] {
+    position: absolute !important;
+    inset: 0 !important;
+    width: 100% !important;
+    height: 100% !important;
+    border: 0 !important;
+  }
+
+  /* ---------- Панель фильтров ---------- */
+  .filter-bar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.6rem;
+    align-items: center;
+    margin: 1.75rem 0 2.25rem;
+  }
+
+  /* Флекс-утилиты Bootstrap (сохраняем поведение) */
+  .d-flex { display: flex; }
+  .d-none { display: none; }
+  .flex-column { flex-direction: column; }
+  .align-items-center { align-items: center; }
+  .justify-content-center { justify-content: center; }
+  .justify-content-between { justify-content: space-between; }
+  .text-center { text-align: center; }
+  .mt-auto { margin-top: auto; }
+  .mb-0 { margin-bottom: 0; }
+  .w-100 { width: 100%; }
+  .h-100 { height: 100%; }
+  .gap-2 { gap: 0.5rem; }
+
+  @media (min-width: 48rem) {
+    .d-md-flex { display: flex; }
+    .d-md-none { display: none; }
+  }
+
+  .eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-family: var(--font-body);
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--color-brand-700);
+    margin-bottom: 0.75rem;
+  }
+
+  .eyebrow::before {
+    content: "";
+    width: 2rem;
+    height: 2px;
+    border-radius: 999px;
+    background: linear-gradient(90deg, var(--color-brand-600), var(--color-gild-400));
+  }
+
+  /* ---------- Карточки ---------- */
+  .card {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    background: #fff;
+    border: 1px solid var(--color-sand-200);
+    border-radius: 1.25rem;
+    overflow: hidden;
+    box-shadow: var(--shadow-soft);
+    transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
+  }
+
+  .card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-lift);
+    border-color: var(--color-brand-200);
+  }
+
+  .card-body {
+    padding: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    flex: 1;
+  }
+
+  .card-title,
+  .card h5 {
+    font-family: var(--font-display);
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: var(--color-sand-950);
+    line-height: 1.3;
+  }
+
+  .card-text,
+  .card p {
+    color: var(--color-sand-600);
+    font-size: 0.925rem;
+    line-height: 1.65;
+  }
+
+  .border-0 { border-width: 0; }
+  .rounded-4 { border-radius: 1.25rem; }
+  .shadow-sm { box-shadow: var(--shadow-soft); }
+
+  /* Верхняя декоративная линия у карточек при наведении */
+  .card::after {
+    content: "";
+    position: absolute;
+    inset-inline: 0;
+    top: 0;
+    height: 3px;
+    background: linear-gradient(90deg, var(--color-brand-600), var(--color-gild-400));
+    opacity: 0;
+    transition: opacity 0.25s ease;
+  }
+  .card:hover::after { opacity: 1; }
+
+  /* ---------- Кнопки ---------- */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    font-family: var(--font-body);
+    font-size: 0.9rem;
+    font-weight: 600;
+    line-height: 1;
+    padding: 0.7rem 1.4rem;
+    border-radius: 999px;
+    border: 1px solid transparent;
+    cursor: pointer;
+    text-decoration: none !important;
+    transition: all 0.2s ease;
+    white-space: nowrap;
+  }
+
+  .btn-sm {
+    font-size: 0.8rem;
+    padding: 0.5rem 1rem;
+  }
+
+  .rounded-pill { border-radius: 999px; }
+
+  .btn-primary {
+    background: linear-gradient(135deg, var(--color-brand-700), var(--color-brand-600));
+    color: #fff;
+    box-shadow: 0 8px 20px -8px rgb(13 98 86 / 0.5);
+  }
+  .btn-primary:hover {
+    background: linear-gradient(135deg, var(--color-brand-800), var(--color-brand-700));
+    transform: translateY(-1px);
+    box-shadow: 0 12px 26px -8px rgb(13 98 86 / 0.55);
+  }
+
+  .btn-outline-primary {
+    border-color: var(--color-brand-300);
+    color: var(--color-brand-700);
+    background: #fff;
+  }
+  .btn-outline-primary:hover {
+    background: var(--color-brand-50);
+    border-color: var(--color-brand-500);
+    color: var(--color-brand-800);
+  }
+
+  .btn-outline-secondary {
+    border-color: var(--color-sand-300);
+    color: var(--color-sand-700);
+    background: #fff;
+  }
+  .btn-outline-secondary:hover {
+    background: var(--color-sand-100);
+    border-color: var(--color-sand-400);
+  }
+
+  /* ---------- Фильтры категорий (чипсы) ---------- */
+  .chip-filter {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.5rem 1.1rem;
+    border-radius: 999px;
+    border: 1px solid var(--color-sand-200);
+    background: #fff;
+    color: var(--color-sand-700);
+    font-size: 0.85rem;
+    font-weight: 600;
+    text-decoration: none;
+    transition: all 0.2s ease;
+  }
+  .chip-filter:hover {
+    border-color: var(--color-brand-400);
+    color: var(--color-brand-700);
+    background: var(--color-brand-50);
+  }
+
+  /* ---------- Бейджи ---------- */
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.35rem 0.8rem;
+    border-radius: 999px;
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+  .bg-primary { background: var(--color-deep-100); color: var(--color-deep-800); }
+  .bg-success { background: var(--color-brand-100); color: var(--color-brand-800); }
+  .bg-info    { background: var(--color-gild-100); color: var(--color-gild-700); }
+
+  /* ---------- Формы ---------- */
+  .form-label {
+    display: block;
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: var(--color-sand-700);
+    margin-bottom: 0.4rem;
+    letter-spacing: 0.01em;
+  }
+
+  input[type="email"],
+  input[type="password"],
+  input[type="text"],
+  input[type="number"],
+  input[type="url"],
+  input[type="tel"],
+  input[type="file"],
+  select,
+  textarea {
+    width: 100%;
+    padding: 0.7rem 1rem;
+    border: 1px solid var(--color-sand-300);
+    border-radius: 0.85rem;
+    background: #fff;
+    color: var(--color-sand-900);
+    font-size: 0.95rem;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  }
+
+  input:focus,
+  select:focus,
+  textarea:focus {
+    outline: none;
+    border-color: var(--color-brand-500);
+    box-shadow: 0 0 0 4px rgb(31 152 131 / 0.12);
+  }
+
+  .form-text {
+    font-size: 0.78rem;
+    color: var(--color-sand-500);
+    margin-top: 0.35rem;
+  }
+
+  /* ---------- Сообщения и алерты ---------- */
+  .alert {
+    padding: 0.9rem 1.2rem;
+    border-radius: 1rem;
+    font-size: 0.9rem;
+    border: 1px solid;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  .alert-info    { background: var(--color-deep-50);  border-color: var(--color-deep-200);  color: var(--color-deep-800); }
+  .alert-danger  { background: #fef2f2; border-color: #fecaca; color: #b91c1c; }
+  .alert-warning { background: var(--color-gild-50); border-color: var(--color-gild-200); color: var(--color-gild-700); }
+  .alert-success { background: var(--color-brand-50); border-color: var(--color-brand-200); color: var(--color-brand-800); }
+
+  ul.errorlist {
+    margin: 0.25rem 0 0;
+    padding: 0;
+    list-style: none;
+    color: #b91c1c;
+    font-size: 0.8rem;
+  }
+
+  /* ---------- Списки уроков ---------- */
+  .list-group { display: flex; flex-direction: column; gap: 0.9rem; }
+
+  .list-group-item {
+    background: #fff;
+    border: 1px solid var(--color-sand-200);
+    border-radius: 1.25rem;
+    padding: 1.4rem 1.6rem;
+    box-shadow: var(--shadow-soft);
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  }
+  .list-group-item:hover {
+    border-color: var(--color-brand-300);
+    box-shadow: var(--shadow-lift);
+  }
+
+  /* ---------- Прочее ---------- */
+  hr {
+    border: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--color-sand-300), transparent);
+    margin: 1.5rem 0;
+  }
+
+  .text-muted { color: var(--color-sand-500) !important; }
+  .fw-bold { font-weight: 700; }
+  .lead { color: var(--color-sand-600); font-size: 1.05rem; line-height: 1.7; }
+  .small { font-size: 0.85rem; }
+
+  /* Аудиоплеер — единый аккуратный вид */
+  audio {
+    width: 100%;
+    height: 44px;
+    border-radius: 999px;
+  }
+
+  /* Плавное появление контента */
+  main {
+    animation: fade-up 0.45s ease both;
+  }
+
+  @keyframes fade-up {
+    from { opacity: 0; transform: translateY(8px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 0.01ms !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+}

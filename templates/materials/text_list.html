@@ -1,34 +1,6 @@
 {% extends 'base.html' %}
 {% load static %}
+
 {% block content %}
-<div class="container py-4">
-    <h1 class="mb-4 fw-bold">Статьи</h1>
-    {% if categories %}
-    <div class="mb-4">
-        <a href="{% url 'text_list' %}" class="btn btn-sm btn-outline-secondary me-2">Все</a>
-        {% for cat in categories %}
-            <a href="?category={{ cat.slug }}" class="btn btn-sm btn-outline-secondary me-2">{{ cat.title }}</a>
-        {% endfor %}
-    </div>
-    {% endif %}
-    <div class="row">
-        {% for text in texts %}
-        <div class="col-md-6 col-lg-4 mb-4">
-            <div class="card h-100 shadow-sm border-0 rounded-4 overflow-hidden">
-                <div class="card-body">
-                    <h5 class="card-title fw-bold">{{ text.title }}</h5>
-                    <p class="card-text text-muted small">{{ text.description|truncatewords:20 }}</p>
-                    <a href="{% url 'text_reader' text.slug %}" class="btn btn-sm btn-outline-primary">
-                        <i class="fas fa-book-open me-1"></i>Читать
-                    </a>
-                </div>
-            </div>
-        </div>
-        {% empty %}
-        <div class="col-12">
-            <div class="alert alert-info rounded-4">Статей пока нет.</div>
-        </div>
-        {% endfor %}
-    </div>
-</div>
+    {% include 'includes/material_list.html' with eyebrow="Библиотека" title="Статьи" subtitle="Текстовые материалы для изучения и размышления." items=texts card_type='text' filter_url=filter_url empty_text="Статей пока нет." %}
 {% endblock %}

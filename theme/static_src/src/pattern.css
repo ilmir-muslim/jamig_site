@@ -1,0 +1,207 @@
+/* ============================================================
+   Декоративный слой: фон, узор, «арабеска»
+   ============================================================ */
+
+@layer components {
+  /* Тёплый радиальный фон страницы */
+  .app-bg {
+    background:
+      radial-gradient(1200px 600px at 85% -10%, var(--color-brand-50), transparent 60%),
+      radial-gradient(900px 500px at -10% 110%, var(--color-gild-50), transparent 55%),
+      var(--color-sand-50);
+  }
+
+  /* Тонкий геометрический узор (восьмиконечная звезда — мотив исламского орнамента) */
+  .pattern-overlay {
+    background-image: url("data:image/svg+xml,%3Csvg width='56' height='56' viewBox='0 0 56 56' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M28 6l4.2 10.3L43 17l-8 7.5 2.5 11L28 29.6 18.5 35.5 21 24.5 13 17l10.8-.7z' fill='none' stroke='%230d6256' stroke-opacity='0.05' stroke-width='1'/%3E%3C/svg%3E");
+    background-size: 56px 56px;
+  }
+
+  /* Логотип-марка в шапке */
+  .brand-mark {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.7rem;
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 1.35rem;
+    color: var(--color-sand-950);
+    text-decoration: none !important;
+    letter-spacing: -0.01em;
+  }
+
+  .brand-mark .brand-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 14px;
+    display: grid;
+    place-items: center;
+    color: #fff;
+    font-size: 1.05rem;
+    background: linear-gradient(135deg, var(--color-brand-700), var(--color-deep-700));
+    box-shadow: 0 6px 16px -6px rgb(13 98 86 / 0.45);
+  }
+
+  /* Навигация — «пилюли» */
+  .nav-pill {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    padding: 0.5rem 1rem;
+    border-radius: 999px;
+    font-size: 0.92rem;
+    font-weight: 500;
+    color: var(--color-sand-700);
+    text-decoration: none !important;
+    transition: all 0.18s ease;
+  }
+  .nav-pill:hover {
+    color: var(--color-brand-800);
+    background: var(--color-brand-50);
+  }
+  .nav-pill.is-active {
+    color: var(--color-brand-900);
+    background: var(--color-brand-100);
+    font-weight: 600;
+  }
+
+  .nav-cta {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    padding: 0.55rem 1.25rem;
+    border-radius: 999px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: #fff;
+    text-decoration: none !important;
+    background: linear-gradient(135deg, var(--color-brand-700), var(--color-brand-600));
+    box-shadow: 0 8px 18px -8px rgb(13 98 86 / 0.5);
+    transition: all 0.2s ease;
+  }
+  .nav-cta:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 12px 24px -8px rgb(13 98 86 / 0.6);
+  }
+
+  /* Dropdown для категорий */
+  .menu-panel {
+    min-width: 240px;
+    padding: 0.5rem;
+    border: 1px solid var(--color-sand-200);
+    border-radius: 1.1rem;
+    background: #fff;
+    box-shadow: var(--shadow-lift);
+  }
+  .menu-panel .dropdown-item {
+    display: flex;
+    align-items: center;
+    padding: 0.55rem 0.8rem;
+    border-radius: 0.7rem;
+    font-size: 0.9rem;
+    color: var(--color-sand-700);
+    text-decoration: none;
+    transition: all 0.15s ease;
+  }
+  .menu-panel .dropdown-item:hover {
+    background: var(--color-brand-50);
+    color: var(--color-brand-800);
+  }
+
+  /* Хлебные крошки / разделитель-орнамент */
+  .ornament {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.9rem;
+    color: var(--color-brand-300);
+  }
+  .ornament::before,
+  .ornament::after {
+    content: "";
+    height: 1px;
+    width: min(120px, 20vw);
+    background: linear-gradient(90deg, transparent, var(--color-sand-300));
+  }
+  .ornament::after {
+    background: linear-gradient(90deg, var(--color-sand-300), transparent);
+  }
+
+  /* Карточка автора (список авторов) */
+  .avatar-ring {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    display: grid;
+    place-items: center;
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 1.3rem;
+    color: #fff;
+    background: linear-gradient(135deg, var(--color-brand-600), var(--color-deep-600));
+    box-shadow:
+      0 0 0 3px #fff,
+      0 0 0 5px var(--color-brand-200);
+  }
+
+  /* Страницы входа/регистрации */
+  .auth-shell {
+    max-width: 980px;
+    margin: 3rem auto 4rem;
+    border-radius: 1.6rem;
+    overflow: hidden;
+    border: 1px solid var(--color-sand-200);
+    background: #fff;
+    box-shadow: var(--shadow-lift);
+    display: grid;
+    grid-template-columns: 1fr;
+  }
+  @media (min-width: 48rem) {
+    .auth-shell { grid-template-columns: 5fr 6fr; }
+  }
+
+  .auth-aside {
+    position: relative;
+    display: none;
+    min-height: 100%;
+    background:
+      linear-gradient(160deg, rgb(14 64 58 / 0.88), rgb(17 35 63 / 0.9)),
+      var(--pattern-img, none);
+    padding: 2.5rem;
+    color: #fff;
+    flex-direction: column;
+    justify-content: space-between;
+  }
+  @media (min-width: 48rem) {
+    .auth-aside { display: flex; }
+  }
+
+  .auth-main {
+    padding: 2.5rem clamp(1.5rem, 4vw, 3rem);
+  }
+
+  .auth-title {
+    font-family: var(--font-display);
+    font-size: 1.9rem;
+    font-weight: 700;
+    color: var(--color-sand-950);
+    margin-bottom: 1.75rem;
+  }
+
+  .field-group { margin-bottom: 1.1rem; }
+
+  .auth-footer-link {
+    margin-top: 1.5rem;
+    padding-top: 1.25rem;
+    border-top: 1px solid var(--color-sand-200);
+    font-size: 0.9rem;
+    color: var(--color-sand-600);
+    text-align: center;
+  }
+  .auth-footer-link a {
+    color: var(--color-brand-700);
+    font-weight: 600;
+    text-decoration: none;
+  }
+  .auth-footer-link a:hover { text-decoration: underline; }
+}

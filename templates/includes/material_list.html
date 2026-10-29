@@ -1,0 +1,101 @@
+{% load static %}
+
+{# ============================================================
+   Единый шаблон списка материалов.
+   Параметры (через include ... with):
+     title, subtitle, eyebrow, items, card_type (video|audio|text),
+     empty_text, filter_url
+   #}
+
+<section class="page-section">
+    <header class="mb-2">
+        <span class="eyebrow">{{ eyebrow|default:"Библиотека" }}</span>
+        <h1 class="page-title">{{ title }}</h1>
+        {% if subtitle %}<p class="page-subtitle">{{ subtitle }}</p>{% endif %}
+    </header>
+
+    {% if categories %}
+    <nav class="filter-bar" aria-label="Фильтр по категориям">
+        <a href="{{ filter_url }}" class="chip-filter {% if not request.GET.category %}!bg-brand-700 !text-white !border-brand-700{% endif %}">Все</a>
+        {% for cat in categories %}
+            <a href="?category={{ cat.slug }}" class="chip-filter {% if request.GET.category == cat.slug %}!bg-brand-700 !text-white !border-brand-700{% endif %}">{{ cat.title }}</a>
+        {% endfor %}
+    </nav>
+    {% endif %}
+
+    <div class="cards-grid {% if card_type == 'audio' %}cols-2{% endif %}">
+        {% for item in items %}
+
+            {# ---------- ВИДЕО ---------- #}
+            {% if card_type == 'video' %}
+            <article class="card group">
+                <div class="video-frame !rounded-none border-b border-sand-100">
+                    {% if item.embed_code %}
+                        {{ item.get_embed_html|safe }}
+                    {% else %}
+                        <div class="absolute inset-0 grid place-items-center bg-linear-to-br from-brand-900 to-deep-950 text-sand-300">
+                            <i class="fas fa-video text-3xl opacity-60"></i>
+                        </div>
+                    {% endif %}
+                </div>
+                <div class="card-body">
+                    <h5 class="card-title m-0 line-clamp-2 group-hover:text-brand-700 transition-colors">{{ item.title }}</h5>
+                    <div class="flex items-center justify-between mt-auto pt-3">
+                        <a href="{% url 'video_detail' item.slug %}" class="btn btn-outline-primary btn-sm">Смотреть</a>
+                        {% if item.published_at %}<span class="text-xs text-sand-400">{{ item.published_at|date:"d.m.Y" }}</span>{% endif %}
+                    </div>
+                </div>
+            </article>
+
+            {# ---------- АУДИО ---------- #}
+            {% elif card_type == 'audio' %}
+            <article class="card group">
+                <div class="card-body">
+                    <div class="flex items-start gap-4 mb-2">
+                        <span class="shrink-0 w-12 h-12 rounded-2xl grid place-items-center bg-brand-50 text-brand-700 text-lg border border-brand-100 group-hover:bg-brand-100 transition-colors">
+                            <i class="fas fa-headphones"></i>
+                        </span>
+                        <div class="min-w-0">
+                            <h5 class="card-title m-0 line-clamp-2">{{ item.title }}</h5>
+                            <p class="text-sm text-sand-500 mt-1 mb-0 line-clamp-1">{{ item.description|default:'Лекция' }}</p>
+                        </div>
+                    </div>
+                    {% if item.audio_file %}
+                        <audio controls preload="none" class="mt-3">
+                            <source src="{{ item.audio_file.url }}" type="audio/mpeg">
+                            Ваш браузер не поддерживает аудио.
+                        </audio>
+                        <a href="{{ item.audio_file.url }}" class="btn btn-outline-secondary btn-sm self-start mt-3" download>
+                            <i class="fas fa-download"></i> Скачать
+                        </a>
+                    {% else %}
+                        <div class="alert alert-warning mt-3 mb-0">Аудиофайл отсутствует</div>
+                    {% endif %}
+                </div>
+            </article>
+
+            {# ---------- ТЕКСТЫ / СТАТЬИ ---------- #}
+            {% else %}
+            <article class="card group">
+                <div class="card-body">
+                    <span class="w-10 h-10 rounded-xl grid place-items-center bg-gild-50 text-gild-600 border border-gild-200 mb-3">
+                        <i class="fas fa-book-open"></i>
+                    </span>
+                    <h5 class="card-title m-0 line-clamp-2">{{ item.title }}</h5>
+                    <p class="card-text line-clamp-3">{{ item.description|truncatewords:24 }}</p>
+                    <a href="{% url 'text_reader' item.slug %}" class="btn btn-outline-primary btn-sm self-start mt-auto">
+                        <i class="fas fa-book-reader"></i> Читать
+                    </a>
+                </div>
+            </article>
+            {% endif %}
+
+        {% empty %}
+            <div class="col-span-full">
+                <div class="alert alert-info justify-center py-10 text-base">
+                    <i class="fas fa-feather me-2 opacity-60"></i> {{ empty_text|default:"Материалы пока отсутствуют." }}
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+</section>
