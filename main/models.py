@@ -2,11 +2,13 @@ from django.db import models
 
 
 class Post(models.Model):
-    POST_TYPES = [
+    """Модель поста (новость, статья или урок) для публикаций на сайте"""
+
+    POST_TYPES = (
         ("news", "Новость"),
         ("article", "Статья"),
         ("lesson", "Урок"),
-    ]
+    )
 
     title = models.CharField(max_length=200, verbose_name="Заголовок")
     content = models.TextField(verbose_name="Содержание")
@@ -20,7 +22,8 @@ class Post(models.Model):
     class Meta:
         verbose_name = "Пост"
         verbose_name_plural = "Посты"
-        ordering = ["-created_at"]
+        ordering = ("-created_at",)
 
     def __str__(self):
+        """Строковое представление поста: его заголовок."""
         return self.title

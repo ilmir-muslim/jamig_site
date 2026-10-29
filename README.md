@@ -4,7 +4,7 @@
 
 ## Стек технологий
 
-- **Backend:** Python 3, Django 5.2
+- **Backend:** Python 3.13, Django 5.2
 - **База данных:** SQLite (разработка), возможна миграция на PostgreSQL
 - **Фронтенд:** Bootstrap 5, Font Awesome, Google Fonts (Inter, Amiri)
 - **Дополнительные библиотеки:** WeasyPrint (генерация PDF), EbookLib (работа с EPUB), pandas/openpyxl (экспорт), pytils (транслитерация)
@@ -100,28 +100,43 @@ templates/                   # HTML-шаблоны
 
 ## Установка и запуск
 
+Управление зависимостями и окружением осуществляется через [uv](https://docs.astral.sh/uv/). Проект использует Python 3.13 (зафиксирован в `.python-version`).
+
 ```bash
 # Клонирование репозитория
 git clone <repo-url>
 cd jamig_site
 
-# Создание виртуального окружения
-python -m venv venv
-source venv/bin/activate  # Linux/Mac
-# или
-venv\Scripts\activate     # Windows
+# Установка uv (https://docs.astral.sh/uv/getting-started/installation/)
+curl -LsSf https://astral.sh/uv/install.sh | sh
 
-# Установка зависимостей
-pip install -r requirements.txt
+# Создание виртуального окружения (.venv) на Python 3.13
+# и установка всех зависимостей из pyproject.toml
+uv sync
+
+# Активация окружения (опционально; uv подхватывает .venv автоматически)
+source .venv/bin/activate  # Linux/Mac
+# или
+.venv\Scripts\activate     # Windows
 
 # Миграции базы данных
-python manage.py migrate
+uv run python manage.py migrate
 
 # Создание суперпользователя
-python manage.py createsuperuser
+uv run python manage.py createsuperuser
 
 # Запуск сервера разработки
-python manage.py runserver
+uv run python manage.py runserver
+```
+
+### Часто используемые команды uv
+
+```bash
+uv sync                      # синхронизация окружения с pyproject.toml
+uv add <package>             # добавить зависимость
+uv remove <package>          # удалить зависимость
+uv lock --upgrade            # обновить uv.lock
+uv run <command>             # выполнить команду в окружении
 ```
 
 ## Разработка

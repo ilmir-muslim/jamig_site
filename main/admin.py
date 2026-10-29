@@ -1,10 +1,13 @@
 from django.contrib import admin
+
 from .models import Post
 
 
 @admin.register(Post)
 class PostAdmin(admin.ModelAdmin):
-    list_display = ["title", "post_type", "is_published", "created_at"]
-    list_filter = ["post_type", "is_published", "created_at"]
-    search_fields = ["title", "content"]
-    list_editable = ["is_published"]
+    """Админ-панель для постов"""
+
+    list_display = ("title", "post_type", "is_published", "created_at")
+    list_filter = ("post_type", "is_published", "created_at")
+    search_fields = ("title", "content")
+    list_editable = ("is_published",)

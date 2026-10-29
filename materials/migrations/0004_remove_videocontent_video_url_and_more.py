@@ -4,19 +4,26 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('materials', '0003_videocontent_video_url_alter_audiocontent_duration_and_more'),
+        (
+            "materials",
+            "0003_videocontent_video_url_alter_audiocontent_duration_and_more",
+        ),
     ]
 
     operations = [
         migrations.RemoveField(
-            model_name='videocontent',
-            name='video_url',
+            model_name="videocontent",
+            name="video_url",
         ),
         migrations.AlterField(
-            model_name='videocontent',
-            name='embed_code',
-            field=models.TextField(blank=True, default='', help_text='Вставьте iframe-код или прямую ссылку на видео (Rutube, YouTube и др.)', verbose_name='Код вставки или ссылка на видео'),
+            model_name="videocontent",
+            name="embed_code",
+            field=models.TextField(
+                blank=True,
+                default="",
+                help_text="Вставьте iframe-код или прямую ссылку на видео (Rutube, YouTube и др.)",
+                verbose_name="Код вставки или ссылка на видео",
+            ),
         ),
     ]

@@ -1,8 +1,9 @@
-from ninja import Router
-from ninja.pagination import paginate, PageNumberPagination
 from django.shortcuts import get_object_or_404
-from .models import Category, VideoContent, AudioContent, TextContent
-from .schemas import CategorySchema, VideoSchema, AudioSchema, TextSchema
+from ninja import Router
+from ninja.pagination import PageNumberPagination, paginate
+
+from .models import AudioContent, Category, TextContent, VideoContent
+from .schemas import AudioSchema, CategorySchema, TextSchema, VideoSchema
 
 router = Router(tags=["Materials"])
 
@@ -15,7 +16,7 @@ def list_categories(request):
 
 @router.get("/videos/", response=list[VideoSchema])
 @paginate(PageNumberPagination, page_size=12)
-def list_videos(request, category: str = None):
+def list_videos(request, category: str | None = None):
     """Список опубликованных видео с опциональной фильтрацией по категории"""
     qs = VideoContent.objects.filter(status="published").select_related(
         "category", "author__user"
@@ -33,7 +34,7 @@ def get_video(request, slug: str):
 
 @router.get("/audios/", response=list[AudioSchema])
 @paginate(PageNumberPagination, page_size=12)
-def list_audios(request, category: str = None):
+def list_audios(request, category: str | None = None):
     """Список опубликованных аудио"""
     qs = AudioContent.objects.filter(status="published").select_related(
         "category", "author__user"
@@ -51,7 +52,7 @@ def get_audio(request, slug: str):
 
 @router.get("/texts/", response=list[TextSchema])
 @paginate(PageNumberPagination, page_size=12)
-def list_texts(request, category: str = None):
+def list_texts(request, category: str | None = None):
     """Список опубликованных статей"""
     qs = TextContent.objects.filter(status="published").select_related(
         "category", "author__user"

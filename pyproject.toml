@@ -1,0 +1,29 @@
+[project]
+name = "jamig-site"
+version = "0.1.0"
+description = "Сайт Джамиг (Django)"
+readme = "README.md"
+requires-python = ">=3.13, <3.14"
+dependencies = [
+    "asgiref==3.10.0",
+    "Django==5.2.8",
+    "pillow==12.0.0",
+    "sqlparse==0.5.3",
+    "pandas==2.2.3",
+    "openpyxl==3.1.2",
+    "weasyprint==68.1",
+    "EbookLib==0.20",
+    "pytils==0.4.4",
+    "django-cors-headers==4.9.0",
+    "django-ninja==1.6.2",
+    "django-tailwind==4.5.0",
+]
+
+[tool.uv]
+# Django-проект не является пакетом: не устанавливаем его как editable-модуль
+package = false
+
+[tool.ruff.lint.per-file-ignores]
+# Генерируемые Django-миграции используют списки (dependencies = [...]),
+# которые являются стандартным паттерном, а не ошибкой.
+"**/migrations/*.py" = ["RUF012"]

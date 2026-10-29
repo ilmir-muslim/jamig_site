@@ -6,31 +6,62 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('materials', '0001_initial'),
+        ("materials", "0001_initial"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='textcontent',
-            name='content',
-            field=models.TextField(blank=True, null=True, verbose_name='Содержание'),
+            model_name="textcontent",
+            name="content",
+            field=models.TextField(blank=True, null=True, verbose_name="Содержание"),
         ),
         migrations.CreateModel(
-            name='ReadingProgress',
+            name="ReadingProgress",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('page_number', models.PositiveIntegerField(default=1, verbose_name='Номер страницы')),
-                ('updated_at', models.DateTimeField(auto_now=True, verbose_name='Последнее обновление')),
-                ('text', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='materials.textcontent', verbose_name='Статья')),
-                ('user', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL, verbose_name='Пользователь')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                (
+                    "page_number",
+                    models.PositiveIntegerField(
+                        default=1, verbose_name="Номер страницы"
+                    ),
+                ),
+                (
+                    "updated_at",
+                    models.DateTimeField(
+                        auto_now=True, verbose_name="Последнее обновление"
+                    ),
+                ),
+                (
+                    "text",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        to="materials.textcontent",
+                        verbose_name="Статья",
+                    ),
+                ),
+                (
+                    "user",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        to=settings.AUTH_USER_MODEL,
+                        verbose_name="Пользователь",
+                    ),
+                ),
             ],
             options={
-                'verbose_name': 'Прогресс чтения',
-                'verbose_name_plural': 'Прогресс чтения',
-                'unique_together': {('user', 'text')},
+                "verbose_name": "Прогресс чтения",
+                "verbose_name_plural": "Прогресс чтения",
+                "unique_together": {("user", "text")},
             },
         ),
     ]

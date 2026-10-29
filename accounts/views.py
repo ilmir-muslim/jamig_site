@@ -1,10 +1,13 @@
-from django.shortcuts import render, redirect
-from django.contrib.auth import login, logout, authenticate
 from django.contrib import messages
-from .forms import RegistrationForm, LoginForm
+from django.contrib.auth import authenticate, login, logout
+from django.shortcuts import redirect, render
+
+from .forms import LoginForm, RegistrationForm
 
 
 def register(request):
+    """Регистрация нового пользователя: создаёт аккаунт, авторизует его
+    и перенаправляет на главную страницу. Если пользователь уже авторизован — редирект на главную."""
     if request.user.is_authenticated:
         return redirect("home")
     if request.method == "POST":
@@ -20,6 +23,8 @@ def register(request):
 
 
 def user_login(request):
+    """Вход в систему по email и паролю. Авторов перенаправляет в студию,
+    остальных — на главную страницу."""
     if request.user.is_authenticated:
         return redirect("home")
     if request.method == "POST":
@@ -32,7 +37,7 @@ def user_login(request):
                 login(request, user)
                 messages.success(request, f"С возвращением, {user.first_name}!")
                 # Перенаправляем на студию, если автор
-                if user.user_type == "author":
+                if getattr(request.user, "user_type", None) == "employee":
                     return redirect("studio_dashboard")
                 return redirect("home")
             else:
@@ -43,6 +48,7 @@ def user_login(request):
 
 
 def user_logout(request):
+    """Выход пользователя из системы с показом информационного сообщения."""
     logout(request)
     messages.info(request, "Вы вышли из системы.")
     return redirect("home")

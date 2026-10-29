@@ -4,30 +4,43 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('materials', '0002_alter_textcontent_content_readingprogress'),
+        ("materials", "0002_alter_textcontent_content_readingprogress"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='videocontent',
-            name='video_url',
-            field=models.URLField(blank=True, help_text='Или укажите прямую ссылку (Rutube, YouTube и др.). Будет преобразована в плеер.', null=True, verbose_name='Ссылка на видео'),
+            model_name="videocontent",
+            name="video_url",
+            field=models.URLField(
+                blank=True,
+                help_text="Или укажите прямую ссылку (Rutube, YouTube и др.). Будет преобразована в плеер.",
+                null=True,
+                verbose_name="Ссылка на видео",
+            ),
         ),
         migrations.AlterField(
-            model_name='audiocontent',
-            name='duration',
-            field=models.PositiveIntegerField(blank=True, null=True, verbose_name='Длительность (секунды)'),
+            model_name="audiocontent",
+            name="duration",
+            field=models.PositiveIntegerField(
+                blank=True, null=True, verbose_name="Длительность (секунды)"
+            ),
         ),
         migrations.AlterField(
-            model_name='textcontent',
-            name='reading_time',
-            field=models.PositiveIntegerField(blank=True, null=True, verbose_name='Время чтения (минуты)'),
+            model_name="textcontent",
+            name="reading_time",
+            field=models.PositiveIntegerField(
+                blank=True, null=True, verbose_name="Время чтения (минуты)"
+            ),
         ),
         migrations.AlterField(
-            model_name='videocontent',
-            name='embed_code',
-            field=models.TextField(blank=True, default='', help_text='Вставьте код iframe для встраивания видео с Rutube', verbose_name='Код вставки видео'),
+            model_name="videocontent",
+            name="embed_code",
+            field=models.TextField(
+                blank=True,
+                default="",
+                help_text="Вставьте код iframe для встраивания видео с Rutube",
+                verbose_name="Код вставки видео",
+            ),
         ),
     ]

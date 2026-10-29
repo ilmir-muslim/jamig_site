@@ -1,7 +1,8 @@
 from ninja import NinjaAPI
-from materials.api import router as materials_router
+
 from courses.api import router as courses_router
 from main.api import router as main_router
+from materials.api import router as materials_router
 
 api = NinjaAPI(
     title="Jamig Mosque API",

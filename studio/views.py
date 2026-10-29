@@ -1,36 +1,41 @@
-from django.shortcuts import render, redirect, get_object_or_404
-from django.contrib.auth.decorators import login_required, user_passes_test
-from django.contrib import messages
-from django.db.models import Q, Sum
-from django.http import JsonResponse, HttpResponseRedirect
-from django.views.decorators.http import require_POST
-from django.forms import modelformset_factory
-from django.urls import reverse
 from urllib.parse import urlencode
+
+from django.contrib import messages
+from django.contrib.auth.decorators import login_required, user_passes_test
+from django.db.models import Sum
+from django.forms import modelformset_factory
+from django.http import HttpResponseRedirect, JsonResponse
+from django.shortcuts import get_object_or_404, redirect, render
+from django.views.decorators.http import require_POST
 
 from accounts.models import Authors
 from courses.models import Course, Lesson
-from materials.models import VideoContent, AudioContent, TextContent
+from materials.models import AudioContent, TextContent, VideoContent
+
 from .forms import (
-    CourseForm,
-    VideoContentForm,
     AudioContentForm,
-    TextContentForm,
+    CourseForm,
     LessonForm,
+    TextContentForm,
+    VideoContentForm,
 )
 
 LessonFormSet = modelformset_factory(Lesson, form=LessonForm, extra=0, can_delete=True)
 
 
 def is_author(user):
+    """Проверка доступа: True, если пользователь авторизован и является автором."""
     return user.is_authenticated and user.user_type == "author"
 
 
 def _get_author(request):
+    """Возвращает профиль автора, связанный с текущим пользователем."""
     return Authors.objects.get(user=request.user)
 
 
 def _status_filter(request, queryset, status_param="status"):
+    """Фильтрует queryset по статусу (draft/published/archived) из GET-параметра.
+    Возвращает кортеж (отфильтрованный queryset, выбранный статус)."""
     status = request.GET.get(status_param, "all")
     if status in ["draft", "published", "archived"]:
         queryset = queryset.filter(status=status)
@@ -40,6 +45,8 @@ def _status_filter(request, queryset, status_param="status"):
 @login_required
 @user_passes_test(is_author, login_url="admin:login")
 def dashboard(request):
+    """Дашборд студии автора: сводная статистика по материалам
+    и последние изменённые видео и статьи."""
     author = _get_author(request)
     total_videos = VideoContent.objects.filter(author=author).count()
     published_videos = VideoContent.objects.filter(
@@ -95,6 +102,7 @@ def dashboard(request):
 @login_required
 @user_passes_test(is_author)
 def video_list(request):
+    """Список видео автора с фильтрацией по статусу."""
     author = _get_author(request)
     qs = VideoContent.objects.filter(author=author).order_by("-updated_at")
     qs, current_filter = _status_filter(request, qs)
@@ -105,6 +113,8 @@ def video_list(request):
 @login_required
 @user_passes_test(is_author)
 def video_create(request):
+    """Создание нового видео. При наличии параметра next (например, из формы
+    урока) после сохранения возвращается обратно с material_id/material_type."""
     next_url = request.GET.get("next") or request.POST.get("next")
     lesson_index = request.GET.get("lesson_index") or request.POST.get("lesson_index")
 
@@ -146,6 +156,7 @@ def video_create(request):
 @login_required
 @user_passes_test(is_author)
 def video_edit(request, pk):
+    """Редактирование видео, принадлежащего текущему автору."""
     video = get_object_or_404(VideoContent, pk=pk, author__user=request.user)
     if request.method == "POST":
         form = VideoContentForm(request.POST, request.FILES, instance=video)
@@ -161,6 +172,7 @@ def video_edit(request, pk):
 @login_required
 @user_passes_test(is_author)
 def video_delete(request, pk):
+    """Удаление видео автора (с подтверждением через GET, удаление через POST)."""
     video = get_object_or_404(VideoContent, pk=pk, author__user=request.user)
     if request.method == "POST":
         video.delete()
@@ -175,6 +187,7 @@ def video_delete(request, pk):
 @login_required
 @user_passes_test(is_author)
 def audio_list(request):
+    """Список аудио автора с фильтрацией по статусу."""
     author = _get_author(request)
     qs = AudioContent.objects.filter(author=author).order_by("-updated_at")
     qs, current_filter = _status_filter(request, qs)
@@ -185,6 +198,8 @@ def audio_list(request):
 @login_required
 @user_passes_test(is_author)
 def audio_create(request):
+    """Создание нового аудио. При наличии next после сохранения
+    возвращается обратно с material_id/material_type."""
     next_url = request.GET.get("next") or request.POST.get("next")
     lesson_index = request.GET.get("lesson_index") or request.POST.get("lesson_index")
 
@@ -226,6 +241,7 @@ def audio_create(request):
 @login_required
 @user_passes_test(is_author)
 def audio_edit(request, pk):
+    """Редактирование аудио, принадлежащего текущему автору."""
     audio = get_object_or_404(AudioContent, pk=pk, author__user=request.user)
     if request.method == "POST":
         form = AudioContentForm(request.POST, request.FILES, instance=audio)
@@ -241,6 +257,7 @@ def audio_edit(request, pk):
 @login_required
 @user_passes_test(is_author)
 def audio_delete(request, pk):
+    """Удаление аудио автора (с подтверждением через GET, удаление через POST)."""
     audio = get_object_or_404(AudioContent, pk=pk, author__user=request.user)
     if request.method == "POST":
         audio.delete()
@@ -255,6 +272,7 @@ def audio_delete(request, pk):
 @login_required
 @user_passes_test(is_author)
 def text_list(request):
+    """Список статей автора с фильтрацией по статусу."""
     author = _get_author(request)
     qs = TextContent.objects.filter(author=author).order_by("-updated_at")
     qs, current_filter = _status_filter(request, qs)
@@ -265,6 +283,8 @@ def text_list(request):
 @login_required
 @user_passes_test(is_author)
 def text_create(request):
+    """Создание новой статьи. При наличии next после сохранения
+    возвращается обратно с material_id/material_type."""
     next_url = request.GET.get("next") or request.POST.get("next")
     lesson_index = request.GET.get("lesson_index") or request.POST.get("lesson_index")
 
@@ -306,6 +326,7 @@ def text_create(request):
 @login_required
 @user_passes_test(is_author)
 def text_edit(request, pk):
+    """Редактирование статьи, принадлежащей текущему автору."""
     text = get_object_or_404(TextContent, pk=pk, author__user=request.user)
     if request.method == "POST":
         form = TextContentForm(request.POST, request.FILES, instance=text)
@@ -321,6 +342,7 @@ def text_edit(request, pk):
 @login_required
 @user_passes_test(is_author)
 def text_delete(request, pk):
+    """Удаление статьи автора (с подтверждением через GET, удаление через POST)."""
     text = get_object_or_404(TextContent, pk=pk, author__user=request.user)
     if request.method == "POST":
         text.delete()
@@ -333,6 +355,8 @@ def text_delete(request, pk):
 
 # ---------- КУРСЫ (с уроками) ----------
 def _set_lesson_formset_material_querysets(formset, author):
+    """Ограничивает выбор материалов (видео/аудио/текст)
+    в формах уроков только материалами данного автора."""
     videos = VideoContent.objects.filter(author=author)
     audios = AudioContent.objects.filter(author=author)
     texts = TextContent.objects.filter(author=author)
@@ -359,6 +383,7 @@ def _publish_course_materials(course):
 @login_required
 @user_passes_test(is_author)
 def course_list_studio(request):
+    """Список курсов автора в студии."""
     author = _get_author(request)
     courses = Course.objects.filter(author=author).order_by("-updated_at")
     return render(request, "studio/course_list.html", {"courses": courses})
@@ -367,6 +392,8 @@ def course_list_studio(request):
 @login_required
 @user_passes_test(is_author)
 def course_create(request):
+    """Создание курса с уроками (formset). При публикации курса
+    автоматически публикуются привязанные к урокам материалы."""
     author = _get_author(request)
     if request.method == "POST":
         course_form = CourseForm(request.POST)
@@ -418,12 +445,15 @@ def course_create(request):
 @login_required
 @user_passes_test(is_author)
 def course_edit(request, pk):
+    """Редактирование курса автора вместе с его уроками через formset."""
     author = _get_author(request)
     course = get_object_or_404(Course, pk=pk, author=author)
     if request.method == "POST":
         course_form = CourseForm(request.POST, instance=course)
         formset = LessonFormSet(
-            request.POST, prefix="lessons", queryset=course.lessons.all()
+            request.POST,
+            prefix="lessons",
+            queryset=course.lessons.all(),  # type: ignore[attr-defined]
         )
         _set_lesson_formset_material_querysets(formset, author)
 
@@ -445,7 +475,7 @@ def course_edit(request, pk):
             return redirect("studio_course_list")
     else:
         course_form = CourseForm(instance=course)
-        formset = LessonFormSet(prefix="lessons", queryset=course.lessons.all())
+        formset = LessonFormSet(prefix="lessons", queryset=course.lessons.all())  # type: ignore[attr-defined]
         _set_lesson_formset_material_querysets(formset, author)
 
     context = {
@@ -463,6 +493,7 @@ def course_edit(request, pk):
 @login_required
 @user_passes_test(is_author)
 def course_delete(request, pk):
+    """Удаление курса автора (с подтверждением через GET, удаление через POST)."""
     author = _get_author(request)
     course = get_object_or_404(Course, pk=pk, author=author)
     if request.method == "POST":
@@ -479,6 +510,8 @@ def course_delete(request, pk):
 @login_required
 @user_passes_test(is_author)
 def video_create_ajax(request):
+    """AJAX-создание видео из модального окна формы курса.
+    Возвращает JSON с id и названием созданного материала."""
     form = VideoContentForm(request.POST, request.FILES)
     if form.is_valid():
         video = form.save(commit=False)
@@ -493,6 +526,8 @@ def video_create_ajax(request):
 @login_required
 @user_passes_test(is_author)
 def audio_create_ajax(request):
+    """AJAX-создание аудио из модального окна формы курса.
+    Возвращает JSON с id и названием созданного материала."""
     form = AudioContentForm(request.POST, request.FILES)
     if form.is_valid():
         audio = form.save(commit=False)
@@ -507,6 +542,8 @@ def audio_create_ajax(request):
 @login_required
 @user_passes_test(is_author)
 def text_create_ajax(request):
+    """AJAX-создание статьи из модального окна формы курса.
+    Возвращает JSON с id и названием созданного материала."""
     form = TextContentForm(request.POST, request.FILES)
     if form.is_valid():
         text = form.save(commit=False)

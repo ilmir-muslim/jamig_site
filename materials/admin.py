@@ -1,16 +1,17 @@
 from django.contrib import admin
 from django.utils.safestring import mark_safe
-from .models import Category, ReadingProgress, VideoContent, AudioContent, TextContent
+
+from .models import AudioContent, Category, ReadingProgress, TextContent, VideoContent
 
 
 class BaseContentAdmin(admin.ModelAdmin):
     """Базовый класс админки для контента"""
 
-    list_display = ["title", "author", "status", "published_at", "views_count"]
-    list_filter = ["status", "category", "author"]
-    search_fields = ["title", "description"]
-    readonly_fields = ["created_at", "updated_at", "views_count"]
-    prepopulated_fields = {"slug": ("title",)}
+    list_display = ("title", "author", "status", "published_at", "views_count")
+    list_filter = ("status", "category", "author")
+    search_fields = ("title", "description")
+    readonly_fields = ("created_at", "updated_at", "views_count")
+    prepopulated_fields = {"slug": ("title",)}  # noqa: RUF012 - словарь, стандартный паттерн Django
     fieldsets = (
         (
             "Основная информация",
@@ -23,18 +24,22 @@ class BaseContentAdmin(admin.ModelAdmin):
 
 @admin.register(Category)
 class CategoryAdmin(admin.ModelAdmin):
-    list_display = ["title", "slug", "order", "is_active"]
-    list_filter = ["is_active"]
-    search_fields = ["title"]
-    prepopulated_fields = {"slug": ("title",)}
-    list_editable = ["order", "is_active"]
+    """Админ-панель для категорий"""
+
+    list_display = ("title", "slug", "order", "is_active")
+    list_filter = ("is_active",)
+    search_fields = ("title",)
+    prepopulated_fields = {"slug": ("title",)}  # noqa: RUF012 - словарь, стандартный паттерн Django
+    list_editable = ("order", "is_active")
 
 
 @admin.register(VideoContent)
 class VideoContentAdmin(BaseContentAdmin):
-    list_display = BaseContentAdmin.list_display + ["is_live", "video_preview"]
-    list_filter = BaseContentAdmin.list_filter + ["is_live"]
-    readonly_fields = BaseContentAdmin.readonly_fields + ["video_preview"]
+    """Админ-панель для видеоматериалов"""
+
+    list_display = (*BaseContentAdmin.list_display, "is_live", "video_preview")
+    list_filter = (*BaseContentAdmin.list_filter, "is_live")
+    readonly_fields = (*BaseContentAdmin.readonly_fields, "video_preview")
 
     fieldsets = (
         (
@@ -53,6 +58,7 @@ class VideoContentAdmin(BaseContentAdmin):
     )
 
     def video_preview(self, obj):
+        """Возвращает HTML-предпросмотр видео для админки."""
         if obj.pk and obj.embed_code:
             return mark_safe(
                 f'<div style="margin-top: 10px;">'
@@ -67,15 +73,19 @@ class VideoContentAdmin(BaseContentAdmin):
 
 @admin.register(AudioContent)
 class AudioContentAdmin(BaseContentAdmin):
-    list_display = BaseContentAdmin.list_display + [
+    """Админ-панель для аудиоматериалов"""
+
+    list_display = (
+        *BaseContentAdmin.list_display,
         "listens_count",
         "duration_display",
         "file_size_display",
-    ]
-    readonly_fields = BaseContentAdmin.readonly_fields + [
+    )
+    readonly_fields = (
+        *BaseContentAdmin.readonly_fields,
         "duration_display",
         "file_size_display",
-    ]
+    )
 
     fieldsets = (
         (
@@ -100,11 +110,13 @@ class AudioContentAdmin(BaseContentAdmin):
     )
 
     def duration_display(self, obj):
+        """Читаемое отображение длительности аудио в админке."""
         return obj.get_duration_display()
 
     duration_display.short_description = "Длительность"
 
     def file_size_display(self, obj):
+        """Читаемое отображение размера аудиофайла в админке."""
         return obj.get_file_size()
 
     file_size_display.short_description = "Размер файла"
@@ -112,7 +124,9 @@ class AudioContentAdmin(BaseContentAdmin):
 
 @admin.register(TextContent)
 class TextContentAdmin(BaseContentAdmin):
-    list_display = BaseContentAdmin.list_display + ["reading_time"]
+    """Админ-панель для текстовых статей"""
+
+    list_display = (*BaseContentAdmin.list_display, "reading_time")
 
     fieldsets = (
         (
@@ -127,7 +141,9 @@ class TextContentAdmin(BaseContentAdmin):
 
 @admin.register(ReadingProgress)
 class ReadingProgressAdmin(admin.ModelAdmin):
-    list_display = ["user", "text", "page_number", "updated_at"]
-    list_filter = ["text"]
-    search_fields = ["user__email", "text__title"]
-    readonly_fields = ["updated_at"]
+    """Админ-панель для модели прогресса чтения"""
+
+    list_display = ("user", "text", "page_number", "updated_at")
+    list_filter = ("text",)
+    search_fields = ("user__email", "text__title")
+    readonly_fields = ("updated_at",)

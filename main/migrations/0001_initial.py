@@ -4,28 +4,56 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     initial = True
 
-    dependencies = [
-    ]
+    dependencies = []
 
     operations = [
         migrations.CreateModel(
-            name='Post',
+            name="Post",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('title', models.CharField(max_length=200, verbose_name='Заголовок')),
-                ('content', models.TextField(verbose_name='Содержание')),
-                ('post_type', models.CharField(choices=[('news', 'Новость'), ('article', 'Статья'), ('lesson', 'Урок')], max_length=10, verbose_name='Тип поста')),
-                ('created_at', models.DateTimeField(auto_now_add=True, verbose_name='Дата создания')),
-                ('updated_at', models.DateTimeField(auto_now=True, verbose_name='Дата обновления')),
-                ('is_published', models.BooleanField(default=True, verbose_name='Опубликовано')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("title", models.CharField(max_length=200, verbose_name="Заголовок")),
+                ("content", models.TextField(verbose_name="Содержание")),
+                (
+                    "post_type",
+                    models.CharField(
+                        choices=[
+                            ("news", "Новость"),
+                            ("article", "Статья"),
+                            ("lesson", "Урок"),
+                        ],
+                        max_length=10,
+                        verbose_name="Тип поста",
+                    ),
+                ),
+                (
+                    "created_at",
+                    models.DateTimeField(
+                        auto_now_add=True, verbose_name="Дата создания"
+                    ),
+                ),
+                (
+                    "updated_at",
+                    models.DateTimeField(auto_now=True, verbose_name="Дата обновления"),
+                ),
+                (
+                    "is_published",
+                    models.BooleanField(default=True, verbose_name="Опубликовано"),
+                ),
             ],
             options={
-                'verbose_name': 'Пост',
-                'verbose_name_plural': 'Посты',
-                'ordering': ['-created_at'],
+                "verbose_name": "Пост",
+                "verbose_name_plural": "Посты",
+                "ordering": ["-created_at"],
             },
         ),
     ]

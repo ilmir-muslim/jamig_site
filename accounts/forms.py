@@ -1,10 +1,13 @@
 from django import forms
 from django.contrib.auth.forms import UserCreationForm
 from django.core.validators import RegexValidator
+
 from .models import User
 
 
 class RegistrationForm(UserCreationForm):
+    """Форма регистрации пользователя по email с опциональным номером телефона"""
+
     phone_regex = RegexValidator(
         regex=r"^\+?1?\d{9,15}$", message="Номер телефона в формате: '+79999999999'."
     )
@@ -12,7 +15,7 @@ class RegistrationForm(UserCreationForm):
         validators=[phone_regex], max_length=17, required=False, label="Номер телефона"
     )
 
-    class Meta(UserCreationForm.Meta):
+    class Meta(UserCreationForm.Meta):  # type: ignore[name-defined]
         model = User
         fields = (
             "email",
@@ -22,7 +25,7 @@ class RegistrationForm(UserCreationForm):
             "password1",
             "password2",
         )
-        widgets = {
+        widgets = {  # noqa: RUF012 - словарь виджетов, стандартный паттерн Django
             "email": forms.EmailInput(
                 attrs={"class": "form-control", "placeholder": "Email"}
             ),
@@ -35,6 +38,8 @@ class RegistrationForm(UserCreationForm):
         }
 
     def __init__(self, *args, **kwargs):
+        """Инициализирует форму регистрации и добавляет Bootstrap-классы
+        к полям пароля и телефона."""
         super().__init__(*args, **kwargs)
         self.fields["password1"].widget.attrs.update(
             {"class": "form-control", "placeholder": "Пароль"}
@@ -48,12 +53,15 @@ class RegistrationForm(UserCreationForm):
 
 
 class LoginForm(forms.Form):
+    """Форма входа пользователя по email и паролю"""
+
     email = forms.EmailField(
         label="Email", widget=forms.EmailInput(attrs={"autofocus": True})
     )
     password = forms.CharField(label="Пароль", widget=forms.PasswordInput)
 
     def __init__(self, *args, **kwargs):
+        """Инициализирует форму входа и добавляет Bootstrap-классы к полям."""
         super().__init__(*args, **kwargs)
         self.fields["email"].widget.attrs.update(
             {"class": "form-control", "placeholder": "Email"}

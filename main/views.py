@@ -1,10 +1,13 @@
-from django.shortcuts import render, get_object_or_404
-from .models import Post
-from materials.models import VideoContent, AudioContent, TextContent
+from django.shortcuts import get_object_or_404, render
+
 from accounts.models import Authors
+from materials.models import AudioContent, TextContent, VideoContent
+
+from .models import Post
 
 
 def home(request):
+    """Главная страница: актуальное видео, последние посты, авторы и активные курсы."""
     # Последнее опубликованное видео
     try:
         current_video = (

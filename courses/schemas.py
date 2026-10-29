@@ -1,32 +1,50 @@
-from ninja import ModelSchema
-from typing import List, Optional
+from typing import ClassVar
+
+from django.db.models import QuerySet
+from ninja import Field, ModelSchema
+
+from materials.schemas import AudioSchema, AuthorSchema, TextSchema, VideoSchema
+
 from .models import Course, Lesson
-from materials.schemas import AuthorSchema, VideoSchema, AudioSchema, TextSchema
 
 
 class CourseSchema(ModelSchema):
-    author: Optional[AuthorSchema] = None
+    """Схема Ninja для курса с вложенной информацией об авторе"""
+
+    author: AuthorSchema | None = None
 
     class Meta:
         model = Course
-        fields = ["id", "title", "slug", "description", "status", "published_at"]
+        fields: ClassVar[list[str]] = [
+            "id",
+            "title",
+            "slug",
+            "description",
+            "status",
+            "published_at",
+        ]
 
 
 class LessonSchema(ModelSchema):
+    """Схема Ninja для урока с вложенными схемами материалов"""
+
     # Подтягиваем детальные схемы материалов из соседнего приложения
-    video: Optional[VideoSchema] = None
-    audio: Optional[AudioSchema] = None
-    text: Optional[TextSchema] = None
+    video: VideoSchema | None = None
+    audio: AudioSchema | None = None
+    text: TextSchema | None = None
 
     class Meta:
         model = Lesson
-        fields = ["id", "title", "description", "order"]
+        fields: ClassVar[list[str]] = ["id", "title", "description", "order"]
 
 
 class CourseDetailSchema(CourseSchema):
+    """Детальная схема курса: дополняет CourseSchema списком уроков"""
+
     # При запросе детального курса отдаем и список его уроков
-    lessons: List[LessonSchema] = []
+    lessons: list[LessonSchema] = Field(default_factory=list)
 
     @staticmethod
-    def resolve_lessons(obj):
-        return obj.lessons.all()
+    def resolve_lessons(obj: Course) -> QuerySet[Lesson]:
+        """Резолвер Ninja: возвращает все уроки курса для детальной схемы."""
+        return obj.lessons.all()  # type: ignore[attr-defined]

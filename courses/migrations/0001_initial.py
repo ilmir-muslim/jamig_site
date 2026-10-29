@@ -5,52 +5,153 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     initial = True
 
     dependencies = [
-        ('accounts', '0001_initial'),
-        ('materials', '0001_initial'),
+        ("accounts", "0001_initial"),
+        ("materials", "0001_initial"),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='Course',
+            name="Course",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('title', models.CharField(max_length=200, verbose_name='Название курса')),
-                ('slug', models.SlugField(max_length=200, unique=True, verbose_name='URL-адрес')),
-                ('description', models.TextField(verbose_name='Описание курса')),
-                ('status', models.CharField(choices=[('draft', 'Черновик'), ('published', 'Опубликован'), ('archived', 'В архиве')], default='draft', max_length=20, verbose_name='Статус')),
-                ('created_at', models.DateTimeField(auto_now_add=True, verbose_name='Дата создания')),
-                ('updated_at', models.DateTimeField(auto_now=True, verbose_name='Дата обновления')),
-                ('published_at', models.DateTimeField(blank=True, null=True, verbose_name='Дата публикации')),
-                ('author', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, to='accounts.authors', verbose_name='Автор курса')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                (
+                    "title",
+                    models.CharField(max_length=200, verbose_name="Название курса"),
+                ),
+                (
+                    "slug",
+                    models.SlugField(
+                        max_length=200, unique=True, verbose_name="URL-адрес"
+                    ),
+                ),
+                ("description", models.TextField(verbose_name="Описание курса")),
+                (
+                    "status",
+                    models.CharField(
+                        choices=[
+                            ("draft", "Черновик"),
+                            ("published", "Опубликован"),
+                            ("archived", "В архиве"),
+                        ],
+                        default="draft",
+                        max_length=20,
+                        verbose_name="Статус",
+                    ),
+                ),
+                (
+                    "created_at",
+                    models.DateTimeField(
+                        auto_now_add=True, verbose_name="Дата создания"
+                    ),
+                ),
+                (
+                    "updated_at",
+                    models.DateTimeField(auto_now=True, verbose_name="Дата обновления"),
+                ),
+                (
+                    "published_at",
+                    models.DateTimeField(
+                        blank=True, null=True, verbose_name="Дата публикации"
+                    ),
+                ),
+                (
+                    "author",
+                    models.ForeignKey(
+                        blank=True,
+                        null=True,
+                        on_delete=django.db.models.deletion.SET_NULL,
+                        to="accounts.authors",
+                        verbose_name="Автор курса",
+                    ),
+                ),
             ],
             options={
-                'verbose_name': 'Курс',
-                'verbose_name_plural': 'Курсы',
-                'ordering': ['-published_at', '-created_at'],
+                "verbose_name": "Курс",
+                "verbose_name_plural": "Курсы",
+                "ordering": ["-published_at", "-created_at"],
             },
         ),
         migrations.CreateModel(
-            name='Lesson',
+            name="Lesson",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('title', models.CharField(max_length=200, verbose_name='Название урока')),
-                ('description', models.TextField(blank=True, verbose_name='Описание урока')),
-                ('order', models.PositiveIntegerField(default=0, verbose_name='Порядок')),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('updated_at', models.DateTimeField(auto_now=True)),
-                ('audio', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, to='materials.audiocontent', verbose_name='Аудиоматериал')),
-                ('course', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='lessons', to='courses.course', verbose_name='Курс')),
-                ('text', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, to='materials.textcontent', verbose_name='Текстовый материал')),
-                ('video', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, to='materials.videocontent', verbose_name='Видеоматериал')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                (
+                    "title",
+                    models.CharField(max_length=200, verbose_name="Название урока"),
+                ),
+                (
+                    "description",
+                    models.TextField(blank=True, verbose_name="Описание урока"),
+                ),
+                (
+                    "order",
+                    models.PositiveIntegerField(default=0, verbose_name="Порядок"),
+                ),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                ("updated_at", models.DateTimeField(auto_now=True)),
+                (
+                    "audio",
+                    models.ForeignKey(
+                        blank=True,
+                        null=True,
+                        on_delete=django.db.models.deletion.SET_NULL,
+                        to="materials.audiocontent",
+                        verbose_name="Аудиоматериал",
+                    ),
+                ),
+                (
+                    "course",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="lessons",
+                        to="courses.course",
+                        verbose_name="Курс",
+                    ),
+                ),
+                (
+                    "text",
+                    models.ForeignKey(
+                        blank=True,
+                        null=True,
+                        on_delete=django.db.models.deletion.SET_NULL,
+                        to="materials.textcontent",
+                        verbose_name="Текстовый материал",
+                    ),
+                ),
+                (
+                    "video",
+                    models.ForeignKey(
+                        blank=True,
+                        null=True,
+                        on_delete=django.db.models.deletion.SET_NULL,
+                        to="materials.videocontent",
+                        verbose_name="Видеоматериал",
+                    ),
+                ),
             ],
             options={
-                'verbose_name': 'Урок',
-                'verbose_name_plural': 'Уроки',
-                'ordering': ['course', 'order'],
+                "verbose_name": "Урок",
+                "verbose_name_plural": "Уроки",
+                "ordering": ["course", "order"],
             },
         ),
     ]

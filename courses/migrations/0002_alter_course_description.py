@@ -4,15 +4,16 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('courses', '0001_initial'),
+        ("courses", "0001_initial"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='course',
-            name='description',
-            field=models.TextField(blank=True, null=True, verbose_name='Описание курса'),
+            model_name="course",
+            name="description",
+            field=models.TextField(
+                blank=True, null=True, verbose_name="Описание курса"
+            ),
         ),
     ]

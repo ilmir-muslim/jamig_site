@@ -1,14 +1,18 @@
+import re
+
 from django import forms
 from django.core.exceptions import ValidationError
-import re
+
 from courses.models import Course, Lesson
-from materials.models import VideoContent, AudioContent, TextContent
+from materials.models import AudioContent, TextContent, VideoContent
 
 
 class VideoContentForm(forms.ModelForm):
+    """Форма создания и редактирования видеоматериала в студии"""
+
     class Meta:
         model = VideoContent
-        fields = [
+        fields = (
             "title",
             "description",
             "embed_code",
@@ -16,8 +20,8 @@ class VideoContentForm(forms.ModelForm):
             "thumbnail",
             "is_live",
             "status",
-        ]
-        widgets = {
+        )
+        widgets = {  # noqa: RUF012 - словарь виджетов, стандартный паттерн Django
             "title": forms.TextInput(
                 attrs={"class": "form-control", "placeholder": "Название"}
             ),
@@ -38,6 +42,8 @@ class VideoContentForm(forms.ModelForm):
         }
 
     def clean_embed_code(self):
+        """Проверяет поле embed_code: принимает валидный iframe-код
+        или ссылку на видео (например, Rutube), иначе — ошибка валидации."""
         code = self.cleaned_data.get("embed_code", "").strip()
         if not code:
             raise ValidationError("Необходимо вставить код или ссылку на видео.")
@@ -58,23 +64,24 @@ class VideoContentForm(forms.ModelForm):
 
     @staticmethod
     def _is_valid_video_url(url):
-        if re.search(r"rutube\.ru/video/[a-f0-9]+", url):
-            return True
-        return False
+        """Проверяет, является ли строка корректной ссылкой на видео Rutube."""
+        return bool(re.search(r"rutube\.ru/video/[a-f0-9]+", url))
 
 
 class AudioContentForm(forms.ModelForm):
+    """Форма создания и редактирования аудиоматериала в студии"""
+
     class Meta:
         model = AudioContent
-        fields = [
+        fields = (
             "title",
             "description",
             "audio_file",
             "category",
             "cover_image",
             "status",
-        ]
-        widgets = {
+        )
+        widgets = {  # noqa: RUF012 - словарь виджетов, стандартный паттерн Django
             "title": forms.TextInput(
                 attrs={"class": "form-control", "placeholder": "Название"}
             ),
@@ -89,9 +96,11 @@ class AudioContentForm(forms.ModelForm):
 
 
 class TextContentForm(forms.ModelForm):
+    """Форма создания и редактирования текстового материала в студии"""
+
     class Meta:
         model = TextContent
-        fields = [
+        fields = (
             "title",
             "subtitle",
             "content",
@@ -99,8 +108,8 @@ class TextContentForm(forms.ModelForm):
             "cover_image",
             "category",
             "status",
-        ]
-        widgets = {
+        )
+        widgets = {  # noqa: RUF012 - словарь виджетов, стандартный паттерн Django
             "title": forms.TextInput(
                 attrs={"class": "form-control", "placeholder": "Название"}
             ),
@@ -122,10 +131,12 @@ class TextContentForm(forms.ModelForm):
 
 
 class CourseForm(forms.ModelForm):
+    """Форма создания и редактирования курса в студии"""
+
     class Meta:
         model = Course
-        fields = ["title", "description", "status", "published_at"]
-        widgets = {
+        fields = ("title", "description", "status", "published_at")
+        widgets = {  # noqa: RUF012 - словарь виджетов, стандартный паттерн Django
             "title": forms.TextInput(
                 attrs={"class": "form-control", "placeholder": "Название курса"}
             ),
@@ -144,10 +155,12 @@ class CourseForm(forms.ModelForm):
 
 
 class LessonForm(forms.ModelForm):
+    """Форма создания и редактирования урока в студии"""
+
     class Meta:
         model = Lesson
-        fields = ["title", "description", "order", "video", "audio", "text"]
-        widgets = {
+        fields = ("title", "description", "order", "video", "audio", "text")
+        widgets = {  # noqa: RUF012 - словарь виджетов, стандартный паттерн Django
             "title": forms.TextInput(
                 attrs={"class": "form-control", "placeholder": "Название урока"}
             ),
@@ -163,4 +176,3 @@ class LessonForm(forms.ModelForm):
             "audio": forms.HiddenInput(),
             "text": forms.HiddenInput(),
         }
-

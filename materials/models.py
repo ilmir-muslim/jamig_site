@@ -1,14 +1,17 @@
 import re
-import pytils.translit
 
+import pytils.translit
 from django.db import models
 from django.urls import reverse
 from django.utils.text import slugify
+
 from accounts.models import Authors
 from jamig_site import settings
 
 
 class Category(models.Model):
+    """Модель категории для группировки материалов сайта"""
+
     title = models.CharField(max_length=200, verbose_name="Название")
     slug = models.SlugField(max_length=200, unique=True, verbose_name="URL-адрес")
     description = models.TextField(blank=True, verbose_name="Описание")
@@ -18,18 +21,21 @@ class Category(models.Model):
     class Meta:
         verbose_name = "Категория"
         verbose_name_plural = "Категории"
-        ordering = ["order", "title"]
+        ordering = ("order", "title")
 
     def __str__(self):
+        """Строковое представление категории: её название."""
         return self.title
 
 
 class BaseContent(models.Model):
-    STATUS_CHOICES = [
+    """Абстрактная базовая модель контента: общие поля, генерация slug и дат"""
+
+    STATUS_CHOICES = (
         ("draft", "Черновик"),
         ("published", "Опубликовано"),
         ("archived", "В архиве"),
-    ]
+    )
 
     title = models.CharField(max_length=200, verbose_name="Название")
     slug = models.SlugField(max_length=200, unique=True, verbose_name="URL-адрес")
@@ -58,9 +64,11 @@ class BaseContent(models.Model):
 
     class Meta:
         abstract = True
-        ordering = ["-published_at", "-created_at"]
+        ordering = ("-published_at", "-created_at")
 
     def save(self, *args, **kwargs):
+        """Автоматически генерирует slug из названия (транслитерация),
+        а при публикации проставляет дату published_at."""
         if not self.slug:
             if self.title:
                 base = pytils.translit.slugify(self.title)
@@ -77,6 +85,8 @@ class BaseContent(models.Model):
 
 
 class VideoContent(BaseContent):
+    """Модель видеоматериала: код встраивания, длительность, обложка, прямой эфир"""
+
     embed_code = models.TextField(
         verbose_name="Код вставки или ссылка на видео",
         help_text="Вставьте iframe-код или прямую ссылку на видео (Rutube, YouTube и др.)",
@@ -92,6 +102,7 @@ class VideoContent(BaseContent):
     is_live = models.BooleanField(default=False, verbose_name="Прямой эфир")
 
     def get_absolute_url(self):
+        """Возвращает абсолютный URL страницы видео."""
         return reverse("video_detail", kwargs={"slug": self.slug})
 
     def get_embed_html(self):
@@ -127,6 +138,7 @@ class VideoContent(BaseContent):
         return None
 
     def extract_video_id(self):
+        """Извлекает ID видео Rutube из кода вставки, либо None."""
         import re
 
         if self.embed_code:
@@ -143,6 +155,8 @@ class VideoContent(BaseContent):
 
 
 class AudioContent(BaseContent):
+    """Модель аудиоматериала: аудиофайл, длительность, обложка и прослушивания"""
+
     audio_file = models.FileField(
         upload_to="audio/%Y/%m/%d/",
         verbose_name="Аудиофайл",
@@ -159,9 +173,11 @@ class AudioContent(BaseContent):
     )
 
     def get_absolute_url(self):
+        """Возвращает абсолютный URL страницы аудио."""
         return reverse("audio_detail", kwargs={"slug": self.slug})
 
     def get_duration_display(self):
+        """Возвращает длительность в формате «ММ:СС», либо «00:00»."""
         if self.duration:
             minutes = self.duration // 60
             seconds = self.duration % 60
@@ -169,6 +185,7 @@ class AudioContent(BaseContent):
         return "00:00"
 
     def get_file_size(self):
+        """Возвращает размер аудиофайла в человекочитаемом виде (КБ/МБ)."""
         if self.audio_file:
             size = self.audio_file.size
             if size < 1024 * 1024:
@@ -183,6 +200,8 @@ class AudioContent(BaseContent):
 
 
 class TextContent(BaseContent):
+    """Модель текстовой статьи: подзаголовок, содержание и время чтения"""
+
     subtitle = models.CharField(max_length=300, blank=True, verbose_name="Подзаголовок")
     content = models.TextField(verbose_name="Содержание", blank=True, null=True)
     cover_image = models.ImageField(
@@ -193,12 +212,15 @@ class TextContent(BaseContent):
     )
 
     def save(self, *args, **kwargs):
+        """Подсчитывает время чтения (примерно 200 слов в минуту),
+        если оно ещё не указано."""
         if not self.reading_time and self.content:
             word_count = len(self.content.split())
             self.reading_time = max(1, word_count // 200)
         super().save(*args, **kwargs)
 
     def get_absolute_url(self):
+        """Возвращает абсолютный URL читалки статьи."""
         return reverse("text_reader", kwargs={"slug": self.slug})
 
     class Meta:
@@ -207,6 +229,8 @@ class TextContent(BaseContent):
 
 
 class ReadingProgress(models.Model):
+    """Модель прогресса чтения статьи пользователем (номер страницы)"""
+
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL, on_delete=models.CASCADE, verbose_name="Пользователь"
     )
@@ -224,4 +248,5 @@ class ReadingProgress(models.Model):
         unique_together = ("user", "text")
 
     def __str__(self):
+        """Строковое представление: пользователь, статья и номер страницы."""
         return f"{self.user} — {self.text.title} (стр. {self.page_number})"
