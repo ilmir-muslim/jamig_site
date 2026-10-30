@@ -39,16 +39,19 @@ class VideoContentForm(forms.ModelForm):
             "thumbnail": forms.ClearableFileInput(attrs={"class": "form-control"}),
             "is_live": forms.CheckboxInput(attrs={"class": "form-check-input"}),
             "status": forms.Select(attrs={"class": "form-select"}),
-            # Поле не входит в fields формы, но используется в шаблоне
-            # редакции видео для планирования публикации.
-            "published_at": forms.DateTimeInput(
-                attrs={"class": "form-control", "type": "datetime-local"},
-                required=False,
-            ),
         }
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        # published_at не входит в Meta.fields, добавляем его вручную (необязательным)
+        # вместе с виджетом, чтобы использовать в шаблоне для планирования публикации.
+        self.fields["published_at"] = forms.DateTimeField(
+            required=False,
+            label="Дата публикации",
+            widget=forms.DateTimeInput(
+                attrs={"class": "form-control", "type": "datetime-local"}
+            ),
+        )
         instance = self.instance
         if instance is not None and instance.pk and instance.published_at:
             self.initial["published_at"] = instance.published_at.strftime(

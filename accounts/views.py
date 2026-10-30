@@ -1,8 +1,9 @@
 from django.contrib import messages
-from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth import authenticate, login, logout, update_session_auth_hash
+from django.contrib.auth.decorators import login_required
 from django.shortcuts import redirect, render
 
-from .forms import LoginForm, RegistrationForm
+from .forms import LoginForm, PasswordChangeForm, ProfileForm, RegistrationForm
 
 
 def register(request):
@@ -52,3 +53,37 @@ def user_logout(request):
     logout(request)
     messages.info(request, "Вы вышли из системы.")
     return redirect("home")
+
+
+@login_required
+def profile(request):
+    """Страница профиля: просмотр и редактирование данных пользователя
+    (имя, телефон, аватар, «о себе»), а также смена пароля."""
+    if request.method == "POST":
+        if "save_profile" in request.POST:
+            form = ProfileForm(request.POST, request.FILES, instance=request.user)
+            password_form = PasswordChangeForm(request.user)
+            if form.is_valid():
+                form.save()
+                messages.success(request, "Профиль успешно обновлён.")
+                return redirect("profile")
+        elif "change_password" in request.POST:
+            form = ProfileForm(instance=request.user)
+            password_form = PasswordChangeForm(request.user, request.POST)
+            if password_form.is_valid():
+                user = password_form.save()
+                update_session_auth_hash(request, user)
+                messages.success(request, "Пароль успешно изменён.")
+                return redirect("profile")
+        else:
+            form = ProfileForm(instance=request.user)
+            password_form = PasswordChangeForm(request.user)
+    else:
+        form = ProfileForm(instance=request.user)
+        password_form = PasswordChangeForm(request.user)
+
+    return render(
+        request,
+        "accounts/profile.html",
+        {"form": form, "password_form": password_form},
+    )
