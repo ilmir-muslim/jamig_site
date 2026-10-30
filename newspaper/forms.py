@@ -41,8 +41,9 @@ class NewspaperIssueForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.fields["issue_date"].widget.format = "%Y-%m-%d"
-        self.fields["issue_date"].input_formats = ["%Y-%m-%d"]  # noqa: RUF012
+        # date input может принимать None (пустое поле), поэтому type: ignore для Pylance
+        self.fields["issue_date"].widget.format = "%Y-%m-%d"  # type: ignore[attr-defined]
+        self.fields["issue_date"].input_formats = ["%Y-%m-%d"]  # type: ignore[attr-defined]
 
 
 class NewspaperBlockForm(forms.ModelForm):
@@ -82,5 +83,17 @@ class NewspaperBlockForm(forms.ModelForm):
             "photo_caption": forms.TextInput(
                 attrs={"class": "form-control", "placeholder": "Подпись к фотографии"}
             ),
-            "order": forms.NumberInput(attrs={"class": "form-control"}),
+            "order": forms.NumberInput(
+                attrs={
+                    "class": "form-control",
+                    "placeholder": "0 — автоматически (в конец выпуска)",
+                }
+            ),
         }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # В форме добавления нового материала поле порядка скрываем:
+        # NewspaperBlock.save() сам рассчитает его (блок встанет в конец выпуска).
+        if self.instance.pk is None:
+            self.fields.pop("order", None)

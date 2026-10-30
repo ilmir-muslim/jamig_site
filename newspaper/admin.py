@@ -20,7 +20,7 @@ class NewspaperIssueAdmin(admin.ModelAdmin):
     search_fields = ("title", "number", "description")
     readonly_fields = ("created_at", "updated_at", "views_count")
     prepopulated_fields = {"slug": ("title",)}  # noqa: RUF012 - стандартный паттерн Django
-    inlines = [NewspaperBlockInline]
+    inlines = [NewspaperBlockInline]  # noqa: RUF012 - стандартный паттерн Django admin
     fieldsets = (
         (
             "Основная информация",

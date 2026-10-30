@@ -27,7 +27,8 @@ def issue_detail(request, slug):
     issue = get_object_or_404(NewspaperIssue, slug=slug, status="published")
     issue.views_count += 1
     issue.save(update_fields=["views_count"])
-    blocks = issue.blocks.all()
+    # related_name="blocks" обратная связь ForeignKey — Pylance не видит её статически
+    blocks = issue.blocks.all().order_by("order", "id")  # type: ignore[attr-defined]
     previous = (
         NewspaperIssue.objects.filter(
             status="published", issue_date__lt=issue.issue_date
@@ -109,7 +110,8 @@ def issue_edit(request, pk):
             "action": "edit",
             "issue": issue,
             "block_form": block_form,
-            "blocks": issue.blocks.all(),
+            # related_name="blocks" — Pylance не видит обратную связь статически
+            "blocks": issue.blocks.all().order_by("order", "id"),  # type: ignore[attr-defined]
         },
     )
 
@@ -138,7 +140,8 @@ def block_create(request, issue_pk):
         if form.is_valid():
             block = form.save(commit=False)
             block.issue = issue
-            form.fields.pop("order", None)
+            # порядок рассчитывается в модели NewspaperBlock.save(), поле order скрыто
+            block.order = 0
             block.save()
             messages.success(request, "Материал добавлён в выпуск.")
         else:
