@@ -21,7 +21,27 @@
             {{ issue.title }}
         </h1>
         <div class="newspaper-masthead-rule-bottom ornament text-brand-500 text-xl mb-4" aria-hidden="true">&#10022; &#10022; &#10022;</div>
-        {% if issue.description %}
+        {% if blocks %}
+        <!-- Главная тема номера (первая полоса) — как в классической газете -->
+        {% with lead=blocks.0 %}
+        <div class="news-lead-maxillo mx-auto max-w-3xl mt-6 text-left">
+            <a href="#block-{{ lead.pk }}" class="no-underline group block">
+                {% if lead.photo %}
+                <figure class="mb-4">
+                    <img src="{{ lead.photo.url }}" alt="{{ lead.title }}" class="w-full max-h-105 object-cover rounded-[1rem] border border-sand-200">
+                    {% if lead.photo_caption %}<figcaption class="text-xs text-sand-500 italic mt-2">{{ lead.photo_caption }}</figcaption>{% endif %}
+                </figure>
+                {% endif %}
+                <span class="news-kicker">{{ lead.get_block_type_display }} · первая полоса</span>
+                <h2 class="news-headline news-headline-hero group-hover:text-brand-700 transition-colors">{{ lead.title }}</h2>
+                {% if lead.subtitle %}<h3 class="news-subheadline">{{ lead.subtitle }}</h3>{% endif %}
+                {% if lead.get_lead_paragraph %}
+                <p class="text-sand-700 leading-relaxed mt-2">{{ lead.get_lead_paragraph }}</p>
+                {% endif %}
+            </a>
+        </div>
+        {% endwith %}
+        {% elif issue.description %}
         <p class="text-sand-600 max-w-2xl mx-auto italic leading-relaxed">{{ issue.description }}</p>
         {% endif %}
         {% if issue.pdf_file %}
@@ -43,7 +63,7 @@
     {% if blocks %}
     <div class="newspaper-grid">
         {% for block in blocks %}
-        <article class="news-block news-block-{{ block.block_type }} {% cycle 'wide' 'normal' 'normal' as blockslice %}">
+        <article id="block-{{ block.pk }}" class="news-block news-block-{{ block.block_type }} news-size-{{ block.size }} {% cycle 'wide' 'normal' 'normal' as blockslice %}">
             <div class="news-block-inner">
                 <span class="news-kicker">{{ block.get_block_type_display }}</span>
                 <h2 class="news-headline">{{ block.title }}</h2>
@@ -60,7 +80,16 @@
                 </figure>
                 {% endif %}
 
-                {% if block.content %}
+                {% for gallery_photo in block.get_gallery_images %}
+                <figure class="news-photo news-photo-extra">
+                    <img src="{{ gallery_photo.url }}" alt="{{ gallery_photo.caption|default:block.title }}">
+                    {% if gallery_photo.caption %}
+                    <figcaption>{{ gallery_photo.caption }}</figcaption>
+                    {% endif %}
+                </figure>
+                {% endfor %}
+
+                {% if block.content or block.author_name %}
                 <div class="news-body">
                     {% if block.author_name %}<p class="news-byline">{{ block.author_name }}</p>{% endif %}
                     {{ block.get_content_html|safe }}

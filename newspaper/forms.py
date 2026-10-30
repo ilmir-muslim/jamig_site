@@ -3,8 +3,20 @@ from django import forms
 from .models import NewspaperBlock, NewspaperIssue
 
 
+class MultipleFileInput(forms.FileInput):
+    """Виджет загрузки нескольких файлов (Django >= 4.2 требует явный флаг)."""
+
+    allow_multiple_selected = True
+
+
 class NewspaperIssueForm(forms.ModelForm):
     """Форма создания и редактирования выпуска газеты в конструкторе"""
+
+    clear_announce = forms.BooleanField(
+        required=False,
+        label="Сбросить ручной анонс",
+        help_text="Отметьте, чтобы анонс снова формировался автоматически из первой полосы.",
+    )
 
     class Meta:
         model = NewspaperIssue
@@ -31,7 +43,9 @@ class NewspaperIssueForm(forms.ModelForm):
             "description": forms.Textarea(
                 attrs={
                     "class": "form-control",
-                    "placeholder": "Анонс для главной страницы",
+                    "placeholder": (
+                        "Не заполняйте — анонс соберётся автоматически из первой полосы"
+                    ),
                     "rows": 3,
                 }
             ),
@@ -44,10 +58,37 @@ class NewspaperIssueForm(forms.ModelForm):
         # date input может принимать None (пустое поле), поэтому type: ignore для Pylance
         self.fields["issue_date"].widget.format = "%Y-%m-%d"  # type: ignore[attr-defined]
         self.fields["issue_date"].input_formats = ["%Y-%m-%d"]  # type: ignore[attr-defined]
+        if "clear_announce" in self.fields:
+            self.fields["clear_announce"].widget.attrs["class"] = "form-check-input"
+
+    def clean_pdf_file(self):
+        pdf = self.cleaned_data.get("pdf_file")
+        if pdf:
+            name = getattr(pdf, "name", "") or ""
+            if not name.lower().endswith(".pdf"):
+                raise forms.ValidationError("Можно загружать только файлы в формате PDF.")
+        return pdf
+
+    def save(self, commit=True):
+        issue = super().save(commit=False)
+        if self.cleaned_data.get("clear_announce"):
+            issue.description = ""
+        if commit:
+            issue.save()
+        return issue
 
 
 class NewspaperBlockForm(forms.ModelForm):
-    """Форма блока (полосы) выпуска: заголовок, текст, фото с подписью"""
+    """Форма материала (полосы) выпуска: заголовки, текст с разметкой, фото"""
+
+    extra_photos = forms.FileField(
+        required=False,
+        label="Дополнительные фотографии",
+        widget=MultipleFileInput(
+            attrs={"class": "form-control", "accept": "image/*"}
+        ),
+        help_text="Можно выбрать несколько файлов — они попадут в галерею материала.",
+    )
 
     class Meta:
         model = NewspaperBlock
@@ -55,10 +96,12 @@ class NewspaperBlockForm(forms.ModelForm):
             "title",
             "subtitle",
             "block_type",
+            "size",
             "content",
             "author_name",
             "photo",
             "photo_caption",
+            "is_front_page",
             "order",
         )
         widgets = {  # noqa: RUF012 - словарь виджетов, стандартный паттерн Django
@@ -69,11 +112,16 @@ class NewspaperBlockForm(forms.ModelForm):
                 attrs={"class": "form-control", "placeholder": "Подзаголовок"}
             ),
             "block_type": forms.Select(attrs={"class": "form-select"}),
+            "size": forms.Select(attrs={"class": "form-select"}),
             "content": forms.Textarea(
                 attrs={
-                    "class": "form-control",
-                    "placeholder": "Текст материала. Каждый абзац — с новой строки.",
-                    "rows": 10,
+                    "class": "form-control font-monospace",
+                    "placeholder": (
+                        "Текст материала. Каждый абзац — с новой строки.\n"
+                        "## Заголовок секции\n### Подзаголовок\n"
+                        "> Цитата-врезка\n--- разделитель"
+                    ),
+                    "rows": 14,
                 }
             ),
             "author_name": forms.TextInput(
@@ -83,6 +131,7 @@ class NewspaperBlockForm(forms.ModelForm):
             "photo_caption": forms.TextInput(
                 attrs={"class": "form-control", "placeholder": "Подпись к фотографии"}
             ),
+            "is_front_page": forms.CheckboxInput(attrs={"class": "form-check-input"}),
             "order": forms.NumberInput(
                 attrs={
                     "class": "form-control",
@@ -97,3 +146,23 @@ class NewspaperBlockForm(forms.ModelForm):
         # NewspaperBlock.save() сам рассчитает его (блок встанет в конец выпуска).
         if self.instance.pk is None:
             self.fields.pop("order", None)
+
+    def get_all_extra_photos(self):
+        """Возвращает ВСЕ файлы, загруженные в поле extra_photos (multiple=True)."""
+        files = getattr(self, "files", None)
+        if not files or not hasattr(files, "getlist"):
+            return []
+        result = []
+        for f in files.getlist("extra_photos"):
+            content_type = getattr(f, "content_type", "") or ""
+            if not content_type.startswith("image/"):
+                continue
+            result.append(f)
+        return result
+
+    def clean_extra_photos(self):
+        # Проверка типов выполняется в get_all_extra_photos; здесь — совместимость.
+        files = self.cleaned_data.get("extra_photos")
+        if isinstance(files, (list, tuple)):
+            return list(files)
+        return [files] if files else []

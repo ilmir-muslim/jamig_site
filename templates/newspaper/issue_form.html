@@ -21,7 +21,10 @@
 {% endif %}
 
 <!-- Параметры выпуска -->
-<div class="card border-0 shadow-sm mb-4">
+<div class="card border-0 shadow-sm mb-4" id="issue-settings-card">
+    <div class="card-header bg-white d-flex align-items-center justify-content-between py-3">
+        <h2 class="h5 mb-0"><i class="fas fa-sliders-h me-2 text-dark opacity-50"></i>Параметры номера</h2>
+    </div>
     <div class="card-body">
         <form method="post" enctype="multipart/form-data" novalidate>
             {% csrf_token %}
@@ -39,21 +42,35 @@
                     {{ form.issue_date }}
                 </div>
                 <div class="col-12">
-                    <label class="form-label" for="{{ form.description.id_for_label }}">Анонс (для главной страницы)</label>
+                    <label class="form-label" for="{{ form.description.id_for_label }}">
+                        Анонс на главной странице
+                        {% if announce_preview.auto %}<span class="badge text-bg-success ms-1">формируется автоматически</span>{% else %}<span class="badge text-bg-secondary ms-1">ручной текст</span>{% endif %}
+                    </label>
                     {{ form.description }}
+                    <div class="form-text">Если оставить поле пустым, анонс соберётся из первой полосы: главное фото и главный заголовок.</div>
                 </div>
                 <div class="col-md-4">
                     <label class="form-label" for="{{ form.cover_image.id_for_label }}">Обложка выпуска</label>
                     {{ form.cover_image }}
                 </div>
                 <div class="col-md-4">
-                    <label class="form-label" for="{{ form.pdf_file.id_for_label }}">PDF-версия номера</label>
+                    <label class="form-label" for="{{ form.pdf_file.id_for_label }}">PDF-версия номера (необязательно)</label>
                     {{ form.pdf_file }}
                 </div>
                 <div class="col-md-4">
                     <label class="form-label" for="{{ form.status.id_for_label }}">Статус</label>
                     {{ form.status }}
                 </div>
+                {% if action == 'edit' and issue.description %}
+                <div class="col-12">
+                    <div class="form-check">
+                        {{ form.clear_announce }}
+                        <label class="form-check-label" for="{{ form.clear_announce.id_for_label }}">
+                            Сбросить ручной анонс (вернуть автоматический из первой полосы)
+                        </label>
+                    </div>
+                </div>
+                {% endif %}
             </div>
             <div class="mt-4">
                 <button type="submit" class="btn btn-primary"><i class="fas fa-save me-1"></i>Сохранить выпуск</button>
@@ -64,23 +81,68 @@
 </div>
 
 {% if action == 'edit' %}
+<!-- Живой предпросмотр анонса на главной странице -->
+<div class="card border-0 shadow-sm mb-4">
+    <div class="card-header bg-white py-3">
+        <h2 class="h5 mb-0"><i class="fas fa-home me-2 text-dark opacity-50"></i>Анонс на главной странице <small class="text-muted fs-6">(формируется из первой полосы)</small></h2>
+    </div>
+    <div class="card-body">
+        <div class="announce-preview border rounded-3 p-3 d-flex gap-3 align-items-start bg-light" id="announce-preview">
+            <div class="announce-preview-image flex-shrink-0" style="width:140px;height:100px;">
+                {% if announce_preview.image %}
+                    <img src="{{ announce_preview.image }}" alt="" class="w-100 h-100 object-fit-cover rounded-2">
+                {% else %}
+                    <div class="w-100 h-100 rounded-2 bg-secondary bg-gradient d-flex align-items-center justify-content-center text-white-50"><i class="far fa-newspaper fa-2x"></i></div>
+                {% endif %}
+            </div>
+            <div class="min-w-0">
+                <div class="small text-muted">Газета мечети · № {{ issue.number }}</div>
+                <div class="fw-bold text-truncate-2" id="announce-headline">{{ announce_preview.headline }}</div>
+                <div class="small text-muted mt-1" id="announce-text">{{ announce_preview.text|truncatechars:180 }}</div>
+            </div>
+        </div>
+        <div class="form-text mt-2">Первый материал со включённым флагом «Первая полоса» (или самый крупный по размеру) задаёт заголовок анонса, его главное фото — картинку анонса. Явно заполненное поле «Анонс» перекрывает автогенерацию.</div>
+    </div>
+</div>
+
 <!-- Конструктор полос: материалы выпуска -->
 <div class="card border-0 shadow-sm">
     <div class="card-header bg-white d-flex align-items-center justify-content-between py-3">
-        <h2 class="h5 mb-0"><i class="far fa-newspaper me-2 text-dark opacity-50"></i>Материалы выпуска (полосы)</h2>
+        <h2 class="h5 mb-0"><i class="far fa-newspaper me-2 text-dark opacity-50"></i>Конструктор выпуска — материалы и полосы</h2>
+        <div class="d-flex gap-2">
+            <button type="button" class="btn btn-sm btn-outline-primary" id="toggle-preview-btn"><i class="fas fa-eye me-1"></i>Предпросмотр газеты</button>
+            <a href="#block-add-form" class="btn btn-sm btn-primary"><i class="fas fa-plus me-1"></i>Добавить материал</a>
+        </div>
     </div>
     <div class="card-body">
+        <!-- Живой предпросмотр газетной полосы -->
+        <div id="newspaper-live-preview" class="news-preview-wrap mb-4 d-none">
+            <div class="news-preview-frame">
+                <div class="news-preview-masthead">
+                    <span>{{ issue.issue_date|date:"d F Y г." }}</span>
+                    <strong>{{ issue.title }}</strong>
+                    <span>№ {{ issue.number }}</span>
+                </div>
+                <div class="news-preview-grid" id="preview-grid"><!-- заполняется JS --></div>
+            </div>
+        </div>
+
         <div class="list-group list-group-flush mb-4">
             {% for block in blocks %}
             <div class="list-group-item px-0">
-                <div class="block-card p-3 d-flex align-items-center gap-3">
+                <div class="block-card p-3 d-flex align-items-center gap-3 border rounded-3 mb-2 {% if block.is_front_page %}border-warning bg-warning-subtle{% endif %}">
                     {% if block.photo %}
                         <img src="{{ block.photo.url }}" alt="" class="block-thumb">
                     {% else %}
                         <div class="block-thumb d-flex align-items-center justify-content-center bg-sand-100 text-muted"><i class="fas fa-image"></i></div>
                     {% endif %}
-                    <div class="grow-1 min-w-0 flex-grow-1">
-                        <span class="badge text-bg-light block-type-badge border">{{ block.get_block_type_display }}</span>
+                    <div class="flex-grow-1 min-w-0">
+                        <div class="d-flex align-items-center gap-2 flex-wrap">
+                            <span class="badge text-bg-light block-type-badge border">{{ block.get_block_type_display }}</span>
+                            <span class="badge text-bg-light block-type-badge border">{{ block.get_size_display }}</span>
+                            {% if block.is_front_page %}<span class="badge text-bg-warning">Первая полоса</span>{% endif %}
+                            {% if block.gallery %}<span class="badge text-bg-light border" title="Фото в галерее"><i class="far fa-images me-1"></i>{{ block.get_gallery_images|length }}</span>{% endif %}
+                        </div>
                         <div class="fw-bold text-truncate mt-1">{{ block.title }}</div>
                         {% if block.author_name %}<small class="text-muted">{{ block.author_name }}</small>{% endif %}
                     </div>
@@ -88,6 +150,7 @@
                         <a href="{% url 'newspaper_editor_block_move' block.pk 'up' %}" class="btn btn-sm btn-outline-secondary" title="Вверх"><i class="fas fa-arrow-up"></i></a>
                         <a href="{% url 'newspaper_editor_block_move' block.pk 'down' %}" class="btn btn-sm btn-outline-secondary" title="Вниз"><i class="fas fa-arrow-down"></i></a>
                         <a href="{% url 'newspaper_editor_block_edit' block.pk %}" class="btn btn-sm btn-outline-secondary" title="Редактировать"><i class="fas fa-pen"></i></a>
+                        <form method="post" action="{% url 'newspaper_editor_block_duplicate' block.pk %}" title="Дублировать">{% csrf_token %}<button type="submit" class="btn btn-sm btn-outline-secondary"><i class="far fa-copy"></i></button></form>
                         <form method="post" action="{% url 'newspaper_editor_block_delete' block.pk %}" onsubmit="return confirm('Удалить материал?');">
                             {% csrf_token %}
                             <button type="submit" class="btn btn-sm btn-outline-danger" title="Удалить"><i class="fas fa-trash-alt"></i></button>
@@ -96,13 +159,13 @@
                 </div>
             </div>
             {% empty %}
-            <p class="text-muted mb-4">В выпуске пока нет материалов — добавьте первую полосу ниже.</p>
+            <p class="text-muted mb-4">В выпуске пока нет материалов — создайте первый материал ниже. Он станет первой полосой и основой анонса на главной странице.</p>
             {% endfor %}
         </div>
 
-        <!-- Форма добавления нового блока -->
+        <!-- Форма добавления нового материала -->
         <hr>
-        <h3 class="h6 mt-4"><i class="fas fa-plus me-2"></i>Добавить материал в выпуск</h3>
+        <h3 class="h6 mt-4" id="block-add-form"><i class="fas fa-plus me-2"></i>Добавить новый материал (статью с фото)</h3>
         <form method="post" action="{% url 'newspaper_editor_block_create' issue.pk %}" enctype="multipart/form-data" novalidate>
             {% csrf_token %}
             <div class="row g-3">
@@ -123,25 +186,82 @@
                     <input type="text" name="subtitle" id="id_new_subtitle" class="form-control" placeholder="Подзаголовок (необязательно)">
                 </div>
                 <div class="col-md-4">
+                    <label class="form-label" for="id_new_size">Размер в вёрстке</label>
+                    <select name="size" id="id_new_size" class="form-select">
+                        {% for value, label in block_form.fields.size.choices %}
+                        <option value="{{ value }}" {% if value == 'normal' %}selected{% endif %}>{{ label }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-4">
                     <label class="form-label" for="id_new_author_name">Автор материала</label>
                     <input type="text" name="author_name" id="id_new_author_name" class="form-control" placeholder="ФИО (необязательно)">
                 </div>
                 <div class="col-12">
-                    <label class="form-label" for="id_new_content">Текст (каждый абзац — с новой строки)</label>
-                    <textarea name="content" id="id_new_content" rows="8" class="form-control" placeholder="Текст материала…"></textarea>
+                    <label class="form-label" for="id_new_content">Текст статьи</label>
+                    <textarea name="content" id="id_new_content" rows="12" class="form-control font-monospace" placeholder="Первый абзац — станет лидом для анонса.&#10;&#10;## Заголовок секции&#10;### Подзаголовок&#10;&gt; Цитата-врезка&#10;--- разделитель"></textarea>
+                    <div class="form-text">Каждый абзац — с новой строки. Разметка: <code>##</code>/<code>###</code> — заголовки секций, <code>&gt;</code> — цитата, <code>---</code> — разделитель, допускается <code>&lt;b&gt;</code>, <code>&lt;i&gt;</code>, <code>&lt;a href&gt;</code>.</div>
                 </div>
-                <div class="col-md-6">
-                    <label class="form-label" for="id_new_photo">Фотография</label>
+                <div class="col-md-4">
+                    <label class="form-label" for="id_new_photo">Главное фото</label>
                     <input type="file" name="photo" id="id_new_photo" accept="image/*" class="form-control">
                 </div>
-                <div class="col-md-6">
-                    <label class="form-label" for="id_new_photo_caption">Подпись к фото</label>
+                <div class="col-md-4">
+                    <label class="form-label" for="id_new_photo_caption">Подпись к главному фото</label>
                     <input type="text" name="photo_caption" id="id_new_photo_caption" class="form-control" placeholder="Подпись к фотографии">
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label" for="id_new_extra_photos">Дополнительные фото (галерея)</label>
+                    <input type="file" name="extra_photos" id="id_new_extra_photos" accept="image/*" multiple class="form-control">
+                </div>
+                <div class="col-12">
+                    <div class="form-check">
+                        <input type="checkbox" name="is_front_page" id="id_new_is_front_page" value="true" class="form-check-input" {% if not blocks %}checked{% endif %}>
+                        <label class="form-check-label" for="id_new_is_front_page">Первая полоса (участвует в формировании анонса на главной)</label>
+                    </div>
                 </div>
             </div>
             <button type="submit" class="btn btn-primary mt-4"><i class="fas fa-plus me-1"></i>Добавить материал</button>
         </form>
     </div>
 </div>
+
+<script id="blocks-preview-data" type="application/json">{{ blocks_json|safe }}</script>
+<script>
+(function () {
+    const btn = document.getElementById('toggle-preview-btn');
+    const wrap = document.getElementById('newspaper-live-preview');
+    const grid = document.getElementById('preview-grid');
+    let blocks = [];
+    try { blocks = JSON.parse(document.getElementById('blocks-preview-data').textContent || '[]'); } catch (e) { blocks = []; }
+
+    function esc(s) { const d = document.createElement('div'); d.textContent = s || ''; return d.innerHTML; }
+
+    function render() {
+        grid.innerHTML = blocks.map(function (b) {
+            let html = '<article class="pv-block pv-size-' + b.size + '">';
+            html += '<span class="pv-kicker">' + esc(b.type) + (b.is_front_page ? ' · первая полоса' : '') + '</span>';
+            html += '<h3 class="pv-headline">' + esc(b.title) + '</h3>';
+            if (b.subtitle) html += '<h4 class="pv-sub">' + esc(b.subtitle) + '</h4>';
+            if (b.photo) html += '<figure><img src="' + esc(b.photo) + '" alt=""><figcaption>' + esc(b.photo_caption) + '</figcaption></figure>';
+            (b.gallery || []).forEach(function (g) { html += '<figure class="pv-extra"><img src="' + esc(g.url) + '" alt=""><figcaption>' + esc(g.caption) + '</figcaption></figure>'; });
+            if (b.author) html += '<p class="pv-byline">' + esc(b.author) + '</p>';
+            html += '<div class="pv-body">' + (b.html || '') + '</div>';
+            html += '</article>';
+            return html;
+        }).join('') || '<p class="text-muted">Материалов пока нет.</p>';
+    }
+
+    if (btn && wrap) {
+        btn.addEventListener('click', function () {
+            wrap.classList.toggle('d-none');
+            if (!wrap.classList.contains('d-none')) { render(); }
+            btn.innerHTML = wrap.classList.contains('d-none')
+                ? '<i class="fas fa-eye me-1"></i>Предпросмотр газеты'
+                : '<i class="fas fa-eye-slash me-1"></i>Скрыть предпросмотр';
+        });
+    }
+})();
+</script>
 {% endif %}
 {% endblock %}

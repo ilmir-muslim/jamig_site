@@ -8,7 +8,7 @@ class NewspaperBlockInline(admin.TabularInline):
 
     model = NewspaperBlock
     extra = 1
-    fields = ("order", "block_type", "title", "subtitle", "author_name", "photo", "photo_caption")
+    fields = ("order", "block_type", "size", "title", "subtitle", "author_name", "photo", "photo_caption", "is_front_page")
 
 
 @admin.register(NewspaperIssue)
@@ -36,6 +36,6 @@ class NewspaperIssueAdmin(admin.ModelAdmin):
 class NewspaperBlockAdmin(admin.ModelAdmin):
     """Админ-панель для блоков газеты"""
 
-    list_display = ("title", "issue", "block_type", "order")
-    list_filter = ("block_type", "issue")
+    list_display = ("title", "issue", "block_type", "size", "is_front_page", "order")
+    list_filter = ("block_type", "size", "is_front_page", "issue")
     search_fields = ("title", "content")

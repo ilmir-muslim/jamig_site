@@ -32,9 +32,24 @@ urlpatterns = [
         name="newspaper_editor_block_edit",
     ),
     path(
+        "block/<int:pk>/duplicate/",
+        views.block_duplicate,
+        name="newspaper_editor_block_duplicate",
+    ),
+    path(
         "block/<int:pk>/delete/",
         views.block_delete,
         name="newspaper_editor_block_delete",
+    ),
+    path(
+        "block/<int:pk>/gallery/add/",
+        views.gallery_add,
+        name="newspaper_editor_gallery_add",
+    ),
+    path(
+        "block/<int:pk>/gallery/remove/",
+        views.gallery_remove,
+        name="newspaper_editor_gallery_remove",
     ),
     path(
         "block/<int:pk>/<str:direction>/",
