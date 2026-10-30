@@ -1,18 +1,17 @@
 {% extends 'studio/base_studio.html' %}
 
-{% block studio_content %}
-<div class="d-flex justify-content-between align-items-center mb-3">
-    <h2 class="fw-bold mb-0">Аудио</h2>
-    <a href="{% url 'studio_audio_create' %}" class="btn btn-primary"><i class="fas fa-plus me-1"></i>Добавить аудио</a>
-</div>
+{% block studio_title %}Аудио{% endblock %}
 
-<div class="mb-3">
-    <div class="btn-group btn-group-sm">
-        <a href="?status=all" class="btn btn-outline-secondary {% if current_filter == 'all' %}active{% endif %}">Все</a>
-        <a href="?status=published" class="btn btn-outline-secondary {% if current_filter == 'published' %}active{% endif %}">Опубликованные</a>
-        <a href="?status=draft" class="btn btn-outline-secondary {% if current_filter == 'draft' %}active{% endif %}">Черновики</a>
-        <a href="?status=archived" class="btn btn-outline-secondary {% if current_filter == 'archived' %}active{% endif %}">Архив</a>
-    </div>
+{% block studio_actions %}<a href="{% url 'studio_audio_create' %}" class="btn btn-primary"><i class="fas fa-plus me-1"></i>Добавить аудио</a>{% endblock %}
+
+{% block studio_content %}
+
+
+<div class="filter-bar studio-filter-bar my-0 mb-4">
+    <a href="?status=all" class="chip-filter {% if current_filter == 'all' %}is-active{% endif %}">Все</a>
+    <a href="?status=published" class="chip-filter {% if current_filter == 'published' %}is-active{% endif %}">Опубликованные</a>
+    <a href="?status=draft" class="chip-filter {% if current_filter == 'draft' %}is-active{% endif %}">Черновики</a>
+    <a href="?status=archived" class="chip-filter {% if current_filter == 'archived' %}is-active{% endif %}">Архив</a>
 </div>
 
 <div class="card border-0 shadow-sm">
@@ -34,9 +33,7 @@
                         <a href="{% url 'studio_audio_edit' audio.pk %}" class="fw-bold text-decoration-none">{{ audio.title }}</a>
                     </td>
                     <td>
-                        <span class="badge bg-{% if audio.status == 'published' %}success{% elif audio.status == 'draft' %}warning{% else %}secondary{% endif %}">
-                            {{ audio.get_status_display }}
-                        </span>
+                        <span class="badge-status badge-{% if audio.status == 'published' %}published{% elif audio.status == 'draft' %}draft{% else %}archived{% endif %}">{{ audio.get_status_display }}</span>
                     </td>
                     <td>{{ audio.updated_at|date:"d.m.Y" }}</td>
                     <td>{{ audio.listens_count }}</td>

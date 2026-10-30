@@ -288,29 +288,11 @@
 {{ block.super }}
 <style>
   .course-editor { color: var(--text-main); }
-  .editor-layout { display: grid; grid-template-columns: 1fr 340px; gap: 1.5rem; align-items: start; }
-  @media (max-width: 992px) { .editor-layout { grid-template-columns: 1fr; } }
-  .form-section { background: var(--card-bg); border: 1px solid var(--card-border); border-radius: var(--radius); padding: 1.5rem; margin-bottom: 1.5rem; box-shadow: var(--shadow-sm); }
-  .section-header { display: flex; align-items: center; gap: 0.5rem; margin-bottom: 1.5rem; padding-bottom: 0.75rem; border-bottom: 1px solid var(--card-border); }
-  .section-header i { font-size: 1.2rem; color: var(--accent); }
-  .section-header h3 { font-size: 1.1rem; font-weight: 600; margin: 0; color: var(--text-main); }
-  .form-label-lg { font-weight: 600; margin-bottom: 0.5rem; display: block; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; font-size: 0.8rem; }
-  .form-control, .form-select { background-color: #fff; border: 1px solid var(--card-border); color: var(--text-main); border-radius: 10px; padding: 0.65rem 1rem; transition: all 0.2s; }
-  .form-control:focus, .form-select:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15); background-color: #fff; }
-  .editor-sidebar { position: sticky; top: 1rem; display: flex; flex-direction: column; gap: 1.5rem; }
-  .progress-card { background: var(--card-bg); border: 1px solid var(--card-border); border-radius: var(--radius); padding: 1.2rem; box-shadow: var(--shadow-sm); }
-  .check-item { display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem; font-size: 0.9rem; color: var(--text-muted); }
-  .check-item.completed { color: var(--success); }
-  .check-item i { font-size: 0.6rem; }
-  .action-buttons { margin-top: auto; }
-  .btn-publish { background: var(--accent); border: none; color: white; font-weight: 600; border-radius: 10px; padding: 0.7rem; transition: 0.2s; }
-  .btn-publish:hover { background: #2563eb; transform: translateY(-1px); }
+  /* Макет редактора, секции, формы и кнопки — в studio.css (единая дизайн-система «Джамиг») */
   .material-picker { display: flex; flex-wrap: wrap; align-items: center; gap: 0.5rem; }
-  .selected-material-name { font-size: 0.9rem; font-weight: 500; color: var(--text-main); max-width: 150px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .selected-material-name { font-size: 0.9rem; font-weight: 500; color: var(--text-main); max-width: 220px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .lesson-form .card-body { padding: 1rem; }
-  .new-lesson-form { background: var(--card-bg); border: 2px dashed var(--card-border); border-radius: var(--radius); }
-  .btn-sm { border-radius: 8px; }
-  .alert-danger { background-color: #f8d7da; border-color: #f5c6cb; color: #721c24; padding: 0.75rem 1.25rem; border-radius: 10px; margin-bottom: 1rem; }
+  .new-lesson-form { background: var(--card-bg); border: 2px dashed var(--sand-300); border-radius: var(--radius); }
 </style>
 {% endblock %}
 

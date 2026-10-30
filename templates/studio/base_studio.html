@@ -7,10 +7,10 @@
 {% block content %}
 <div class="studio-wrapper">
     <nav class="studio-sidebar">
-        <div class="sidebar-brand">
-            <i class="fas fa-play-circle me-2"></i>
-            <span>Джамиг Студия</span>
-        </div>
+        <a href="{% url 'studio_dashboard' %}" class="sidebar-brand text-decoration-none">
+            <span class="sidebar-brand-icon"><i class="fas fa-mosque"></i></span>
+            <span>Джамиг <b>Студия</b></span>
+        </a>
         <ul class="sidebar-nav">
             <li>
                 <a href="{% url 'studio_dashboard' %}" 
@@ -49,13 +49,25 @@
             </li>
         </ul>
         <div class="sidebar-footer">
-            <a href="{% url 'home' %}" class="btn btn-outline-light btn-sm w-100">
-                <i class="fas fa-arrow-left me-1"></i> На сайт
+            <a href="{% url 'home' %}" class="sidebar-back-link">
+                <i class="fas fa-arrow-left"></i> Вернуться на сайт
             </a>
         </div>
     </nav>
     <main class="studio-main">
-        <div class="container-fluid p-4">
+        <div class="studio-page">
+            <header class="studio-topbar">
+                <div>
+                    <h1 class="studio-page-title">{% block studio_title %}Студия{% endblock %}</h1>
+                    {% block studio_subtitle %}{% endblock %}
+                </div>
+                <div class="studio-topbar-actions">
+                    {% block studio_actions %}{% endblock %}
+                    <span class="studio-user-chip d-none d-lg-inline-flex">
+                        <i class="fas fa-feather-pointed"></i>{{ user.get_full_name|default:user.username }}
+                    </span>
+                </div>
+            </header>
             {% block studio_content %}{% endblock %}
         </div>
     </main>
