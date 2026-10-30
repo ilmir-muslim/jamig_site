@@ -11,6 +11,7 @@ urlpatterns = [
     path("studio/", include("studio.urls")),
     path("api/", api.urls),
     path("courses/", include("courses.urls")),
+    path("newspaper/", include("newspaper.urls")),
     path("", include("materials.urls")),
     path("", include("main.urls")),
 ]

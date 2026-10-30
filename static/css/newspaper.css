@@ -1,0 +1,173 @@
+/* ============================================================
+   Газета мечети «Джамиг» — классическая газетная вёрстка
+   (публичные страницы выпусков + конструктор редактора)
+   ============================================================ */
+
+.newspaper-page {
+    position: relative;
+    z-index: 10;
+}
+
+/* ---------- Мачта (masthead) ---------- */
+.newspaper-masthead .newspaper-brand {
+    font-family: "Cormorant Garamond", Georgia, serif;
+    letter-spacing: 0.04em;
+}
+
+.newspaper-masthead-rule-top {
+    border-bottom: 3px double rgba(23, 21, 18, 0.25);
+    padding-bottom: 0.75rem;
+}
+
+.newspaper-masthead-rule-bottom {
+    border-top: 1px solid rgba(23, 21, 18, 0.15);
+    padding-top: 0.75rem;
+}
+
+/* ---------- Газетная сетка полос ---------- */
+.newspaper-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 320px), 1fr));
+    gap: 1.75rem;
+    align-items: start;
+}
+
+.news-block.wide {
+    grid-column: 1 / -1;
+}
+
+@media (min-width: 992px) {
+    .news-block.wide {
+        grid-column: span 2;
+    }
+}
+
+.news-block-inner {
+    background: #fffdf8; /* «газетная» бумага */
+    border: 1px solid rgba(23, 21, 18, 0.12);
+    border-radius: 0.9rem;
+    padding: 1.6rem 1.6rem 1.4rem;
+    box-shadow: 0 10px 30px -22px rgba(23, 21, 18, 0.35);
+    height: 100%;
+}
+
+.news-kicker {
+    display: inline-block;
+    font-size: 0.68rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.16em;
+    color: #b08a3e;
+    border-bottom: 1px solid rgba(176, 138, 62, 0.35);
+    padding-bottom: 0.15rem;
+    margin-bottom: 0.75rem;
+}
+
+.news-headline {
+    font-family: "Cormorant Garamond", Georgia, serif;
+    font-weight: 700;
+    font-size: 1.75rem;
+    line-height: 1.15;
+    color: #1d1a16;
+    margin-bottom: 0.5rem;
+}
+
+.news-subheadline {
+    font-family: "Cormorant Garamond", Georgia, serif;
+    font-style: italic;
+    font-weight: 600;
+    font-size: 1.1rem;
+    color: #5c554b;
+    margin-bottom: 0.9rem;
+}
+
+.news-photo {
+    margin: 0 0 1rem;
+}
+
+.news-photo img {
+    width: 100%;
+    border-radius: 0.5rem;
+    border: 1px solid rgba(23, 21, 18, 0.12);
+    display: block;
+}
+
+.news-photo figcaption {
+    font-size: 0.8rem;
+    color: #6f675b;
+    font-style: italic;
+    padding-top: 0.4rem;
+    border-bottom: 1px dotted rgba(23, 21, 18, 0.2);
+    margin-bottom: 0.5rem;
+}
+
+.news-byline {
+    font-size: 0.78rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: #8a8172;
+    margin-bottom: 0.6rem;
+}
+
+.news-body p {
+    font-family: Georgia, "Times New Roman", serif;
+    font-size: 1rem;
+    line-height: 1.65;
+    color: #2c2822;
+    text-align: justify;
+    margin-bottom: 0.75rem;
+}
+
+.news-body p:first-of-type::first-letter {
+    font-family: "Cormorant Garamond", Georgia, serif;
+    font-size: 3.1rem;
+    font-weight: 700;
+    float: left;
+    line-height: 0.85;
+    padding-right: 0.45rem;
+    color: #7a5c1e;
+}
+
+/* Объявления — компактный блок с рамкой */
+.news-block-announcement .news-block-inner {
+    background: #fbf6ea;
+    border: 2px solid rgba(176, 138, 62, 0.45);
+}
+
+/* Фотография без текста — крупное фото */
+.news-block-photo .news-headline {
+    font-size: 1.35rem;
+}
+
+/* ---------- Конструктор редактора (внутри Студии) ---------- */
+.newspaper-editor-shell {
+    min-height: 100vh;
+    background: var(--bs-body-bg, #faf7f0);
+}
+
+.block-card {
+    border: 1px solid rgba(23, 21, 18, 0.12);
+    border-left: 4px solid #b08a3e;
+    border-radius: 0.6rem;
+    background: #fffdf8;
+    transition: box-shadow 0.2s ease;
+}
+
+.block-card:hover {
+    box-shadow: 0 8px 24px -18px rgba(23, 21, 18, 0.4);
+}
+
+.block-card .block-thumb {
+    width: 64px;
+    height: 64px;
+    object-fit: cover;
+    border-radius: 0.4rem;
+    border: 1px solid rgba(23, 21, 18, 0.12);
+}
+
+.block-type-badge {
+    font-size: 0.68rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}

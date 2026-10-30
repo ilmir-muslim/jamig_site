@@ -1,0 +1,66 @@
+{% extends 'newspaper/base_editor.html' %}
+
+{% block editor_title %}Материал: {{ block.title|truncatechars:60 }}{% endblock %}
+{% block editor_subtitle %}<p class="studio-page-subtitle">Полоса выпуска № {{ issue.number }} — «{{ issue.title }}»</p>{% endblock %}
+{% block editor_actions %}
+<a href="{% url 'newspaper_editor_issue_edit' issue.pk %}" class="btn btn-outline-secondary"><i class="fas fa-arrow-left me-1"></i>К выпуску</a>
+{% endblock %}
+
+{% block editor_content %}
+
+{% if form.errors %}
+    <div class="alert alert-danger">
+        <strong>Ошибки в форме:</strong>
+        <ul class="mb-0">
+            {% for field in form %}{% for error in field.errors %}<li>{{ field.label }}: {{ error }}</li>{% endfor %}{% endfor %}
+        </ul>
+    </div>
+{% endif %}
+
+<div class="card border-0 shadow-sm">
+    <div class="card-body">
+        <form method="post" enctype="multipart/form-data" novalidate>
+            {% csrf_token %}
+            <div class="row g-3">
+                <div class="col-md-8">
+                    <label class="form-label" for="{{ form.title.id_for_label }}">Заголовок</label>
+                    {{ form.title }}
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label" for="{{ form.block_type.id_for_label }}">Тип материала</label>
+                    {{ form.block_type }}
+                </div>
+                <div class="col-md-8">
+                    <label class="form-label" for="{{ form.subtitle.id_for_label }}">Подзаголовок</label>
+                    {{ form.subtitle }}
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label" for="{{ form.author_name.id_for_label }}">Автор материала</label>
+                    {{ form.author_name }}
+                </div>
+                <div class="col-12">
+                    <label class="form-label" for="{{ form.content.id_for_label }}">Текст (каждый абзац — с новой строки)</label>
+                    {{ form.content }}
+                </div>
+                <div class="col-md-5">
+                    <label class="form-label" for="{{ form.photo.id_for_label }}">Фотография</label>
+                    {{ form.photo }}
+                    {% if block.photo %}<small class="text-muted">Текущее: {{ block.photo.name }}</small>{% endif %}
+                </div>
+                <div class="col-md-5">
+                    <label class="form-label" for="{{ form.photo_caption.id_for_label }}">Подпись к фото</label>
+                    {{ form.photo_caption }}
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label" for="{{ form.order.id_for_label }}">Порядок</label>
+                    {{ form.order }}
+                </div>
+            </div>
+            <div class="mt-4 d-flex gap-2">
+                <button type="submit" class="btn btn-primary"><i class="fas fa-save me-1"></i>Сохранить материал</button>
+                <a href="{% url 'newspaper_editor_issue_edit' issue.pk %}" class="btn btn-outline-secondary">Отмена</a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

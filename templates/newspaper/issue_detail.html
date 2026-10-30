@@ -1,0 +1,96 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ issue.title }} № {{ issue.number }} — Газета мечети «Джамиг»{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/newspaper.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="newspaper-page max-w-6xl mx-auto w-full px-2 pb-10">
+
+    <!-- Мачта (шапка) газеты в классическом стиле -->
+    <header class="newspaper-masthead text-center bg-white border border-sand-200 rounded-[1.4rem] shadow-soft px-6 py-10 mb-8">
+        <div class="newspaper-masthead-rule-top flex items-center justify-between text-xs uppercase tracking-[0.2em] text-sand-500 font-semibold mb-6">
+            <span>{{ issue.issue_date|date:"d F Y г." }}</span>
+            <span>Издание мечети «Джамиг»</span>
+            <span>Выпуск № {{ issue.number }}</span>
+        </div>
+        <h1 class="newspaper-brand font-display text-5xl md:text-7xl font-bold text-sand-950 tracking-tight uppercase mb-4">
+            {{ issue.title }}
+        </h1>
+        <div class="newspaper-masthead-rule-bottom ornament text-brand-500 text-xl mb-4" aria-hidden="true">&#10022; &#10022; &#10022;</div>
+        {% if issue.description %}
+        <p class="text-sand-600 max-w-2xl mx-auto italic leading-relaxed">{{ issue.description }}</p>
+        {% endif %}
+        {% if issue.pdf_file %}
+        <div class="mt-6">
+            <a href="{{ issue.pdf_file.url }}" target="_blank" rel="noopener" class="btn btn-primary btn-sm shadow-lift">
+                <i class="fas fa-file-pdf"></i> Скачать номер в PDF
+            </a>
+        </div>
+        {% endif %}
+    </header>
+
+    {% if issue.cover_image %}
+    <figure class="newspaper-cover mb-10 bg-white border border-sand-200 rounded-[1.4rem] shadow-soft overflow-hidden p-3">
+        <img src="{{ issue.cover_image.url }}" alt="Обложка выпуска № {{ issue.number }}" class="w-full max-h-125 object-cover rounded-[1rem]">
+    </figure>
+    {% endif %}
+
+    <!-- Газетная полоса: блоки в колонки, как в классической газете -->
+    {% if blocks %}
+    <div class="newspaper-grid">
+        {% for block in blocks %}
+        <article class="news-block news-block-{{ block.block_type }} {% cycle 'wide' 'normal' 'normal' as blockslice %}">
+            <div class="news-block-inner">
+                <span class="news-kicker">{{ block.get_block_type_display }}</span>
+                <h2 class="news-headline">{{ block.title }}</h2>
+                {% if block.subtitle %}
+                <h3 class="news-subheadline">{{ block.subtitle }}</h3>
+                {% endif %}
+
+                {% if block.photo %}
+                <figure class="news-photo">
+                    <img src="{{ block.photo.url }}" alt="{{ block.title }}">
+                    {% if block.photo_caption %}
+                    <figcaption>{{ block.photo_caption }}</figcaption>
+                    {% endif %}
+                </figure>
+                {% endif %}
+
+                {% if block.content %}
+                <div class="news-body">
+                    {% if block.author_name %}<p class="news-byline">{{ block.author_name }}</p>{% endif %}
+                    {{ block.get_content_html|safe }}
+                </div>
+                {% endif %}
+            </div>
+        </article>
+        {% endfor %}
+    </div>
+    {% else %}
+    <p class="text-center text-sand-500 py-10">В этом выпуске материалы ещё не размещены.</p>
+    {% endif %}
+
+    <!-- Навигация по архиву -->
+    <nav class="flex items-center justify-between mt-12 gap-4" aria-label="Навигация по выпускам">
+        {% if previous_issue %}
+        <a href="{% url 'newspaper_issue_detail' previous_issue.slug %}" class="btn btn-outline-secondary btn-sm btn-outline-accent no-underline">
+            &larr; № {{ previous_issue.number }}
+        </a>
+        {% else %}<span></span>{% endif %}
+
+        <a href="{% url 'newspaper_home' %}" class="font-semibold text-brand-700 hover:text-brand-800 no-underline inline-flex items-center gap-2">
+            <i class="far fa-newspaper" aria-hidden="true"></i> Все выпуски газеты
+        </a>
+
+        {% if next_issue %}
+        <a href="{% url 'newspaper_issue_detail' next_issue.slug %}" class="btn btn-outline-secondary btn-sm btn-outline-accent no-underline">
+            № {{ next_issue.number }} &rarr;
+        </a>
+        {% else %}<span></span>{% endif %}
+    </nav>
+</div>
+{% endblock %}

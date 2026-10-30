@@ -1,0 +1,147 @@
+{% extends 'newspaper/base_editor.html' %}
+
+{% block editor_title %}{% if action == 'create' %}Новый выпуск{% else %}Выпуск № {{ issue.number }} — {{ issue.title }}{% endif %}{% endblock %}
+{% block editor_subtitle %}<p class="studio-page-subtitle">Конструктор выпуска газеты: параметры номера и полоса с материалами</p>{% endblock %}
+{% block editor_actions %}
+    {% if action == 'edit' and issue.status == 'published' %}
+    <a href="{% url 'newspaper_issue_detail' issue.slug %}" target="_blank" rel="noopener" class="btn btn-outline-primary"><i class="fas fa-eye me-1"></i>Открыть на сайте</a>
+    {% endif %}
+{% endblock %}
+
+{% block editor_content %}
+
+{% if form.errors %}
+    <div class="alert alert-danger">
+        <strong>Ошибки в форме выпуска:</strong>
+        <ul class="mb-0">
+            {% for field in form %}{% for error in field.errors %}<li>{{ field.label }}: {{ error }}</li>{% endfor %}{% endfor %}
+            {% for error in form.non_field_errors %}<li>{{ error }}</li>{% endfor %}
+        </ul>
+    </div>
+{% endif %}
+
+<!-- Параметры выпуска -->
+<div class="card border-0 shadow-sm mb-4">
+    <div class="card-body">
+        <form method="post" enctype="multipart/form-data" novalidate>
+            {% csrf_token %}
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <label class="form-label" for="{{ form.title.id_for_label }}">Название выпуска</label>
+                    {{ form.title }}
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label" for="{{ form.number.id_for_label }}">Номер</label>
+                    {{ form.number }}
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label" for="{{ form.issue_date.id_for_label }}">Дата выпуска</label>
+                    {{ form.issue_date }}
+                </div>
+                <div class="col-12">
+                    <label class="form-label" for="{{ form.description.id_for_label }}">Анонс (для главной страницы)</label>
+                    {{ form.description }}
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label" for="{{ form.cover_image.id_for_label }}">Обложка выпуска</label>
+                    {{ form.cover_image }}
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label" for="{{ form.pdf_file.id_for_label }}">PDF-версия номера</label>
+                    {{ form.pdf_file }}
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label" for="{{ form.status.id_for_label }}">Статус</label>
+                    {{ form.status }}
+                </div>
+            </div>
+            <div class="mt-4">
+                <button type="submit" class="btn btn-primary"><i class="fas fa-save me-1"></i>Сохранить выпуск</button>
+                <a href="{% url 'newspaper_editor_dashboard' %}" class="btn btn-outline-secondary">К списку выпусков</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+{% if action == 'edit' %}
+<!-- Конструктор полос: материалы выпуска -->
+<div class="card border-0 shadow-sm">
+    <div class="card-header bg-white d-flex align-items-center justify-content-between py-3">
+        <h2 class="h5 mb-0"><i class="far fa-newspaper me-2 text-dark opacity-50"></i>Материалы выпуска (полосы)</h2>
+    </div>
+    <div class="card-body">
+        <div class="list-group list-group-flush mb-4">
+            {% for block in blocks %}
+            <div class="list-group-item px-0">
+                <div class="block-card p-3 d-flex align-items-center gap-3">
+                    {% if block.photo %}
+                        <img src="{{ block.photo.url }}" alt="" class="block-thumb">
+                    {% else %}
+                        <div class="block-thumb d-flex align-items-center justify-content-center bg-sand-100 text-muted"><i class="fas fa-image"></i></div>
+                    {% endif %}
+                    <div class="grow-1 min-w-0 flex-grow-1">
+                        <span class="badge text-bg-light block-type-badge border">{{ block.get_block_type_display }}</span>
+                        <div class="fw-bold text-truncate mt-1">{{ block.title }}</div>
+                        {% if block.author_name %}<small class="text-muted">{{ block.author_name }}</small>{% endif %}
+                    </div>
+                    <div class="d-flex align-items-center gap-1">
+                        <a href="{% url 'newspaper_editor_block_move' block.pk 'up' %}" class="btn btn-sm btn-outline-secondary" title="Вверх"><i class="fas fa-arrow-up"></i></a>
+                        <a href="{% url 'newspaper_editor_block_move' block.pk 'down' %}" class="btn btn-sm btn-outline-secondary" title="Вниз"><i class="fas fa-arrow-down"></i></a>
+                        <a href="{% url 'newspaper_editor_block_edit' block.pk %}" class="btn btn-sm btn-outline-secondary" title="Редактировать"><i class="fas fa-pen"></i></a>
+                        <form method="post" action="{% url 'newspaper_editor_block_delete' block.pk %}" onsubmit="return confirm('Удалить материал?');">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-sm btn-outline-danger" title="Удалить"><i class="fas fa-trash-alt"></i></button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            {% empty %}
+            <p class="text-muted mb-4">В выпуске пока нет материалов — добавьте первую полосу ниже.</p>
+            {% endfor %}
+        </div>
+
+        <!-- Форма добавления нового блока -->
+        <hr>
+        <h3 class="h6 mt-4"><i class="fas fa-plus me-2"></i>Добавить материал в выпуск</h3>
+        <form method="post" action="{% url 'newspaper_editor_block_create' issue.pk %}" enctype="multipart/form-data" novalidate>
+            {% csrf_token %}
+            <div class="row g-3">
+                <div class="col-md-8">
+                    <label class="form-label" for="id_new_title">Заголовок</label>
+                    <input type="text" name="title" id="id_new_title" class="form-control" placeholder="Заголовок материала" required>
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label" for="id_new_block_type">Тип материала</label>
+                    <select name="block_type" id="id_new_block_type" class="form-select">
+                        {% for value, label in block_form.fields.block_type.choices %}
+                        <option value="{{ value }}">{{ label }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-8">
+                    <label class="form-label" for="id_new_subtitle">Подзаголовок</label>
+                    <input type="text" name="subtitle" id="id_new_subtitle" class="form-control" placeholder="Подзаголовок (необязательно)">
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label" for="id_new_author_name">Автор материала</label>
+                    <input type="text" name="author_name" id="id_new_author_name" class="form-control" placeholder="ФИО (необязательно)">
+                </div>
+                <div class="col-12">
+                    <label class="form-label" for="id_new_content">Текст (каждый абзац — с новой строки)</label>
+                    <textarea name="content" id="id_new_content" rows="8" class="form-control" placeholder="Текст материала…"></textarea>
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label" for="id_new_photo">Фотография</label>
+                    <input type="file" name="photo" id="id_new_photo" accept="image/*" class="form-control">
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label" for="id_new_photo_caption">Подпись к фото</label>
+                    <input type="text" name="photo_caption" id="id_new_photo_caption" class="form-control" placeholder="Подпись к фотографии">
+                </div>
+            </div>
+            <button type="submit" class="btn btn-primary mt-4"><i class="fas fa-plus me-1"></i>Добавить материал</button>
+        </form>
+    </div>
+</div>
+{% endif %}
+{% endblock %}

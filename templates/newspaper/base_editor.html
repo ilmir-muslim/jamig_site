@@ -1,0 +1,64 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block header %}{% endblock %}
+{% block footer %}{% endblock %}
+
+{% block content %}
+<div class="studio-wrapper">
+    <nav class="studio-sidebar">
+        <a href="{% url 'home' %}" class="sidebar-brand text-decoration-none">
+            <span class="sidebar-brand-icon"><i class="fas fa-mosque"></i></span>
+            <span>Джамиг <b>Газета</b></span>
+        </a>
+        <ul class="sidebar-nav">
+            <li>
+                <a href="{% url 'newspaper_editor_dashboard' %}"
+                   class="{% if request.resolver_match.url_name == 'newspaper_editor_dashboard' %}active{% endif %}">
+                    <i class="far fa-newspaper"></i>
+                    <span>Выпуски</span>
+                </a>
+            </li>
+            <li>
+                <a href="{% url 'newspaper_editor_issue_create' %}">
+                    <i class="fas fa-plus"></i>
+                    <span>Новый выпуск</span>
+                </a>
+            </li>
+            <li>
+                <a href="{% url 'newspaper_home' %}">
+                    <i class="fas fa-eye"></i>
+                    <span>Смотреть на сайте</span>
+                </a>
+            </li>
+        </ul>
+        <div class="sidebar-footer">
+            <a href="{% url 'home' %}" class="sidebar-back-link">
+                <i class="fas fa-arrow-left"></i> Вернуться на сайт
+            </a>
+        </div>
+    </nav>
+    <main class="studio-main">
+        <div class="studio-page">
+            <header class="studio-topbar">
+                <div>
+                    <h1 class="studio-page-title">{% block editor_title %}Конструктор газеты{% endblock %}</h1>
+                    {% block editor_subtitle %}{% endblock %}
+                </div>
+                <div class="studio-topbar-actions">
+                    {% block editor_actions %}{% endblock %}
+                    <span class="studio-user-chip d-none d-lg-inline-flex">
+                        <i class="far fa-newspaper"></i>{{ user.get_full_name|default:user.email }}
+                    </span>
+                </div>
+            </header>
+            {% block editor_content %}{% endblock %}
+        </div>
+    </main>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/studio.css' %}">
+<link rel="stylesheet" href="{% static 'css/newspaper.css' %}">
+{% endblock %}

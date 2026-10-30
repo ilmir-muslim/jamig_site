@@ -75,6 +75,50 @@
             </div>
             {% endif %}
 
+            <!-- ================= Анонс газеты ================= -->
+            {% if latest_newspaper_issue %}
+            <section class="bg-white rounded-[1.6rem] shadow-soft border border-sand-200 overflow-hidden flex flex-col md:flex-row">
+                <a href="{% url 'newspaper_issue_detail' latest_newspaper_issue.slug %}" class="md:w-2/5 bg-sand-950 relative group cursor-pointer flex items-center justify-center min-h-62.5 overflow-hidden no-underline">
+                    {% if latest_newspaper_issue.cover_image %}
+                        <img src="{{ latest_newspaper_issue.cover_image.url }}" alt="Обложка выпуска № {{ latest_newspaper_issue.number }}" class="absolute inset-0 w-full h-full object-cover opacity-90 group-hover:scale-[1.03] transition-transform duration-500">
+                    {% else %}
+                        <div class="absolute inset-0 bg-linear-to-br from-brand-800 to-deep-950"></div>
+                        <i class="far fa-newspaper text-white/70 text-6xl relative z-10 group-hover:scale-110 transition-transform" aria-hidden="true"></i>
+                    {% endif %}
+                    <span class="absolute top-4 left-4 badge bg-gild-400! text-sand-950! border-0 font-bold shadow-sm">
+                        <i class="far fa-newspaper me-1"></i>Газета мечети
+                    </span>
+                </a>
+                <div class="p-8 md:w-3/5 flex flex-col justify-center">
+                    <div class="flex items-center gap-3 mb-3">
+                        <span class="eyebrow m-0">Свежий выпуск</span>
+                        <span class="text-sm text-sand-500">№ {{ latest_newspaper_issue.number }} от {{ latest_newspaper_issue.issue_date|date:"d M Y" }}</span>
+                    </div>
+                    <a href="{% url 'newspaper_issue_detail' latest_newspaper_issue.slug %}" style="text-decoration:none;">
+                        <h2 class="font-display text-2xl md:text-3xl font-bold text-sand-950 mb-3 hover:text-brand-700 transition-colors">
+                            {{ latest_newspaper_issue.title }}
+                        </h2>
+                    </a>
+                    {% if latest_newspaper_issue.description %}
+                    <p class="text-sand-600 line-clamp-3 mb-5 leading-relaxed">{{ latest_newspaper_issue.description }}</p>
+                    {% endif %}
+                    <div class="flex flex-wrap items-center gap-3 mt-auto">
+                        <a href="{% url 'newspaper_issue_detail' latest_newspaper_issue.slug %}" class="btn btn-primary btn-sm shadow-lift">
+                            <i class="fas fa-book-open"></i> Читать выпуск
+                        </a>
+                        <a href="{% url 'newspaper_home' %}" class="inline-flex items-center gap-1.5 text-brand-700 font-semibold hover:text-brand-800 no-underline text-sm">
+                            Все выпуски <span aria-hidden="true">&rarr;</span>
+                        </a>
+                        {% if latest_newspaper_issue.pdf_file %}
+                        <a href="{{ latest_newspaper_issue.pdf_file.url }}" target="_blank" rel="noopener" class="inline-flex items-center gap-1.5 text-sand-500 hover:text-brand-700 no-underline text-sm ms-auto">
+                            <i class="fas fa-file-pdf" aria-hidden="true"></i> PDF
+                        </a>
+                        {% endif %}
+                    </div>
+                </div>
+            </section>
+            {% endif %}
+
             <!-- ================= Последние публикации ================= -->
             <section>
                 <div class="flex items-end justify-between mb-8">
