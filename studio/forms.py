@@ -39,7 +39,32 @@ class VideoContentForm(forms.ModelForm):
             "thumbnail": forms.ClearableFileInput(attrs={"class": "form-control"}),
             "is_live": forms.CheckboxInput(attrs={"class": "form-check-input"}),
             "status": forms.Select(attrs={"class": "form-select"}),
+            # Поле не входит в fields формы, но используется в шаблоне
+            # редакции видео для планирования публикации.
+            "published_at": forms.DateTimeInput(
+                attrs={"class": "form-control", "type": "datetime-local"},
+                required=False,
+            ),
         }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        instance = self.instance
+        if instance is not None and instance.pk and instance.published_at:
+            self.initial["published_at"] = instance.published_at.strftime(
+                "%Y-%m-%dT%H:%M"
+            )
+
+    def save(self, commit=True):
+        video = super().save(commit=commit)
+        # Сохраняем дату публикации, если она указана в форме
+        published_at = self.cleaned_data.get("published_at")
+        if published_at is not None:
+            VideoContent.objects.filter(pk=video.pk).update(
+                published_at=published_at
+            )
+            video.published_at = published_at
+        return video
 
     def clean_embed_code(self):
         """Проверяет поле embed_code: принимает валидный iframe-код

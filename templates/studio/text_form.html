@@ -29,31 +29,35 @@
           <input type="hidden" name="lesson_index" value="{{ lesson_index }}">
         {% endif %}
 
-        <div class="p-3 bg-white border-bottom">
-            <div class="row g-2 align-items-end">
-                <div class="col-md-4">
-                    <label class="form-label small mb-1 text-muted">Название</label>
+        <div class="text-meta-panel">
+            <div class="text-meta-grid">
+                <div>
+                    <label class="form-label-lg" for="{{ form.title.id_for_label }}">Название</label>
                     {{ form.title }}
+                    {% if form.title.errors %}<div class="field-errors text-danger small">{{ form.title.errors }}</div>{% endif %}
                 </div>
-                <div class="col-md-4">
-                    <label class="form-label small mb-1 text-muted">Подзаголовок</label>
+                <div>
+                    <label class="form-label-lg" for="{{ form.subtitle.id_for_label }}">Подзаголовок</label>
                     {{ form.subtitle }}
+                    {% if form.subtitle.errors %}<div class="field-errors text-danger small">{{ form.subtitle.errors }}</div>{% endif %}
                 </div>
-                <div class="col-md-2">
-                    <label class="form-label small mb-1 text-muted">Категория</label>
+                <div>
+                    <label class="form-label-lg" for="{{ form.category.id_for_label }}">Категория</label>
                     {{ form.category }}
+                    {% if form.category.errors %}<div class="field-errors text-danger small">{{ form.category.errors }}</div>{% endif %}
                 </div>
-                <div class="col-md-2">
-                    <label class="form-label small mb-1 text-muted">Статус</label>
+                <div>
+                    <label class="form-label-lg" for="{{ form.status.id_for_label }}">Статус</label>
                     {{ form.status }}
+                    {% if form.status.errors %}<div class="field-errors text-danger small">{{ form.status.errors }}</div>{% endif %}
                 </div>
             </div>
-            <div class="mt-2">
-                <label class="btn btn-sm btn-outline-secondary mb-0">
+            <div class="meta-aux-row">
+                <label class="btn btn-sm btn-outline-secondary file-btn mb-0">
                     <i class="fas fa-upload me-1"></i> Загрузить файл (txt, docx)
                     <input type="file" id="file-upload-input" accept=".txt,.docx" style="display:none;">
                 </label>
-                <small class="text-muted ms-2">Текст автоматически вставится в редактор</small>
+                <small class="text-muted">Текст автоматически вставится в редактор</small>
             </div>
         </div>
 
@@ -61,7 +65,7 @@
 
         <div id="quill-editor" class="flex-grow-1"></div>
 
-        <div class="p-2 bg-white border-top d-flex justify-content-end gap-2">
+        <div class="editor-actionbar">
             {% if next_url %}
                 <button type="submit" class="btn btn-primary">
                     <i class="fas fa-save me-2"></i>Сохранить
@@ -81,6 +85,102 @@
 </div>
 {% endblock %}
 
+{% block extra_css %}
+{{ block.super }}
+<style>
+    .studio-main {
+        position: relative;
+        overflow: hidden;
+    }
+
+    .text-form-full-height {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        display: flex;
+        flex-direction: column;
+        padding: clamp(1rem, 2vw, 1.5rem);
+    }
+
+    #content-form {
+        min-height: 0;
+        background: var(--card-bg);
+        border: 1px solid var(--card-border);
+        border-radius: var(--radius);
+        box-shadow: var(--shadow-sm);
+        overflow: hidden;
+    }
+
+    /* Верхняя панель метаданных статьи */
+    .text-meta-panel {
+        padding: clamp(1rem, 2vw, 1.5rem);
+        border-bottom: 1px solid var(--sand-200);
+        background: var(--sand-50);
+    }
+
+    /* Нижняя панель действий */
+    .editor-actionbar {
+        display: flex;
+        justify-content: flex-end;
+        align-items: center;
+        gap: 0.75rem;
+        flex-wrap: wrap;
+        padding: 0.9rem clamp(1rem, 2vw, 1.5rem);
+        border-top: 1px solid var(--sand-200);
+        background: #fff;
+    }
+
+    #quill-editor {
+        flex: 1;
+        min-height: 0;
+        display: flex;
+        flex-direction: column;
+    }
+    #quill-editor .ql-container {
+        flex: 1;
+        overflow-y: auto !important;
+    }
+
+    .ql-toolbar.ql-snow {
+        border: none;
+        border-bottom: 1px solid var(--sand-200);
+        background: #fff;
+        padding: 0.6rem 0.9rem;
+    }
+    .ql-container.ql-snow {
+        border: none;
+        font-family: 'Manrope', system-ui, sans-serif;
+        font-size: 16px;
+        line-height: 1.65;
+        color: var(--sand-900);
+    }
+    .ql-editor {
+        min-height: 100%;
+        padding: 1.5rem 2rem;
+    }
+    .ql-editor.ql-blank::before {
+        font-style: normal;
+        color: var(--sand-400);
+    }
+    .ql-toolbar .ql-stroke { stroke: var(--sand-600); }
+    .ql-toolbar .ql-fill { fill: var(--sand-600); }
+    .ql-toolbar .ql-picker-label { color: var(--sand-700); }
+    .ql-toolbar .ql-button:hover svg,
+    .ql-toolbar .ql-active svg { filter: drop-shadow(0 0 1px var(--brand-600)); }
+    .ql-toolbar button:hover .ql-stroke,
+    .ql-toolbar button.ql-active .ql-stroke { stroke: var(--brand-600); }
+    .ql-toolbar button:hover .ql-fill,
+    .ql-toolbar button.ql-active .ql-fill { fill: var(--brand-600); }
+
+    @media (max-width: 768px) {
+        .text-form-full-height { padding: 0.75rem; }
+        .ql-editor { padding: 1rem 1.15rem; }
+    }
+</style>
+{% endblock %}
+
 {% block extra_js %}
 {{ block.super }}
 <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
@@ -98,55 +198,4 @@
 </script>
 
 <script src="{% static 'js/studio_text_form.js' %}"></script>
-
-<style>
-    .studio-main {
-        position: relative;
-        overflow: hidden;
-    }
-
-    .text-form-full-height {
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        display: flex;
-        flex-direction: column;
-    }
-
-    #content-form {
-        min-height: 0;
-    }
-
-    #quill-editor {
-        flex: 1;
-        min-height: 0;
-        display: flex;
-        flex-direction: column;
-    }
-    #quill-editor .ql-container {
-        flex: 1;
-        overflow-y: auto !important;
-    }
-
-    .ql-toolbar.ql-snow {
-        border: none;
-        border-bottom: 1px solid #e2e8f0;
-        background: #f8fafc;
-    }
-    .ql-container.ql-snow {
-        border: none;
-        font-size: 16px;
-        line-height: 1.6;
-    }
-    .ql-editor {
-        min-height: 100%;
-        padding: 1.5rem 2rem;
-    }
-    .ql-editor.ql-blank::before {
-        font-style: normal;
-        color: #94a3b8;
-    }
-</style>
 {% endblock %}

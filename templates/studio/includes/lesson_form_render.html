@@ -21,11 +21,11 @@
         </button>
       </div>
     </div>
-    <div class="mb-3">
-      <label>{{ lesson_form.description.label }}</label>
+    <div class="lesson-desc-block">
+      <label for="{{ lesson_form.description.id_for_label }}">{{ lesson_form.description.label }}</label>
       {{ lesson_form.description }}
       {% if lesson_form.description.errors %}
-        <div class="text-danger small mt-1">{{ lesson_form.description.errors }}</div>
+        <div class="field-errors text-danger small">{{ lesson_form.description.errors }}</div>
       {% endif %}
     </div>
     <div class="lesson-materials">

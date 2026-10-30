@@ -22,13 +22,15 @@
             <i class="fas fa-info-circle"></i>
             <h3>Основная информация</h3>
           </div>
-          <div class="mb-4">
-            <label class="form-label-lg">Название аудио</label>
+          <div class="form-block">
+            <label class="form-label-lg" for="{{ form.title.id_for_label }}">Название аудио</label>
             {{ form.title }}
+            {% if form.title.errors %}<div class="field-errors text-danger small">{{ form.title.errors }}</div>{% endif %}
           </div>
-          <div class="mb-4">
-            <label class="form-label-lg">Описание</label>
+          <div class="form-block">
+            <label class="form-label-lg" for="{{ form.description.id_for_label }}">Описание</label>
             {{ form.description }}
+            {% if form.description.errors %}<div class="field-errors text-danger small">{{ form.description.errors }}</div>{% endif %}
           </div>
         </section>
 
@@ -38,7 +40,7 @@
             <i class="fas fa-headphones"></i>
             <h3>Аудиофайл</h3>
           </div>
-          <div class="mb-4">
+          <div class="form-block">
             <label class="form-label-lg">Загрузить аудио</label>
             <div class="audio-uploader" id="audioUploader">
               {{ form.audio_file }}
@@ -48,13 +50,14 @@
                   <p>Перетащите аудиофайл сюда или кликните для выбора</p>
                   <small>MP3, WAV, OGG — до 20 МБ</small>
                 </div>
-                <div class="audio-preview-player mt-3" id="audioPlayerWrapper" style="display:none;">
+                <div class="audio-preview-player" id="audioPlayerWrapper" style="display:none;">
                   <audio controls id="audioPlayer" class="w-100">
                     Ваш браузер не поддерживает аудио.
                   </audio>
                 </div>
               </div>
             </div>
+            {% if form.audio_file.errors %}<div class="field-errors text-danger small">{{ form.audio_file.errors }}</div>{% endif %}
           </div>
         </section>
 
@@ -64,8 +67,8 @@
             <i class="fas fa-paint-brush"></i>
             <h3>Оформление</h3>
           </div>
-          <div class="row">
-            <div class="col-md-6 mb-4">
+          <div class="field-grid-2">
+            <div>
               <label class="form-label-lg">Обложка</label>
               <div class="thumbnail-uploader" id="coverUploader">
                 {{ form.cover_image }}
@@ -78,19 +81,22 @@
                   <img id="coverPreviewImg" src="#" alt="Превью обложки" style="display:none;">
                 </div>
               </div>
+              {% if form.cover_image.errors %}<div class="field-errors text-danger small">{{ form.cover_image.errors }}</div>{% endif %}
             </div>
-            <div class="col-md-6 mb-4">
-              <label class="form-label-lg">Категория</label>
+            <div>
+              <label class="form-label-lg" for="{{ form.category.id_for_label }}">Категория</label>
               {{ form.category }}
+              {% if form.category.errors %}<div class="field-errors text-danger small">{{ form.category.errors }}</div>{% endif %}
+              <label class="form-label-lg mt-4" for="{{ form.status.id_for_label }}">Статус</label>
+              {{ form.status }}
+              {% if form.status.errors %}<div class="field-errors text-danger small">{{ form.status.errors }}</div>{% endif %}
             </div>
-          </div>
-          <div class="mb-3">
-            <label class="form-label-lg">Статус</label>
-            {{ form.status }}
           </div>
         </section>
 
-        {{ form.non_field_errors }}
+        {% if form.non_field_errors %}
+          <div class="alert alert-danger">{{ form.non_field_errors }}</div>
+        {% endif %}
       </form>
     </div>
 

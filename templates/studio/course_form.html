@@ -19,25 +19,25 @@
             <i class="fas fa-info-circle"></i>
             <h3>Основная информация</h3>
           </div>
-          <div class="mb-4">
-            <label class="form-label-lg">Название курса</label>
+          <div class="form-block">
+            <label class="form-label-lg" for="{{ form.title.id_for_label }}">Название курса</label>
             {{ form.title }}
             {% if form.title.errors %}
-              <div class="text-danger small mt-1">{{ form.title.errors }}</div>
+              <div class="field-errors text-danger small">{{ form.title.errors }}</div>
             {% endif %}
           </div>
-          <div class="mb-4">
-            <label class="form-label-lg">Описание</label>
+          <div class="form-block">
+            <label class="form-label-lg" for="{{ form.description.id_for_label }}">Описание</label>
             {{ form.description }}
             {% if form.description.errors %}
-              <div class="text-danger small mt-1">{{ form.description.errors }}</div>
+              <div class="field-errors text-danger small">{{ form.description.errors }}</div>
             {% endif %}
           </div>
-          <div class="mb-3">
-            <label class="form-label-lg">Статус</label>
+          <div class="form-block">
+            <label class="form-label-lg" for="{{ form.status.id_for_label }}">Статус</label>
             {{ form.status }}
             {% if form.status.errors %}
-              <div class="text-danger small mt-1">{{ form.status.errors }}</div>
+              <div class="field-errors text-danger small">{{ form.status.errors }}</div>
             {% endif %}
           </div>
         </section>
@@ -47,18 +47,18 @@
             <i class="fas fa-calendar-alt"></i>
             <h3>Публикация</h3>
           </div>
-          <div class="mb-3">
-            <label class="form-label-lg">Дата публикации</label>
+          <div class="form-block">
+            <label class="form-label-lg" for="{{ form.published_at.id_for_label }}">Дата публикации</label>
             {{ form.published_at }}
             {% if form.published_at.errors %}
-              <div class="text-danger small mt-1">{{ form.published_at.errors }}</div>
+              <div class="field-errors text-danger small">{{ form.published_at.errors }}</div>
             {% endif %}
             <small class="text-muted">Оставьте пустым для немедленной публикации при выборе статуса «Опубликовано»</small>
           </div>
         </section>
 
         <section class="form-section" id="lessons-section">
-          <div class="section-header mb-3">
+          <div class="section-header">
             <i class="fas fa-list-ol"></i>
             <h3>Уроки</h3>
           </div>
@@ -75,16 +75,17 @@
               <h5><i class="fas fa-plus-circle me-2"></i>Новый урок</h5>
               <div class="lesson-grid-top">
                 <div>
-                  <label>Название урока</label>
+                  <label for="new-lesson-title">Название урока</label>
                   <input type="text" class="form-control" id="new-lesson-title" placeholder="Название урока">
                 </div>
                 <div>
-                  <label>Порядок</label>
+                  <label for="new-lesson-order">Порядок</label>
                   <input type="number" class="form-control" id="new-lesson-order" value="0" min="0">
                 </div>
+                <div class="lesson-remove-cell" aria-hidden="true"></div>
               </div>
-              <div class="mb-3">
-                <label>Описание</label>
+              <div class="lesson-desc-block">
+                <label for="new-lesson-description">Описание</label>
                 <textarea class="form-control" id="new-lesson-description" rows="2" placeholder="Краткое описание"></textarea>
               </div>
               <div class="lesson-materials">
@@ -188,10 +189,19 @@
 <style>
   .course-editor { color: var(--text-main); }
   /* Макет редактора, секции, формы и кнопки — в studio.css (единая дизайн-система «Джамиг») */
-  .material-picker { display: flex; flex-wrap: wrap; align-items: center; gap: 0.5rem; }
-  .selected-material-name { font-size: 0.9rem; font-weight: 500; color: var(--text-main); max-width: 220px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .lesson-form .card-body { padding: 1rem; }
-  .new-lesson-form { background: var(--card-bg); border: 2px dashed var(--sand-300); border-radius: var(--radius); }
+
+  /* Отступ между карточками уроков (надёжно, без bootstrap mb-*) */
+  .lesson-form { margin-bottom: 1.25rem; }
+  .lesson-form:last-of-type { margin-bottom: 0; }
+
+  /* Поле «Описание» курса — textarea всегда поперёк колонки */
+  #id_description { width: 100%; resize: vertical; }
+
+  /* Дата публикации курса не выходит за пределы секции */
+  #id_published_at { max-width: 340px; }
+
+  /* Карточка «Новый урок» отделена от списка сохранённых уроков */
+  .new-lesson-form { margin-top: 1.5rem; }
 </style>
 {% endblock %}
 

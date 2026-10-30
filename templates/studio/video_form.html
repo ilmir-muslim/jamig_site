@@ -23,13 +23,15 @@
             <i class="fas fa-info-circle"></i>
             <h3>Основная информация</h3>
           </div>
-          <div class="mb-4">
-            <label class="form-label-lg">Название видео</label>
+          <div class="form-block">
+            <label class="form-label-lg" for="{{ form.title.id_for_label }}">Название видео</label>
             {{ form.title }}
+            {% if form.title.errors %}<div class="field-errors text-danger small">{{ form.title.errors }}</div>{% endif %}
           </div>
-          <div class="mb-4">
-            <label class="form-label-lg">Описание</label>
+          <div class="form-block">
+            <label class="form-label-lg" for="{{ form.description.id_for_label }}">Описание</label>
             {{ form.description }}
+            {% if form.description.errors %}<div class="field-errors text-danger small">{{ form.description.errors }}</div>{% endif %}
           </div>
         </section>
 
@@ -39,11 +41,12 @@
             <i class="fas fa-video"></i>
             <h3>Видео</h3>
           </div>
-          <div class="mb-4">
-            <label class="form-label-lg">Код вставки (iframe) или ссылка на видео</label>
+          <div class="form-block">
+            <label class="form-label-lg" for="{{ form.embed_code.id_for_label }}">Код вставки (iframe) или ссылка на видео</label>
             <div class="embed-input-group">
               {{ form.embed_code }}
             </div>
+            {% if form.embed_code.errors %}<div class="field-errors text-danger small">{{ form.embed_code.errors }}</div>{% endif %}
             <small class="text-muted">Поддерживаются iframe-коды и ссылки rutube.ru/video/... . Ссылка будет автоматически преобразована в плеер.</small>
           </div>
         </section>
@@ -54,8 +57,8 @@
             <i class="fas fa-paint-brush"></i>
             <h3>Оформление</h3>
           </div>
-          <div class="row">
-            <div class="col-md-6 mb-4">
+          <div class="field-grid-2">
+            <div>
               <label class="form-label-lg">Обложка</label>
               <div class="thumbnail-uploader" id="thumbnailUploader">
                 {{ form.thumbnail }}
@@ -68,13 +71,15 @@
                   <img id="thumbnailPreviewImg" src="#" alt="Превью обложки" style="display:none;">
                 </div>
               </div>
+              {% if form.thumbnail.errors %}<div class="field-errors text-danger small">{{ form.thumbnail.errors }}</div>{% endif %}
             </div>
-            <div class="col-md-6 mb-4">
-              <label class="form-label-lg">Категория</label>
+            <div>
+              <label class="form-label-lg" for="{{ form.category.id_for_label }}">Категория</label>
               {{ form.category }}
+              {% if form.category.errors %}<div class="field-errors text-danger small">{{ form.category.errors }}</div>{% endif %}
             </div>
           </div>
-          <div class="form-check form-switch mb-4">
+          <div class="form-check form-switch">
             {{ form.is_live }}
             <label class="form-check-label" for="{{ form.is_live.id_for_label }}">
               <i class="fas fa-broadcast-tower me-1"></i> Прямой эфир
@@ -88,23 +93,24 @@
             <i class="fas fa-paper-plane"></i>
             <h3>Публикация</h3>
           </div>
-          <div class="row align-items-end">
-            <div class="col-md-6 mb-3">
-              <label class="form-label-lg">Статус</label>
+          <div class="field-grid-2">
+            <div>
+              <label class="form-label-lg" for="{{ form.status.id_for_label }}">Статус</label>
               {{ form.status }}
+              {% if form.status.errors %}<div class="field-errors text-danger small">{{ form.status.errors }}</div>{% endif %}
             </div>
-            <div class="col-md-6 mb-3">
-              <label class="form-label-lg">Запланировать публикацию</label>
-              <div class="input-group">
-                {{ form.published_at }}
-                <span class="input-group-text"><i class="fas fa-calendar-alt"></i></span>
-              </div>
+            <div>
+              <label class="form-label-lg" for="{{ form.published_at.id_for_label }}">Запланировать публикацию</label>
+              {{ form.published_at }}
+              {% if form.published_at.errors %}<div class="field-errors text-danger small">{{ form.published_at.errors }}</div>{% endif %}
               <small class="text-muted">Оставьте пустым для немедленной публикации при выборе статуса «Опубликовано»</small>
             </div>
           </div>
         </section>
 
-        {{ form.non_field_errors }}
+        {% if form.non_field_errors %}
+          <div class="alert alert-danger">{{ form.non_field_errors }}</div>
+        {% endif %}
       </form>
     </div>
 

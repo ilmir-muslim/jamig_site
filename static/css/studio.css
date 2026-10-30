@@ -696,29 +696,278 @@
     width: 100%;
 }
 
-/* Вложенные bootstrap row/col внутри секций редакторов */
-.studio-wrapper .row {
-    display: flex;
-    flex-wrap: wrap;
-    margin-inline: -0.75rem;
+/* ===== СЕТКИ ВНУТРИ СЕКЦИЙ РЕДАКТОРОВ =====
+   Собственные CSS-grid сетки вместо bootstrap row/col:
+   Tailwind-сборка переопределяет часть bootstrap-утилит, из-за чего
+   колонки «row/col» ломались и элементы наползали друг на друга. */
+
+/* Двухколоночная сетка полей (обложка + категория и т.п.) */
+.studio-wrapper .field-grid-2 {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1.25rem;
+    margin-bottom: 1.25rem;
 }
 
-.studio-wrapper .row > [class*="col-"] {
-    padding-inline: 0.75rem;
-    flex: 1 0 0%;
+/* Равные широкие колонки для верхней панели статьи */
+.studio-wrapper .text-meta-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 1rem;
+    align-items: end;
+}
+
+@media (max-width: 991px) {
+    .studio-wrapper .text-meta-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 575px) {
+    .studio-wrapper .field-grid-2,
+    .studio-wrapper .text-meta-grid {
+        grid-template-columns: minmax(0, 1fr);
+    }
+}
+
+/* Единые отступы блоков форм (надёжная замена bootstrap mb-*) */
+.studio-wrapper .form-block { margin-bottom: 1.25rem; }
+.studio-wrapper .form-block:last-child { margin-bottom: 0; }
+
+/* Строка вспомогательных элементов (загрузка файла в статье) */
+.studio-wrapper .meta-aux-row {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.5rem 0.9rem;
+    margin-top: 1rem;
+}
+
+/* Подпись-кнопка загрузки файла */
+.studio-wrapper label.file-btn {
+    cursor: pointer;
+    white-space: nowrap;
+}
+
+/* Кнопки в фирменном стиле студии для всех вариантов */
+.studio-wrapper .btn-outline-primary {
+    border: 1px solid var(--brand-600);
+    color: var(--brand-700);
+    background: #fff;
+    border-radius: 999px;
+    font-weight: 600;
+}
+
+.studio-wrapper .btn-outline-primary:hover,
+.studio-wrapper .btn-outline-primary:focus {
+    background: var(--brand-50);
+    border-color: var(--brand-700);
+    color: var(--brand-800);
+}
+
+.studio-wrapper .btn-light,
+.studio-wrapper .studio-main .btn.btn-light {
+    border: 1px solid var(--sand-300);
+    background: #fff;
+    color: var(--sand-700);
+    border-radius: 999px;
+    font-weight: 600;
+}
+
+.studio-wrapper .btn-light:hover {
+    background: var(--sand-100);
+    border-color: var(--sand-400);
+    color: var(--sand-900);
+}
+
+/* Файловые input'ы (thumbnail / audio / cover): читаемая строка выбора */
+.studio-wrapper input[type="file"].form-control {
+    padding: 0.5rem 0.75rem;
+    font-size: 0.875rem;
+    line-height: 1.5;
+    background-color: var(--sand-50);
+    border-style: dashed;
+    width: 100%;
+}
+
+.studio-wrapper input[type="file"].form-control::file-selector-button {
+    border: 1px solid var(--sand-300);
+    background: #fff;
+    color: var(--sand-700);
+    border-radius: 999px;
+    padding: 0.35rem 0.9rem;
+    margin-right: 0.75rem;
+    font-weight: 600;
+    font-size: 0.8rem;
+    transition: all 0.2s;
+}
+
+.studio-wrapper input[type="file"].form-control::file-selector-button:hover {
+    border-color: var(--brand-400);
+    color: var(--brand-700);
+    background: var(--brand-50);
+}
+
+/* datetime-local не должен выходить за пределы колонки */
+.studio-wrapper input[type="datetime-local"].form-control,
+.studio-wrapper input[type="date"].form-control,
+.studio-wrapper input[type="time"].form-control {
+    min-width: 0;
+    width: 100%;
+}
+
+/* Переключатель «Прямой эфир» */
+.studio-wrapper .form-check.form-switch {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+}
+
+.studio-wrapper .form-switch .form-check-input {
+    margin: 0;
+    width: 2.7em;
+    height: 1.45em;
+    border: 1px solid var(--sand-300);
+    background-color: var(--sand-200);
+    cursor: pointer;
+    flex-shrink: 0;
+}
+
+.studio-wrapper .form-switch .form-check-input:checked {
+    background-color: var(--brand-600);
+    border-color: var(--brand-600);
+}
+
+.studio-wrapper .form-check-label {
+    font-size: 0.92rem;
+    font-weight: 600;
+    color: var(--sand-700);
+    cursor: pointer;
+}
+
+/* Ошибки полей — аккуратным блоком под полем */
+.studio-wrapper .field-errors,
+.studio-wrapper .text-danger.small {
+    display: block;
+    margin-top: 0.35rem;
+    font-size: 0.8rem;
+    line-height: 1.4;
+}
+
+.studio-wrapper .field-errors ul,
+.studio-wrapper .text-danger.small ul {
+    margin: 0;
+    padding-left: 1.1rem;
+}
+
+/* ===== НАДЁЖНЫЕ УТИЛИТЫ СТУДИИ =====
+   Дублируют bootstrap-классы, которые используются в редакторах, но не
+   зависят от загрузки/порядка bootstrap и Tailwind — иначе элементы
+   «слипались» и наползали друг на друга. */
+
+.studio-wrapper .d-flex { display: flex; }
+.studio-wrapper .flex-column { flex-direction: column; }
+.studio-wrapper .flex-grow-1 { flex-grow: 1; }
+.studio-wrapper .align-items-center { align-items: center; }
+.studio-wrapper .align-items-end { align-items: flex-end; }
+.studio-wrapper .justify-content-between { justify-content: space-between; }
+.studio-wrapper .justify-content-center { justify-content: center; }
+.studio-wrapper .justify-content-end { justify-content: flex-end; }
+.studio-wrapper .gap-2 { gap: 0.5rem; }
+.studio-wrapper .w-100 { width: 100%; }
+.studio-wrapper .text-center { text-align: center; }
+.studio-wrapper .fw-semibold { font-weight: 600; }
+.studio-wrapper .small { font-size: 0.875em; }
+
+.studio-wrapper .mt-1 { margin-top: 0.25rem; }
+.studio-wrapper .mt-2 { margin-top: 0.5rem; }
+.studio-wrapper .mt-3 { margin-top: 0.75rem; }
+.studio-wrapper .mt-4 { margin-top: 1rem; }
+.studio-wrapper .mb-0 { margin-bottom: 0; }
+.studio-wrapper .mb-1 { margin-bottom: 0.25rem; }
+.studio-wrapper .mb-2 { margin-bottom: 0.5rem; }
+.studio-wrapper .mb-3 { margin-bottom: 0.75rem; }
+.studio-wrapper .mb-4 { margin-bottom: 1rem; }
+.studio-wrapper .m-3 { margin: 0.75rem; }
+
+.studio-wrapper .p-2 { padding: 0.5rem; }
+.studio-wrapper .p-3 { padding: 0.75rem; }
+
+.studio-wrapper .bg-white { background-color: #fff; }
+.studio-wrapper .bg-light { background-color: var(--sand-100); }
+.studio-wrapper .bg-dark { background-color: var(--sand-950, #171512); }
+.studio-wrapper .text-white-50 { color: rgba(255, 255, 255, 0.65); }
+.studio-wrapper .border-bottom { border-bottom: 1px solid var(--sand-200); }
+.studio-wrapper .border-top { border-top: 1px solid var(--sand-200); }
+.studio-wrapper .rounded-3 { border-radius: 0.75rem; }
+.studio-wrapper .text-decoration-none { text-decoration: none; }
+
+/* Кнопки студии всегда занимают всю ширину сайдбара (как задумано) */
+.studio-wrapper .editor-sidebar .btn.w-100 { display: block; width: 100%; }
+.studio-wrapper .editor-sidebar .btn-link.w-100 { text-align: center; }
+
+/* Прогресс-бар готовности (без зависимости от bootstrap) */
+.studio-wrapper .progress {
+    display: flex;
+    overflow: hidden;
+    background: var(--sand-200);
+    border-radius: 999px;
+}
+
+.studio-wrapper .progress-bar {
+    display: flex;
+    background-color: var(--brand-600);
+    transition: width 0.3s ease;
+}
+
+.studio-wrapper .progress-bar.bg-primary { background-color: var(--brand-600); }
+
+/* Соотношения сторон для превью видео */
+.studio-wrapper .ratio { position: relative; width: 100%; }
+.studio-wrapper .ratio > * {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+}
+.studio-wrapper .ratio-16x9 { aspect-ratio: 16 / 9; }
+
+/* Иконки внутри подписей и кнопок — с корректным интервалом */
+.studio-wrapper .me-1 { margin-right: 0.25rem; }
+.studio-wrapper .me-2 { margin-right: 0.5rem; }
+.studio-wrapper .ms-2 { margin-left: 0.5rem; }
+
+/* Подсказки под полями */
+.studio-wrapper small.text-muted {
+    display: block;
+    margin-top: 0.4rem;
+    font-size: 0.8rem;
+    line-height: 1.45;
+    color: var(--sand-500);
+}
+
+/* Поля форм никогда не выходят за границы контейнера */
+.studio-wrapper .form-control,
+.studio-wrapper .form-select {
+    max-width: 100%;
     min-width: 0;
 }
 
-.studio-wrapper .col-md-6 { flex-grow: 0; flex-shrink: 0; flex-basis: 50%; max-width: 50%; }
-.studio-wrapper .col-md-4 { flex-grow: 0; flex-shrink: 0; flex-basis: 33.3333%; max-width: 33.3333%; }
-.studio-wrapper .col-md-3 { flex-grow: 0; flex-shrink: 0; flex-basis: 25%; max-width: 25%; }
-.studio-wrapper .col-md-2 { flex-grow: 0; flex-shrink: 0; flex-basis: 16.6667%; max-width: 16.6667%; }
+.studio-wrapper textarea.form-control { resize: vertical; }
 
-@media (max-width: 768px) {
-    .studio-wrapper .col-md-6,
-    .studio-wrapper .col-md-4,
-    .studio-wrapper .col-md-3,
-    .studio-wrapper .col-md-2 { flex-basis: 100%; max-width: 100%; }
+/* Сообщения об ошибках формы (non-field) */
+.studio-wrapper .alert-danger {
+    background: #fef2f2;
+    border: 1px solid #fecaca;
+    color: #b42318;
+    border-radius: 1rem;
+    padding: 1rem 1.25rem;
+    font-size: 0.9rem;
+}
+
+.studio-wrapper .alert-danger ul {
+    margin: 0.5rem 0 0;
+    padding-left: 1.2rem;
 }
 
 /* ===== РЕДАКТОР КУРСА: УРОКИ ===== */
@@ -760,6 +1009,43 @@
     gap: 1rem;
     align-items: end;
     margin-bottom: 1rem;
+}
+
+/* Кнопка удаления урока — не прилипает к полю «Порядок» на узких экранах */
+.studio-wrapper .lesson-remove-cell {
+    display: flex;
+    justify-content: flex-end;
+}
+
+/* Подпись над textarea описания урока (в render-шаблоне нет form-label-lg) */
+.studio-wrapper .lesson-form > .card-body > label,
+.studio-wrapper .new-lesson-form > .card-body > label,
+.studio-wrapper .lesson-desc-block > label {
+    display: block;
+    font-weight: 600;
+    margin-bottom: 0.4rem;
+    color: var(--sand-600);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    font-size: 0.72rem;
+}
+
+/* Поле «Описание» урока — с собственным отступом снизу */
+.studio-wrapper .lesson-desc-block {
+    margin-bottom: 1.1rem;
+}
+
+/* Текстовые input'ы внутри карточек уроков никогда не выходят за границы */
+.studio-wrapper .lesson-form .form-control,
+.studio-wrapper .new-lesson-form .form-control {
+    width: 100%;
+    min-width: 0;
+}
+
+/* Hidden-поля формысетов не должны ничего занимать в сетке */
+.studio-wrapper .lesson-form input[type="hidden"],
+.studio-wrapper .new-lesson-form input[type="hidden"] {
+    display: none;
 }
 
 /* Сетка материалов: видео / аудио / текст — три равные широкие колонки */
