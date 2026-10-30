@@ -10,6 +10,18 @@ from materials.models import AudioContent, TextContent, VideoContent
 class VideoContentForm(forms.ModelForm):
     """Форма создания и редактирования видеоматериала в студии"""
 
+    # Явно объявленное поле: не входит в Meta.fields, но используется
+    # в шаблоне редакции видео для планирования публикации.
+    published_at = forms.DateTimeField(
+        label="Дата публикации",
+        required=False,
+        widget=forms.DateTimeInput(
+            attrs={"class": "form-control", "type": "datetime-local"},
+            format="%Y-%m-%dT%H:%M",
+        ),
+        input_formats=["%Y-%m-%dT%H:%M", "%Y-%m-%d %H:%M"],
+    )
+
     class Meta:
         model = VideoContent
         fields = (
@@ -43,8 +55,6 @@ class VideoContentForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        # published_at не входит в Meta.fields, добавляем его вручную (необязательным)
-        # вместе с виджетом, чтобы использовать в шаблоне для планирования публикации.
         self.fields["published_at"] = forms.DateTimeField(
             required=False,
             label="Дата публикации",
@@ -59,14 +69,12 @@ class VideoContentForm(forms.ModelForm):
             )
 
     def save(self, commit=True):
-        video = super().save(commit=commit)
-        # Сохраняем дату публикации, если она указана в форме
-        published_at = self.cleaned_data.get("published_at")
-        if published_at is not None:
-            VideoContent.objects.filter(pk=video.pk).update(
-                published_at=published_at
-            )
-            video.published_at = published_at
+        video = super().save(commit=False)
+        # Сохраняем дату публикации из формы (None — если поле очищено;
+        # модель сама проставит текущее время при статусе «Опубликовано»).
+        video.published_at = self.cleaned_data.get("published_at") or None
+        if commit:
+            video.save()
         return video
 
     def clean_embed_code(self):
