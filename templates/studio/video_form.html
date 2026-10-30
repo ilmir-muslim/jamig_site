@@ -23,13 +23,15 @@
             <i class="fas fa-info-circle"></i>
             <h3>Основная информация</h3>
           </div>
-          <div class="mb-4">
-            <label class="form-label-lg">Название видео</label>
+          <div class="form-block">
+            <label class="form-label-lg" for="{{ form.title.id_for_label }}">Название видео</label>
             {{ form.title }}
+            {% if form.title.errors %}<div class="field-errors text-danger small">{{ form.title.errors }}</div>{% endif %}
           </div>
-          <div class="mb-4">
-            <label class="form-label-lg">Описание</label>
+          <div class="form-block">
+            <label class="form-label-lg" for="{{ form.description.id_for_label }}">Описание</label>
             {{ form.description }}
+            {% if form.description.errors %}<div class="field-errors text-danger small">{{ form.description.errors }}</div>{% endif %}
           </div>
         </section>
 
@@ -39,11 +41,12 @@
             <i class="fas fa-video"></i>
             <h3>Видео</h3>
           </div>
-          <div class="mb-4">
-            <label class="form-label-lg">Код вставки (iframe) или ссылка на видео</label>
+          <div class="form-block">
+            <label class="form-label-lg" for="{{ form.embed_code.id_for_label }}">Код вставки (iframe) или ссылка на видео</label>
             <div class="embed-input-group">
               {{ form.embed_code }}
             </div>
+            {% if form.embed_code.errors %}<div class="field-errors text-danger small">{{ form.embed_code.errors }}</div>{% endif %}
             <small class="text-muted">Поддерживаются iframe-коды и ссылки rutube.ru/video/... . Ссылка будет автоматически преобразована в плеер.</small>
           </div>
         </section>
@@ -54,8 +57,8 @@
             <i class="fas fa-paint-brush"></i>
             <h3>Оформление</h3>
           </div>
-          <div class="row">
-            <div class="col-md-6 mb-4">
+          <div class="field-grid-2">
+            <div>
               <label class="form-label-lg">Обложка</label>
               <div class="thumbnail-uploader" id="thumbnailUploader">
                 {{ form.thumbnail }}
@@ -68,13 +71,15 @@
                   <img id="thumbnailPreviewImg" src="#" alt="Превью обложки" style="display:none;">
                 </div>
               </div>
+              {% if form.thumbnail.errors %}<div class="field-errors text-danger small">{{ form.thumbnail.errors }}</div>{% endif %}
             </div>
-            <div class="col-md-6 mb-4">
-              <label class="form-label-lg">Категория</label>
+            <div>
+              <label class="form-label-lg" for="{{ form.category.id_for_label }}">Категория</label>
               {{ form.category }}
+              {% if form.category.errors %}<div class="field-errors text-danger small">{{ form.category.errors }}</div>{% endif %}
             </div>
           </div>
-          <div class="form-check form-switch mb-4">
+          <div class="form-check form-switch">
             {{ form.is_live }}
             <label class="form-check-label" for="{{ form.is_live.id_for_label }}">
               <i class="fas fa-broadcast-tower me-1"></i> Прямой эфир
@@ -88,23 +93,24 @@
             <i class="fas fa-paper-plane"></i>
             <h3>Публикация</h3>
           </div>
-          <div class="row align-items-end">
-            <div class="col-md-6 mb-3">
-              <label class="form-label-lg">Статус</label>
+          <div class="field-grid-2">
+            <div>
+              <label class="form-label-lg" for="{{ form.status.id_for_label }}">Статус</label>
               {{ form.status }}
+              {% if form.status.errors %}<div class="field-errors text-danger small">{{ form.status.errors }}</div>{% endif %}
             </div>
-            <div class="col-md-6 mb-3">
-              <label class="form-label-lg">Запланировать публикацию</label>
-              <div class="input-group">
-                {{ form.published_at }}
-                <span class="input-group-text"><i class="fas fa-calendar-alt"></i></span>
-              </div>
+            <div>
+              <label class="form-label-lg" for="{{ form.published_at.id_for_label }}">Запланировать публикацию</label>
+              {{ form.published_at }}
+              {% if form.published_at.errors %}<div class="field-errors text-danger small">{{ form.published_at.errors }}</div>{% endif %}
               <small class="text-muted">Оставьте пустым для немедленной публикации при выборе статуса «Опубликовано»</small>
             </div>
           </div>
         </section>
 
-        {{ form.non_field_errors }}
+        {% if form.non_field_errors %}
+          <div class="alert alert-danger">{{ form.non_field_errors }}</div>
+        {% endif %}
       </form>
     </div>
 
@@ -161,119 +167,25 @@
 {% block extra_css %}
 {{ block.super }}
 <style>
-  .video-editor {
-    color: var(--text-main);
-  }
+  .video-editor { color: var(--text-main); }
+  /* Стили макета, секций, карточек и кнопок — в studio.css (единая дизайн-система) */
 
-  .editor-layout {
-    display: grid;
-    grid-template-columns: 1fr 340px;
-    gap: 1.5rem;
-    align-items: start;
-  }
+  .embed-input-group { display: flex; gap: 0.5rem; }
+  .embed-input-group textarea { flex: 1; }
 
-  @media (max-width: 992px) {
-    .editor-layout {
-      grid-template-columns: 1fr;
-    }
-  }
-
-  .form-section {
-    background: var(--card-bg);
-    border: 1px solid var(--card-border);
-    border-radius: var(--radius);
-    padding: 1.5rem;
-    margin-bottom: 1.5rem;
-    box-shadow: var(--shadow-sm);
-  }
-
-  .section-header {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    margin-bottom: 1.5rem;
-    padding-bottom: 0.75rem;
-    border-bottom: 1px solid var(--card-border);
-  }
-
-  .section-header i {
-    font-size: 1.2rem;
-    color: var(--accent);
-  }
-
-  .section-header h3 {
-    font-size: 1.1rem;
-    font-weight: 600;
-    margin: 0;
-    color: var(--text-main);
-  }
-
-  .form-label-lg {
-    font-weight: 600;
-    margin-bottom: 0.5rem;
-    display: block;
-    color: var(--text-muted);
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    font-size: 0.8rem;
-  }
-
-  .form-control, .form-select {
-    background-color: #fff;
-    border: 1px solid var(--card-border);
-    color: var(--text-main);
-    border-radius: 10px;
-    padding: 0.65rem 1rem;
-    transition: all 0.2s;
-  }
-
-  .form-control:focus, .form-select:focus {
-    border-color: var(--accent);
-    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
-    background-color: #fff;
-  }
-
-  .form-control::placeholder {
-    color: var(--text-muted);
-    opacity: 0.7;
-  }
-
-  .embed-input-group {
-    display: flex;
-    gap: 0.5rem;
-  }
-
-  .embed-input-group textarea {
-    flex: 1;
-  }
-
-  .thumbnail-uploader {
-    position: relative;
-  }
+  .thumbnail-uploader { position: relative; }
 
   .upload-area {
-    border: 2px dashed var(--card-border);
-    border-radius: 12px;
     padding: 1.5rem;
     text-align: center;
     cursor: pointer;
-    transition: 0.2s;
-    background: #f8fafc;
     min-height: 150px;
     display: flex;
     align-items: center;
     justify-content: center;
   }
 
-  .upload-area:hover, .upload-area.dragover {
-    border-color: var(--accent);
-    background: rgba(59, 130, 246, 0.03);
-  }
-
-  .upload-area img {
-    max-height: 140px;
-    border-radius: 8px;
-  }
+  .upload-area img { max-height: 140px; border-radius: 8px; }
 
   #id_thumbnail {
     position: absolute;
@@ -285,62 +197,10 @@
     cursor: pointer;
   }
 
-  .editor-sidebar {
-    position: sticky;
-    top: 1rem;
-    display: flex;
-    flex-direction: column;
-    gap: 1.5rem;
-  }
-
-  .progress-card, .video-preview-card {
-    background: var(--card-bg);
-    border: 1px solid var(--card-border);
-    border-radius: var(--radius);
-    padding: 1.2rem;
-    box-shadow: var(--shadow-sm);
-  }
-
-  .check-item {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    margin-bottom: 0.5rem;
-    font-size: 0.9rem;
-    color: var(--text-muted);
-  }
-
-  .check-item.completed {
-    color: var(--success);
-  }
-
-  .check-item i {
-    font-size: 0.6rem;
-  }
-
-  .action-buttons {
-    margin-top: auto;
-  }
-
-  .btn-publish {
-    background: var(--accent);
-    border: none;
-    color: white;
-    font-weight: 600;
-    border-radius: 10px;
-    padding: 0.7rem;
-    transition: 0.2s;
-  }
-
-  .btn-publish:hover {
-    background: #2563eb;
-    transform: translateY(-1px);
-  }
-
   #sidebarVideoPreview {
-    border-radius: 10px;
+    border-radius: 12px;
     overflow: hidden;
-    background: #1e293b;
+    background: var(--sand-950, #171512);
   }
 </style>
 {% endblock %}

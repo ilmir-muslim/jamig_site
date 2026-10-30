@@ -1,14 +1,12 @@
 {% extends 'studio/base_studio.html' %}
 
-{% block studio_content %}
-<div class="d-flex justify-content-between align-items-center mb-4">
-    <h4 class="fw-bold" style="color: var(--text-main);">Дашборд</h4>
-    <span class="text-muted">{{ user.get_full_name }}</span>
-</div>
+{% block studio_title %}Дашборд{% endblock %}
 
+{% block studio_subtitle %}<p class="studio-page-subtitle">{{ user.get_full_name|default:user.username }}, обзор ваших материалов</p>{% endblock %}
+
+{% block studio_content %}
 <!-- Статистика -->
-<div class="row g-4 mb-4">
-    <div class="col-sm-6 col-xl-3">
+<div class="stats-grid">
         <div class="studio-card stat-card">
             <div class="stat-icon" style="background: #eff6ff; color: #3b82f6;">
                 <i class="fas fa-video"></i>
@@ -19,9 +17,7 @@
                 <small class="text-success">{{ stats.published_videos }} опубликовано</small>
             </div>
         </div>
-    </div>
-    <div class="col-sm-6 col-xl-3">
-        <div class="studio-card stat-card">
+    <div class="studio-card stat-card">
             <div class="stat-icon" style="background: #ecfdf5; color: #22c55e;">
                 <i class="fas fa-headphones"></i>
             </div>
@@ -31,9 +27,7 @@
                 <small class="text-success">{{ stats.published_audios }} опубликовано</small>
             </div>
         </div>
-    </div>
-    <div class="col-sm-6 col-xl-3">
-        <div class="studio-card stat-card">
+    <div class="studio-card stat-card">
             <div class="stat-icon" style="background: #fff7ed; color: #f97316;">
                 <i class="fas fa-file-alt"></i>
             </div>
@@ -43,9 +37,7 @@
                 <small class="text-success">{{ stats.published_texts }} опубликовано</small>
             </div>
         </div>
-    </div>
-    <div class="col-sm-6 col-xl-3">
-        <div class="studio-card stat-card">
+    <div class="studio-card stat-card">
             <div class="stat-icon" style="background: #fdf2f8; color: #ec4899;">
                 <i class="fas fa-eye"></i>
             </div>
@@ -55,12 +47,10 @@
                 <small class="text-muted">за все время</small>
             </div>
         </div>
-    </div>
 </div>
 
 <!-- Последние материалы -->
-<div class="row g-4">
-    <div class="col-lg-6">
+<div class="recent-grid">
         <div class="studio-card p-3">
             <h5 class="fw-bold mb-3" style="font-size: 1rem;">Последние видео</h5>
             {% for v in recent_videos %}
@@ -72,9 +62,7 @@
                 <p class="text-muted">Нет видео</p>
             {% endfor %}
         </div>
-    </div>
-    <div class="col-lg-6">
-        <div class="studio-card p-3">
+    <div class="studio-card p-3">
             <h5 class="fw-bold mb-3" style="font-size: 1rem;">Последние статьи</h5>
             {% for t in recent_texts %}
                 <div class="d-flex justify-content-between align-items-center mb-2">
@@ -85,6 +73,5 @@
                 <p class="text-muted">Нет статей</p>
             {% endfor %}
         </div>
-    </div>
 </div>
 {% endblock %}

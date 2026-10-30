@@ -30,7 +30,7 @@ body.dark-theme {
     display: flex;
     height: calc(100vh - 56px);
     overflow: hidden;
-    font-family: 'Inter', 'Georgia', serif;
+    font-family: 'Cormorant Garamond', 'Amiri', Georgia, serif;
     background: var(--reader-bg);
     color: var(--reader-text);
 }

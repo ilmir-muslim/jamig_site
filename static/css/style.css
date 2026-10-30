@@ -33,7 +33,7 @@ html {
 }
 
 body {
-    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    font-family: 'Manrope', system-ui, -apple-system, sans-serif;
     background-color: var(--blue-white);
     color: var(--text-dark);
     line-height: 1.6;
