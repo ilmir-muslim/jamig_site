@@ -1,3 +1,7 @@
 @import "tailwindcss";
-/* stylelint-disable-next-line at-rule-no-unknown */
+@import "./tokens.css";
+@import "./pattern.css";
+@import "./components.css";
+
+/* Подключаем все шаблоны и JS проекта как источники классов */
 @source "../../../**/*.{html,py,js}";

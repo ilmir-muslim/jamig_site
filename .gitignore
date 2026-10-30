@@ -1,7 +1,3 @@
 __pycache__/
+*.pyc
 db.sqlite3
-media/
-.vscode
-.venv
-.ruff_cache
-.codeassistant

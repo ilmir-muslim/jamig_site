@@ -1,0 +1,65 @@
+/* ============================================================
+   Дизайн-токены портала «Джамиг» (Tailwind CSS v4, @theme)
+   Концепция: «духовная современность» — тёплый пергаментный
+   фон, фирменный изумруд + глубокий синий, серифный акцентный
+   шрифт для заголовков, мягкие тени и большие скругления.
+   ============================================================ */
+
+@theme {
+  /* Фирменная палитра: изумрудно-нефритовый (исламский зелёный) */
+  --color-brand-50: #eefaf6;
+  --color-brand-100: #d5f2e9;
+  --color-brand-200: #afe4d6;
+  --color-brand-300: #7dd0bd;
+  --color-brand-400: #45b59f;
+  --color-brand-500: #1f9883;
+  --color-brand-600: #0f7b6a;
+  --color-brand-700: #0d6256;
+  --color-brand-800: #0e4e45;
+  --color-brand-900: #0e403a;
+  --color-brand-950: #04241f;
+
+  /* Глубокий синий (наследует бренд мечети #004B87) */
+  --color-deep-50: #eff5fc;
+  --color-deep-100: #dbeaf7;
+  --color-deep-200: #bed8f2;
+  --color-deep-300: #91bfe9;
+  --color-deep-400: #5d9ddd;
+  --color-deep-500: #387fd0;
+  --color-deep-600: #2566b4;
+  --color-deep-700: #1f5293;
+  --color-deep-800: #1d4577;
+  --color-deep-900: #1c3a63;
+  --color-deep-950: #11233f;
+
+  /* Тёплый золотой — только для тонких акцентов */
+  --color-gild-50: #fbf7ec;
+  --color-gild-100: #f5ecd2;
+  --color-gild-200: #ead7a5;
+  --color-gild-300: #ddba6f;
+  --color-gild-400: #d3a24a;
+  --color-gild-500: #c68b34;
+  --color-gild-600: #ab6d2a;
+  --color-gild-700: #8a5225;
+
+  /* Тёплые нейтральные («пергамент») вместо холодного slate */
+  --color-sand-50: #faf9f6;
+  --color-sand-100: #f3f1ea;
+  --color-sand-200: #e7e3d8;
+  --color-sand-300: #d5cfbf;
+  --color-sand-400: #b3aa94;
+  --color-sand-500: #8f856d;
+  --color-sand-600: #6f6653;
+  --color-sand-700: #574f41;
+  --color-sand-800: #3d3830;
+  --color-sand-900: #272420;
+  --color-sand-950: #171512;
+
+  /* Шрифты */
+  --font-display: "Playfair Display", "Amiri", Georgia, serif;
+  --font-body: "Inter", ui-sans-serif, system-ui, sans-serif;
+
+  /* Мягкие слоистые тени */
+  --shadow-soft: 0 1px 2px rgb(23 21 18 / 0.04), 0 8px 24px -12px rgb(23 21 18 / 0.12);
+  --shadow-lift: 0 2px 4px rgb(23 21 18 / 0.05), 0 16px 40px -16px rgb(23 21 18 / 0.2);
+}
