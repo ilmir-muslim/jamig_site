@@ -67,7 +67,7 @@
     min-height: calc(100vh - 56px);
     background-color: var(--studio-bg);
     color: var(--text-main);
-    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    font-family: 'Manrope', system-ui, -apple-system, sans-serif;
 }
 
 /* Базовые настройки для элементов студии (поверх preflight/bootstrap) */
@@ -82,9 +82,29 @@
 .studio-wrapper h3,
 .studio-wrapper h4,
 .studio-wrapper h5 {
-    font-family: 'Playfair Display', Georgia, serif;
+    font-family: 'Cormorant Garamond', 'Amiri', Georgia, serif;
     color: var(--sand-950);
-    letter-spacing: -0.01em;
+    letter-spacing: 0;
+}
+
+/* Cormorant Garamond — лёгкий сериф: компенсируем размер и насыщенность */
+.studio-wrapper h1,
+.studio-wrapper h2 {
+    font-weight: 600;
+    font-size: 1.18em;
+    line-height: 1.2;
+}
+
+.studio-wrapper h3,
+.studio-wrapper h4 {
+    font-weight: 600;
+    font-size: 1.1em;
+    line-height: 1.25;
+}
+
+.studio-wrapper h5 {
+    font-weight: 700;
+    font-size: 1.05em;
 }
 
 /* ===== САЙДБАР ===== */
@@ -108,7 +128,7 @@
     align-items: center;
     gap: 0.65rem;
     color: #f4faf7;
-    font-family: 'Playfair Display', Georgia, serif;
+    font-family: 'Cormorant Garamond', 'Amiri', Georgia, serif;
 }
 
 .sidebar-brand b {
@@ -233,7 +253,7 @@
 }
 
 .studio-page-title {
-    font-family: 'Playfair Display', Georgia, serif;
+    font-family: 'Cormorant Garamond', 'Amiri', Georgia, serif;
     font-size: clamp(1.6rem, 2.6vw, 2.2rem);
     font-weight: 700;
     color: var(--sand-950);
@@ -373,7 +393,7 @@
 
 .studio-wrapper .table-studio thead th {
     background: transparent;
-    font-family: 'Inter', sans-serif;
+    font-family: 'Manrope', sans-serif;
     font-weight: 600;
     color: var(--sand-500);
     padding: 0.6rem 1rem;
@@ -480,7 +500,7 @@
     text-transform: uppercase;
     letter-spacing: 0.06em;
     font-size: 0.75rem;
-    font-family: 'Inter', sans-serif;
+    font-family: 'Manrope', sans-serif;
 }
 
 .studio-wrapper .editor-sidebar {

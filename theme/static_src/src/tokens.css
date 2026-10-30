@@ -55,9 +55,11 @@
   --color-sand-900: #272420;
   --color-sand-950: #171512;
 
-  /* Шрифты */
-  --font-display: "Playfair Display", "Amiri", Georgia, serif;
-  --font-body: "Inter", ui-sans-serif, system-ui, sans-serif;
+  /* Шрифты: Manrope — современный геометричный гротеск с отличной
+     кириллицей (интерфейс); Cormorant Garamond — утончённый сериф с
+     полной кириллицей и арабской вязью через Amiri (заголовки). */
+  --font-display: "Cormorant Garamond", "Amiri", Georgia, serif;
+  --font-body: "Manrope", ui-sans-serif, system-ui, sans-serif;
 
   /* Мягкие слоистые тени */
   --shadow-soft: 0 1px 2px rgb(23 21 18 / 0.04), 0 8px 24px -12px rgb(23 21 18 / 0.12);
