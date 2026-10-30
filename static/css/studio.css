@@ -455,8 +455,16 @@
     align-items: start;
 }
 
+/* Редактор курса: уроки широкие — даём форме почти всю ширину окна,
+   иначе блоки добавления урока сжимаются и всё сбивается в кучу */
+.studio-wrapper .course-editor .editor-layout {
+    grid-template-columns: minmax(0, 1fr) minmax(300px, 340px);
+    gap: 1.5rem;
+}
+
 @media (max-width: 1200px) {
-    .studio-wrapper .editor-layout {
+    .studio-wrapper .editor-layout,
+    .studio-wrapper .course-editor .editor-layout {
         grid-template-columns: minmax(0, 1fr);
     }
     .studio-wrapper .editor-sidebar { position: static !important; }
@@ -711,6 +719,108 @@
     .studio-wrapper .col-md-4,
     .studio-wrapper .col-md-3,
     .studio-wrapper .col-md-2 { flex-basis: 100%; max-width: 100%; }
+}
+
+/* ===== РЕДАКТОР КУРСА: УРОКИ ===== */
+/* Карточки уроков и форма добавления нового урока — на всю ширину
+   колонки редактора; внутренние сетки не дают элементам скомкаться */
+.studio-wrapper .lesson-form.card,
+.studio-wrapper .new-lesson-form {
+    border: 1px solid var(--card-border);
+    border-radius: var(--radius);
+    background: var(--card-bg);
+    box-shadow: var(--shadow-sm);
+}
+
+.studio-wrapper .lesson-form .card-body,
+.studio-wrapper .new-lesson-form .card-body {
+    padding: clamp(1rem, 2vw, 1.5rem);
+}
+
+.studio-wrapper .new-lesson-form {
+    border: 2px dashed var(--brand-200);
+    background: var(--brand-50);
+    margin-bottom: 0;
+}
+
+.studio-wrapper .new-lesson-form h5 {
+    font-family: 'Cormorant Garamond', Georgia, serif;
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--sand-950);
+    margin: 0 0 1rem;
+    padding-bottom: 0.6rem;
+    border-bottom: 1px solid var(--sand-200);
+}
+
+/* Сетка «урок»: название + порядок + удаление */
+.studio-wrapper .lesson-grid-top {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 130px auto;
+    gap: 1rem;
+    align-items: end;
+    margin-bottom: 1rem;
+}
+
+/* Сетка материалов: видео / аудио / текст — три равные широкие колонки */
+.studio-wrapper .lesson-materials {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 1rem;
+}
+
+.studio-wrapper .material-field > label,
+.studio-wrapper .lesson-grid-top > div > label {
+    display: block;
+    font-weight: 600;
+    margin-bottom: 0.4rem;
+    color: var(--sand-600);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    font-size: 0.72rem;
+}
+
+.studio-wrapper .material-picker {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem;
+    background: var(--sand-50);
+    border: 1px solid var(--sand-200);
+    border-radius: 0.85rem;
+    padding: 0.55rem 0.7rem;
+    min-height: 3rem;
+}
+
+.studio-wrapper .selected-material-name {
+    flex: 1 1 auto;
+    min-width: 0;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--sand-800, var(--sand-700));
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.studio-wrapper .material-picker .btn {
+    flex-shrink: 0;
+    white-space: nowrap;
+}
+
+.studio-wrapper .lesson-actions-row {
+    display: flex;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+    margin-top: 1.1rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--sand-200);
+}
+
+@media (max-width: 768px) {
+    .studio-wrapper .lesson-grid-top {
+        grid-template-columns: minmax(0, 1fr);
+    }
 }
 
 /* ===== АДАПТИВНОСТЬ ===== */

@@ -1,0 +1,87 @@
+{# Рендер одного урока из lesson_formset в единой сетке редактора курса #}
+<div class="lesson-form card mb-3" data-form-index="{{ forloop.counter0 }}">
+  <div class="card-body">
+    <div class="lesson-grid-top">
+      <div>
+        <label>{{ lesson_form.title.label }}</label>
+        {{ lesson_form.title }}
+        {% if lesson_form.title.errors %}
+          <div class="text-danger small">{{ lesson_form.title.errors }}</div>
+        {% endif %}
+      </div>
+      <div>
+        <label>Порядок</label>
+        <input type="number" name="lessons-{{ forloop.counter0 }}-order"
+               class="form-control lesson-order-input"
+               value="{{ lesson_form.instance.order|default:0 }}" min="0">
+      </div>
+      <div>
+        <button type="button" class="btn btn-sm btn-outline-danger remove-lesson-btn" title="Удалить урок">
+          <i class="fas fa-trash-alt"></i>
+        </button>
+      </div>
+    </div>
+    <div class="mb-3">
+      <label>{{ lesson_form.description.label }}</label>
+      {{ lesson_form.description }}
+      {% if lesson_form.description.errors %}
+        <div class="text-danger small mt-1">{{ lesson_form.description.errors }}</div>
+      {% endif %}
+    </div>
+    <div class="lesson-materials">
+      <div class="material-field">
+        <label>Видео</label>
+        <div class="material-picker">
+          {{ lesson_form.video }}
+          {% if lesson_form.video.errors %}
+            <div class="text-danger small">{{ lesson_form.video.errors }}</div>
+          {% endif %}
+          <span class="selected-material-name" data-type="video">{% if lesson_form.instance.video %}{{ lesson_form.instance.video.title }}{% else %}Не выбрано{% endif %}</span>
+          <a href="{% url 'studio_video_create' %}?next={{ request.path }}&lesson_index={{ forloop.counter0 }}"
+             class="btn btn-sm btn-outline-secondary create-material-link">
+            <i class="fas fa-plus-circle"></i> Создать
+          </a>
+          <button type="button" class="btn btn-sm btn-outline-secondary pick-material-btn" data-type="video">
+            <i class="fas fa-search"></i> Выбрать
+          </button>
+        </div>
+      </div>
+      <div class="material-field">
+        <label>Аудио</label>
+        <div class="material-picker">
+          {{ lesson_form.audio }}
+          {% if lesson_form.audio.errors %}
+            <div class="text-danger small">{{ lesson_form.audio.errors }}</div>
+          {% endif %}
+          <span class="selected-material-name" data-type="audio">{% if lesson_form.instance.audio %}{{ lesson_form.instance.audio.title }}{% else %}Не выбрано{% endif %}</span>
+          <a href="{% url 'studio_audio_create' %}?next={{ request.path }}&lesson_index={{ forloop.counter0 }}"
+             class="btn btn-sm btn-outline-secondary create-material-link">
+            <i class="fas fa-plus-circle"></i> Создать
+          </a>
+          <button type="button" class="btn btn-sm btn-outline-secondary pick-material-btn" data-type="audio">
+            <i class="fas fa-search"></i> Выбрать
+          </button>
+        </div>
+      </div>
+      <div class="material-field">
+        <label>Текст</label>
+        <div class="material-picker">
+          {{ lesson_form.text }}
+          {% if lesson_form.text.errors %}
+            <div class="text-danger small">{{ lesson_form.text.errors }}</div>
+          {% endif %}
+          <span class="selected-material-name" data-type="text">{% if lesson_form.instance.text %}{{ lesson_form.instance.text.title }}{% else %}Не выбрано{% endif %}</span>
+          <a href="{% url 'studio_text_create' %}?next={{ request.path }}&lesson_index={{ forloop.counter0 }}"
+             class="btn btn-sm btn-outline-secondary create-material-link">
+            <i class="fas fa-plus-circle"></i> Создать
+          </a>
+          <button type="button" class="btn btn-sm btn-outline-secondary pick-material-btn" data-type="text">
+            <i class="fas fa-search"></i> Выбрать
+          </button>
+        </div>
+      </div>
+    </div>
+    {{ lesson_form.non_field_errors }}
+    {% for hidden in lesson_form.hidden_fields %}{{ hidden }}{% endfor %}
+  </div>
+</div>
