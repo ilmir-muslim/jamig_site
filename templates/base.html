@@ -27,13 +27,13 @@
     <div class="pattern-overlay fixed inset-0 pointer-events-none z-0" aria-hidden="true"></div>
 
     <!-- ================= ФОНОВАЯ ГЕОМЕТРИЯ (фирменные цвета мечети) ================= -->
-    <div class="fixed top-0 left-0 w-[110px] md:w-[190px] h-[110px] md:h-[190px] pointer-events-none z-0 opacity-90">
+    <div class="fixed top-0 left-0 w-27.5 md:w-47.5 h-27.5 md:h-47.5 pointer-events-none z-0 opacity-90">
         <div class="absolute top-0 left-0 w-full h-[60%] bg-brand-600/80" style="clip-path: polygon(0 0, 100% 0, 0 100%);"></div>
         <div class="absolute top-0 left-0 w-[60%] h-full bg-deep-800/80" style="clip-path: polygon(0 0, 100% 0, 0 100%);"></div>
         <div class="absolute top-0 left-0 w-[85%] h-[85%] bg-deep-600/60" style="clip-path: polygon(30% 0, 100% 0, 0 100%, 0 30%);"></div>
     </div>
 
-    <div class="fixed bottom-0 right-0 w-[110px] md:w-[190px] h-[110px] md:h-[190px] pointer-events-none z-0 opacity-90">
+    <div class="fixed bottom-0 right-0 w-27.5 md:w-47.5 h-27.5 md:h-47.5 pointer-events-none z-0 opacity-90">
         <div class="absolute bottom-0 right-0 w-full h-[60%] bg-brand-600/80" style="clip-path: polygon(100% 100%, 0 100%, 100% 0);"></div>
         <div class="absolute bottom-0 right-0 w-[60%] h-full bg-deep-800/80" style="clip-path: polygon(100% 100%, 100% 0, 0 100%);"></div>
         <div class="absolute bottom-0 right-0 w-[85%] h-[85%] bg-deep-600/60" style="clip-path: polygon(100% 70%, 100% 0, 0 100%, 70% 100%);"></div>
@@ -72,6 +72,8 @@
                     <ul class="dropdown-menu menu-panel border-0 shadow-none p-2 mt-2">
                         <li><a href="{% url 'video_list' %}" class="dropdown-item"><i class="fas fa-video me-2 text-brand-600 opacity-70"></i>Видео</a></li>
                         <li><a href="{% url 'audio_list' %}" class="dropdown-item"><i class="fas fa-headphones me-2 text-brand-600 opacity-70"></i>Аудио</a></li>
+                        <li><a href="{% url 'text_list' %}" class="dropdown-item"><i class="fas fa-file-lines me-2 text-brand-600 opacity-70"></i>Тексты</a></li>
+                        <li><a href="{% url 'course_list' %}" class="dropdown-item"><i class="fas fa-graduation-cap me-2 text-brand-600 opacity-70"></i>Курсы</a></li>
                         {% if menu_categories %}
                         <li><hr class="dropdown-divider border-sand-200"></li>
                         {% for cat in menu_categories %}
