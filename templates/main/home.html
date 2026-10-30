@@ -41,7 +41,7 @@
             <!-- ================= Актуальное видео ================= -->
             {% if current_video %}
             <div class="bg-white rounded-[1.6rem] shadow-soft border border-sand-200 overflow-hidden flex flex-col md:flex-row">
-                <a href="{% url 'video_detail' current_video.slug %}" class="md:w-2/5 bg-sand-950 relative group cursor-pointer flex items-center justify-center min-h-[250px] overflow-hidden">
+                <a href="{% url 'video_detail' current_video.slug %}" class="md:w-2/5 bg-sand-950 relative group cursor-pointer flex items-center justify-center min-h-62.5 overflow-hidden">
                     {% if current_video.thumbnail %}
                         <img src="{{ current_video.thumbnail.url }}" alt="{{ current_video.title }}" class="absolute inset-0 w-full h-full object-cover opacity-75 group-hover:opacity-55 group-hover:scale-[1.03] transition-all duration-500">
                     {% else %}

@@ -10,3 +10,4 @@ class AccountsConfig(AppConfig):
     def ready(self):
         """Вызывается при старте Django: активирует сигналы приложения."""
         # Активируем сигналы
+        import accounts.signals  # noqa: F401
