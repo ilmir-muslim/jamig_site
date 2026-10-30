@@ -1,4 +1,7 @@
 __pycache__/
 *.pyc
+.vscode/settings.json
+media/
 db.sqlite3
 node_modules/
+    
