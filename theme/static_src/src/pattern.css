@@ -64,6 +64,13 @@
     background: var(--color-brand-100);
     font-weight: 600;
   }
+  .nav-avatar {
+    width: 1.5rem;
+    height: 1.5rem;
+    border-radius: 999px;
+    object-fit: cover;
+    border: 1px solid rgb(255 255 255 / 0.7);
+  }
 
   .nav-cta {
     display: inline-flex;

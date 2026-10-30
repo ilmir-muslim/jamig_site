@@ -1,0 +1,250 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Мой профиль — Мечеть «Джамиг»{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl w-full mx-auto">
+
+    <!-- Шапка профиля -->
+    <section class="panel-card p-6 md:p-8 flex flex-col sm:flex-row items-center gap-6 mb-8">
+        <div class="profile-avatar-shell shrink-0">
+            {% if user.avatar %}
+                <img src="{{ user.avatar.url }}" alt="{{ user.get_full_name }}"
+                     class="profile-avatar-img" />
+            {% else %}
+                <span class="profile-avatar-placeholder">
+                    <i class="fas fa-user"></i>
+                </span>
+            {% endif %}
+        </div>
+        <div class="text-center sm:text-start">
+            <span class="eyebrow">Личный кабинет</span>
+            <h1 class="font-display text-3xl font-bold mt-1 mb-1">
+                {{ user.get_full_name|default:"Без имени" }}
+            </h1>
+            <p class="text-sand-500 m-0 text-sm">{{ user.email }}</p>
+            <div class="mt-3 flex flex-wrap justify-center sm:justify-start gap-2">
+                <span class="profile-badge">
+                    <i class="fas fa-tag me-1.5"></i>{{ user.get_user_type_display }}
+                </span>
+                {% if user.is_verified %}
+                <span class="profile-badge profile-badge--verified">
+                    <i class="fas fa-circle-check me-1.5"></i>Подтверждённый аккаунт
+                </span>
+                {% endif %}
+                <span class="profile-badge">
+                    <i class="far fa-calendar me-1.5"></i>С нами с {{ user.created_at|date:"d.m.Y" }}
+                </span>
+            </div>
+        </div>
+    </section>
+
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+
+        <!-- Редактирование профиля -->
+        <section class="panel-card p-6 md:p-7">
+            <h2 class="section-heading mb-5"><i class="fas fa-id-card me-2 text-brand-600"></i>Данные профиля</h2>
+
+            <form method="post" enctype="multipart/form-data" novalidate>
+                {% csrf_token %}
+
+                {% if form.non_field_errors %}
+                    <div class="alert alert-danger mb-4 flex-col items-start!">
+                        {% for error in form.non_field_errors %}<p class="mb-1">{{ error }}</p>{% endfor %}
+                    </div>
+                {% endif %}
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div class="field-group">
+                        <label class="form-label" for="{{ form.first_name.id_for_label }}">Имя</label>
+                        {{ form.first_name }}
+                        {{ form.first_name.errors }}
+                    </div>
+                    <div class="field-group">
+                        <label class="form-label" for="{{ form.last_name.id_for_label }}">Фамилия</label>
+                        {{ form.last_name }}
+                        {{ form.last_name.errors }}
+                    </div>
+                </div>
+
+                <div class="field-group">
+                    <label class="form-label" for="{{ form.phone_number.id_for_label }}">Номер телефона</label>
+                    {{ form.phone_number }}
+                    <div class="form-text">Формат: +79999999999 (необязательно)</div>
+                    {{ form.phone_number.errors }}
+                </div>
+
+                <div class="field-group">
+                    <label class="form-label" for="{{ form.avatar.id_for_label }}">Фото профиля</label>
+                    {{ form.avatar }}
+                    {% if user.avatar %}
+                    <div class="form-text">
+                        Оставьте галочку «Очистить», чтобы удалить текущее фото.
+                    </div>
+                    {% endif %}
+                    {{ form.avatar.errors }}
+                </div>
+
+                <div class="field-group">
+                    <label class="form-label" for="{{ form.bio.id_for_label }}">О себе</label>
+                    {{ form.bio }}
+                    <div class="form-text">Максимум 500 символов</div>
+                    {{ form.bio.errors }}
+                </div>
+
+                <button type="submit" name="save_profile" value="1" class="btn btn-primary w-100 py-3! mt-2">
+                    <i class="fas fa-floppy-disk"></i> Сохранить изменения
+                </button>
+            </form>
+        </section>
+
+        <!-- Аккаунт и смена пароля -->
+        <div class="space-y-8">
+            <section class="panel-card p-6 md:p-7">
+                <h2 class="section-heading mb-4"><i class="fas fa-envelope me-2 text-brand-600"></i>Учётная запись</h2>
+                <dl class="profile-info-list m-0">
+                    <div class="profile-info-row">
+                        <dt>Email</dt>
+                        <dd>{{ user.email }}</dd>
+                    </div>
+                    <div class="profile-info-row">
+                        <dt>Тип аккаунта</dt>
+                        <dd>{{ user.get_user_type_display }}</dd>
+                    </div>
+                    <div class="profile-info-row">
+                        <dt>Дата регистрации</dt>
+                        <dd>{{ user.created_at|date:"d F Y" }}</dd>
+                    </div>
+                    <div class="profile-info-row">
+                        <dt>Последнее обновление</dt>
+                        <dd>{{ user.updated_at|date:"d F Y, H:i" }}</dd>
+                    </div>
+                </dl>
+            </section>
+
+            <section class="panel-card p-6 md:p-7">
+                <h2 class="section-heading mb-5"><i class="fas fa-lock me-2 text-brand-600"></i>Смена пароля</h2>
+
+                <form method="post" novalidate>
+                    {% csrf_token %}
+
+                    {% if password_form.non_field_errors %}
+                        <div class="alert alert-danger mb-4 flex-col items-start!">
+                            {% for error in password_form.non_field_errors %}<p class="mb-1">{{ error }}</p>{% endfor %}
+                        </div>
+                    {% endif %}
+
+                    <div class="field-group">
+                        <label class="form-label" for="{{ password_form.old_password.id_for_label }}">Текущий пароль</label>
+                        {{ password_form.old_password }}
+                        {{ password_form.old_password.errors }}
+                    </div>
+
+                    <div class="field-group">
+                        <label class="form-label" for="{{ password_form.new_password1.id_for_label }}">Новый пароль</label>
+                        {{ password_form.new_password1 }}
+                        {{ password_form.new_password1.errors }}
+                    </div>
+
+                    <div class="field-group">
+                        <label class="form-label" for="{{ password_form.new_password2.id_for_label }}">Подтверждение нового пароля</label>
+                        {{ password_form.new_password2 }}
+                        {{ password_form.new_password2.errors }}
+                    </div>
+
+                    <button type="submit" name="change_password" value="1" class="btn btn-outline-dark w-100 py-3! mt-2">
+                        <i class="fas fa-key"></i> Изменить пароль
+                    </button>
+                </form>
+            </section>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .panel-card {
+        background: rgba(255, 255, 255, 0.85);
+        backdrop-filter: blur(12px);
+        border: 1px solid rgba(231, 220, 200, 0.8);
+        border-radius: 1.4rem;
+        box-shadow: 0 12px 34px -20px rgb(23 21 18 / 0.25);
+    }
+    .section-heading {
+        font-family: "Cormorant Garamond", serif;
+        font-weight: 700;
+        font-size: 1.35rem;
+        color: var(--color-deep-800, #2c2620);
+    }
+    .profile-avatar-shell {
+        width: 6.5rem;
+        height: 6.5rem;
+        border-radius: 50%;
+        overflow: hidden;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: linear-gradient(135deg, #f3ecdf, #e7dcc8);
+        border: 3px solid rgba(191, 155, 88, 0.45);
+        box-shadow: 0 8px 24px -14px rgb(23 21 18 / 0.35);
+    }
+    .profile-avatar-img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+    .profile-avatar-placeholder {
+        font-size: 2rem;
+        color: #b7a684;
+    }
+    .profile-badge {
+        display: inline-flex;
+        align-items: center;
+        font-size: 0.75rem;
+        font-weight: 600;
+        padding: 0.3rem 0.75rem;
+        border-radius: 999px;
+        background: rgba(231, 220, 200, 0.55);
+        border: 1px solid rgba(191, 155, 88, 0.35);
+        color: #6b5d45;
+    }
+    .profile-badge--verified {
+        background: rgba(46, 125, 92, 0.12);
+        border-color: rgba(46, 125, 92, 0.4);
+        color: #2e7d5c;
+    }
+    .profile-info-list {
+        display: flex;
+        flex-direction: column;
+        gap: 0.65rem;
+    }
+    .profile-info-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: baseline;
+        gap: 1rem;
+        padding-bottom: 0.65rem;
+        border-bottom: 1px dashed rgba(231, 220, 200, 0.9);
+    }
+    .profile-info-row:last-child {
+        border-bottom: none;
+        padding-bottom: 0;
+    }
+    .profile-info-row dt {
+        font-size: 0.8rem;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+        color: #a08e6f;
+        font-weight: 600;
+    }
+    .profile-info-row dd {
+        margin: 0;
+        font-size: 0.925rem;
+        color: #3c352c;
+        text-align: right;
+        word-break: break-word;
+    }
+</style>
+{% endblock %}

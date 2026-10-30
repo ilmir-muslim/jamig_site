@@ -84,12 +84,29 @@
                 <span class="w-px h-5 bg-sand-300 mx-1.5 hidden md:block" aria-hidden="true"></span>
 
                 {% if user.is_authenticated %}
-                    {% if user.user_type == 'author' %}
-                    <a href="{% url 'studio_dashboard' %}" class="nav-pill font-semibold"><i class="fas fa-feather-pointed me-1.5 text-brand-600"></i>Студия</a>
-                    {% endif %}
-                    <a href="{% url 'logout' %}" class="nav-pill text-sand-500 hover:text-red-600" title="Выйти">
-                        <i class="fas fa-arrow-right-from-bracket me-1.5"></i><span class="hidden sm:inline">{{ user.first_name|default:"Выйти" }}</span>
-                    </a>
+                    <div class="dropdown">
+                        <a href="#" class="nav-pill dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+                            {% if user.avatar %}
+                                <img src="{{ user.avatar.url }}" alt="" class="nav-avatar d-inline-block align-middle me-1">
+                            {% else %}
+                                <i class="fas fa-user-circle me-1.5 text-brand-600"></i>
+                            {% endif %}
+                            <span class="hidden sm:inline">{{ user.first_name|default:"Профиль" }}</span>
+                        </a>
+                        <ul class="dropdown-menu menu-panel border-0 shadow-none p-2 mt-2">
+                            <li><a href="{% url 'profile' %}" class="dropdown-item"><i class="fas fa-id-card me-2 text-brand-600 opacity-70"></i>Мой профиль</a></li>
+                            {% if user.user_type == 'author' %}
+                            <li><a href="{% url 'studio_dashboard' %}" class="dropdown-item"><i class="fas fa-feather-pointed me-2 text-brand-600 opacity-70"></i>Студия</a></li>
+                            {% endif %}
+                            <li><hr class="dropdown-divider border-sand-200"></li>
+                            <li>
+                                <form method="post" action="{% url 'logout' %}">
+                                    {% csrf_token %}
+                                    <button type="submit" class="dropdown-item"><i class="fas fa-arrow-right-from-bracket me-2 opacity-70"></i>Выйти</button>
+                                </form>
+                            </li>
+                        </ul>
+                    </div>
                 {% else %}
                     <a href="{% url 'login' %}" class="nav-pill">Войти</a>
                     <a href="{% url 'register' %}" class="nav-cta ms-0.5">Регистрация</a>
