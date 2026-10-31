@@ -43,6 +43,13 @@
 
     * { box-sizing: border-box; }
 
+    html {
+        /* WeasyPrint понимает только @page size (без width/height на div'ах),
+           поэтому весь макет листа A3 описываем здесь и в .sheet-body. */
+        margin: 0;
+        padding: 0;
+    }
+
     body {
         font-family: "Times New Roman", Tahoma, "Liberation Serif", Georgia, serif;
         font-size: 9.6pt;
@@ -51,27 +58,47 @@
         margin: 0;
     }
 
-    .print-sheet { page-break-after: always; }
-    .print-sheet:last-child { page-break-after: auto; }
+    /* Каждый физический лист = одна PDF-страница. Обрезов между «полови-
+       нами» разворота быть не должно — они всегда ровно по половине поля. */
+    .print-sheet { page-break-after: always; break-after: page; }
+    .print-sheet:last-child { page-break-after: auto; break-after: auto; }
 
-    /* ---------- Колонки: полоса льётся в 4 колонки как страница газеты ---------- */
+    .sheet-body {
+        display: flex;
+        flex-direction: row;
+        align-items: stretch;
+        gap: 8mm;
+        /* 420mm − 12mm×2 (поля @page) = 396mm на разворот */
+        height: 265mm;
+    }
+
+    /* Одна печатная полоса (половина разворота): ~194mm ширины. */
+    .sheet-half {
+        flex: 1 1 0;
+        min-width: 0;
+        overflow: hidden;
+        position: relative;
+    }
+
+    /* Полоса льётся строго внутри своей половины разворота: 3 колонки. */
     .news-columns {
-        column-count: 4;
-        column-gap: 7mm;
+        column-count: 3;
+        column-gap: 6mm;
         column-rule: 0.4pt solid #cfc7ba;
         column-fill: auto;
+        height: 265mm;
     }
 
     /* ---------- Мачта (шапка только на первой полосе) ---------- */
     .print-masthead {
         column-span: all;
         text-align: center;
-        padding-bottom: 4mm;
-        margin-bottom: 5mm;
+        padding-bottom: 3mm;
+        margin-bottom: 4mm;
         border-bottom: 2.5pt solid #171512;
     }
     .print-masthead .brand {
-        font-size: 30pt;
+        font-size: 24pt;
         font-weight: 700;
         letter-spacing: 0.03em;
         margin: 0 0 1.5mm;
@@ -239,73 +266,80 @@
 </style>
 </head>
 <body>
-{% for page_blocks in pages %}
+{# sheets — список физических листов A3. Каждый лист = одна PDF-страница:  #}
+{# left/right половины разворота в spread-порядке (1+N, N-1+2, ...).       #}
+{% for sheet in sheets %}
 <div class="print-sheet">
-    <div class="news-columns">
+    <div class="sheet-body">
+        {% for half in sheet %}
+        <section class="sheet-half">
+            <div class="news-columns">
 
-        {% if forloop.first %}
-        <header class="print-masthead">
-            <h1 class="brand">{{ issue.publication_name }}</h1>
-            {% if settings_tagline %}<div class="tagline">{{ settings_tagline }}</div>{% endif %}
-            <span class="meta">
-                <span>№ {{ issue.number }}</span>
-                <span>{{ issue.issue_date|date:"j F Y" }}</span>
-                {% if issue.editor.get_full_name %}<span>Редактор: {{ issue.editor.get_full_name }}</span>{% endif %}
-                <span>{{ issue.print_pages }} полос</span>
-            </span>
-        </header>
-        {% else %}
-        <div class="print-page-label">
-            {% if forloop.last %}Последняя полоса · № {{ issue.number }}{% else %}№ {{ issue.number }} · {{ issue.issue_date|date:"d.m.Y" }}{% endif %}
-        </div>
-        {% endif %}
-
-        {% for block in page_blocks %}
-        <article class="print-block size-{{ block.size }}{% if block.is_ad %} is-ad{% endif %}">
-            <div class="print-kicker">{{ block.get_block_type_display }}{% if block.is_front_page and forloop.parentloop.first %} · первая полоса{% endif %}</div>
-            <h2 class="print-headline">{{ block.title }}</h2>
-            {% if block.subtitle %}<div class="print-subheadline">{{ block.subtitle }}</div>{% endif %}
-            {% if block.author_name %}<div class="print-byline">{{ block.author_name }}</div>{% endif %}
-
-            {% if block.photo %}
-            <figure class="print-photo">
-                <img src="{{ block.print_photo_url }}" alt="{{ block.photo_caption|default:block.title }}">
-                {% if block.photo_caption %}<figcaption>{{ block.photo_caption }}</figcaption>{% endif %}
-            </figure>
-            {% endif %}
-
-            <div class="print-text">{{ block.print_content_parts|safe }}</div>
-
-            {% if block.print_gallery %}
-            <div class="print-gallery">
-                {% for item in block.print_gallery %}
-                <div class="g-item">
-                    <img src="{{ item.url }}" alt="{{ item.caption }}">
-                    {% if item.caption %}<div class="g-cap">{{ item.caption }}</div>{% endif %}
+                {% if half.is_front %}
+                <header class="print-masthead">
+                    <h1 class="brand">{{ issue.publication_name }}</h1>
+                    {% if settings_tagline %}<div class="tagline">{{ settings_tagline }}</div>{% endif %}
+                    <span class="meta">
+                        <span>№ {{ issue.number }}</span>
+                        <span>{{ issue.issue_date|date:"d.m.Y" }}</span>
+                        {% if issue.editor.get_full_name %}<span>Ред.: {{ issue.editor.get_full_name }}</span>{% endif %}
+                    </span>
+                </header>
+                {% else %}
+                <div class="print-page-label">
+                    {% if half.page_no %}Стр. {{ half.page_no }} · № {{ issue.number }} · {{ issue.issue_date|date:"d.m.Y" }}{% endif %}
                 </div>
+                {% endif %}
+
+                {% for block in half.blocks %}
+                <article class="print-block size-{{ block.size }}{% if block.is_ad %} is-ad{% endif %}">
+                    <div class="print-kicker">{{ block.get_block_type_display }}{% if half.is_front and block.is_front_page %} · первая полоса{% endif %}</div>
+                    <h2 class="print-headline">{{ block.title }}</h2>
+                    {% if block.subtitle %}<div class="print-subheadline">{{ block.subtitle }}</div>{% endif %}
+                    {% if block.author_name %}<div class="print-byline">{{ block.author_name }}</div>{% endif %}
+
+                    {% if block.photo %}
+                    <figure class="print-photo">
+                        <img src="{{ block.print_photo_url }}" alt="{{ block.photo_caption|default:block.title }}">
+                        {% if block.photo_caption %}<figcaption>{{ block.photo_caption }}</figcaption>{% endif %}
+                    </figure>
+                    {% endif %}
+
+                    <div class="print-text">{{ block.print_content_parts|safe }}</div>
+
+                    {% if block.print_gallery %}
+                    <div class="print-gallery">
+                        {% for item in block.print_gallery %}
+                        <div class="g-item">
+                            <img src="{{ item.url }}" alt="{{ item.caption }}">
+                            {% if item.caption %}<div class="g-cap">{{ item.caption }}</div>{% endif %}
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+
+                    {% if block.is_ad %}
+                    <div class="ad-footer">
+                        {% if block.advertiser_name %}<div class="advertiser">{{ block.advertiser_name }}</div>{% endif %}
+                        {% if block.advertiser_contact %}<div class="ad-contacts">{{ block.advertiser_contact }}</div>{% endif %}
+                    </div>
+                    {% endif %}
+                </article>
+                {% empty %}
+                {% if half.is_front %}
+                <p style="column-span: all; text-align:center;">В выпуске пока нет материалов.</p>
+                {% endif %}
                 {% endfor %}
-            </div>
-            {% endif %}
 
-            {% if block.is_ad %}
-            <div class="ad-footer">
-                {% if block.advertiser_name %}<div class="advertiser">{{ block.advertiser_name }}</div>{% endif %}
-                {% if block.advertiser_contact %}<div class="ad-contacts">{{ block.advertiser_contact }}</div>{% endif %}
+                {% if half.is_last %}
+                <footer class="print-colophon">
+                    {% for line in colophon %}<div>{{ line }}</div>{% endfor %}
+                    <div>Макет собран в электронном конструкторе · выгрузка {{ generated_at|date:"d.m.Y H:i" }} · печать A3 двусторонно, полосы 1–{{ total_pages }}</div>
+                </footer>
+                {% endif %}
             </div>
-            {% endif %}
-        </article>
-        {% empty %}
-        {% if forloop.first %}
-        <p style="column-span: all; text-align:center;">В выпуске пока нет материалов.</p>
-        {% endif %}
+        </section>
         {% endfor %}
-
-        {% if forloop.last %}
-        <footer class="print-colophon">
-            {% for line in colophon %}<div>{{ line }}</div>{% endfor %}
-            <div>Макет собран в электронном конструкторе · выгрузка {{ generated_at|date:"d.m.Y H:i" }} · печать A3, стороны 1–{{ issue.print_pages }}</div>
-        </footer>
-        {% endif %}
     </div>
 </div>
 {% endfor %}

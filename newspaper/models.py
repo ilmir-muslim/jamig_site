@@ -237,46 +237,107 @@ class NewspaperIssue(models.Model):
         "ad": 1000,
     }
 
-    def build_print_pages(self):
-        """Разливает материалы конструктора по печатным полосам.
+    def estimate_block_height_mm(self, block):
+        """Грубая оценка высоты материала в мм одной колонки полосы.
 
-        Полоса 1 — первая страница (материалы с флагом «первая полоса»),
-        последняя полоса — обложка с выходными данными; остальные заполняются
-        материалами по порядку. Если материалов больше, чем полос, лишние
-        доливаются на последнюю текстовую полосу (WeasyPrint разобьёт их по
-        колонкам), поэтому пустых страниц не остаётся.
+        Используется для автоматической раскладки печатной версии: WeasyPrint
+        сам разбивает текст по колонкам, но число полос и распределение
+        материалов по ним нужно посчитать заранее, чтобы не оставлять
+        пустых страниц.
+        """
+        text = re.sub(r"<[^>]+>", " ", block.content or "")
+        chars = len(text.strip())
+        # ~55 знаков в строке узкой газетной колонки, ~4.7 мм на строку
+        mm = (chars / 55.0) * 4.7
+        if block.photo:
+            mm += 95 if block.size in ("lead", "large") else 60
+        mm += len(block.print_gallery or []) * 55
+        if block.subtitle:
+            mm += 10
+        if block.author_name:
+            mm += 6
+        return max(25.0, mm)
+
+    def build_print_pages(self):
+        """Разливает материалы конструктора по печатным полосам (сторонам).
+
+        Каждая полоса — ровно одна половина разворота A3: 3 колонки шириной
+        ~60 мм и высотой ~250 мм (ёмкость полосы ~750 мм колоночного текста).
+        Материал, который целиком не влезает в полосу, WeasyPrint продолжит
+        в следующей колонке той же полосы. Пустых страниц быть не должно:
+        контент распределяется РОВНО по N полосам; если материалов больше,
+        чем влезает — число полос автоматически расширяется до следующего
+        кратного 4 (для шитья степлером).
         """
         blocks = list(self.blocks.all().order_by("order", "id"))  # type: ignore[attr-defined]
-        pages_count = self.print_pages
+        page_cap = 750.0  # мм колоночной высоты на одну полосу (3 × 250)
+
         front = [b for b in blocks if b.is_front_page]
         rest = [b for b in blocks if not b.is_front_page]
         page1 = front or rest[:1]
         pool = rest[1:] if (not front and page1) else rest
 
-        pages = []
-        used_capacity = 0
-        capacity1 = sum(self._PAGE_CAPACITY.get(b.size, 1300) for b in page1) or 1
-        remaining = []
-        for b in pool:
-            weight = self._PAGE_CAPACITY.get(b.size, 1300)
-            if used_capacity + weight <= capacity1 * 1.6:
-                page1.append(b)
-                used_capacity += weight
-            else:
-                remaining.append(b)
-        pages.append(page1)
+        heights = {b.pk: self.estimate_block_height_mm(b) for b in blocks}
+        total_h = sum(heights[b.pk] for b in blocks) or page_cap
 
-        inner_count = pages_count - 2
-        if inner_count > 0:
-            per_page = max(1, -(-len(remaining) // inner_count)) if remaining else 1
-            for i in range(inner_count):
-                pages.append(remaining[i * per_page:(i + 1) * per_page])
-            overflow = remaining[inner_count * per_page:]
-        else:
-            overflow = remaining
-        # Последняя полоса: оставшиеся материалы + выходные данные
-        pages.append(overflow)
+        pages_count = max(self.print_pages, -(-int(total_h) // int(page_cap)) or 1)
+        if pages_count % 4:
+            pages_count = ((pages_count + 3) // 4) * 4
+
+        ordered = list(page1) + list(pool)
+        per_cap = max(total_h / pages_count, 1.0)
+        pages: list[list] = [[] for _ in range(pages_count)]
+        idx, acc = 0, 0.0
+        for b in ordered:
+            h = heights[b.pk]
+            # Полоса уже с контентом и следующий блок её переполнит —
+            # переходим к следующей полосе. Последний блок всегда остаётся
+            # на последней полосе (там же выходные данные) — WeasyPrint
+            # разобьёт его по колонкам.
+            if idx < pages_count - 1 and acc > 0 and acc + h > per_cap:
+                idx += 1
+                acc = 0.0
+            pages[idx].append(b)
+            acc += h
         return pages
+
+    def build_print_sheets(self):
+        """Собирает физические листы A3 для двусторонней печати «книжкой».
+
+        Возвращает список листов; каждый лист — это [левая_половина,
+        правая_половина], где половина — dict с номером полосы, её
+        материалами и флагами ``is_front`` / ``is_last``.
+
+        Порядок spread-фольги (как в типографии):
+          сторона 1 листа: полоса 1 (титул) | полоса N (задняя обложка)
+          сторона 2 листа: полоса N-1       | полоса 2
+        После складывания и шитья степлером страницы идут 1..N по порядку.
+        """
+        pages = self.build_print_pages()
+        n = len(pages)
+        order = []  # попарно: (левая, правая) для каждой стороны листа
+        lo, hi = 0, n - 1
+        left_first = True
+        while lo <= hi:
+            pair = (lo, hi) if left_first else (hi, lo)
+            order.append(pair)
+            left_first = not left_first
+            lo += 1
+            hi -= 1
+        sheets = []
+        for side in order:
+            halves = []
+            for idx in side:
+                halves.append(
+                    {
+                        "page_no": idx + 1,
+                        "blocks": pages[idx],
+                        "is_front": idx == 0,
+                        "is_last": idx == n - 1,
+                    }
+                )
+            sheets.append(halves)
+        return sheets
 
     def colophon_lines(self):
         """Выходные данные для последней полосы печатной версии."""

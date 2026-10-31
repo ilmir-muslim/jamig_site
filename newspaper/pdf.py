@@ -27,7 +27,6 @@ def build_issue_pdf(issue) -> bytes:
     """
     from weasyprint import HTML  # импорт здесь: модуль опционален для окружения
 
-    pages = issue.build_print_pages()
     try:
         settings_obj = NewspaperSettings.load()
     except Exception:
@@ -36,7 +35,8 @@ def build_issue_pdf(issue) -> bytes:
         "newspaper/issue_print.html",
         {
             "issue": issue,
-            "pages": pages,
+            "sheets": issue.build_print_sheets(),
+            "total_pages": len(issue.build_print_pages()),
             "colophon": issue.colophon_lines(),
             "settings_tagline": settings_obj.tagline if settings_obj else "",
             "generated_at": timezone.localtime(),
