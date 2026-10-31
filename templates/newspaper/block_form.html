@@ -3,6 +3,7 @@
 {% block editor_title %}Материал: {{ block.title|truncatechars:60 }}{% endblock %}
 {% block editor_subtitle %}<p class="studio-page-subtitle">Полоса выпуска № {{ issue.number }} — «{{ issue.title }}»</p>{% endblock %}
 {% block editor_actions %}
+<a href="{% url 'newspaper_editor_block_duplicate' block.pk %}" class="btn btn-outline-secondary" title="Создать копию материала"><i class="far fa-copy me-1"></i>Дублировать</a>
 <a href="{% url 'newspaper_editor_issue_edit' issue.pk %}" class="btn btn-outline-secondary"><i class="fas fa-arrow-left me-1"></i>К выпуску</a>
 {% endblock %}
 
@@ -35,25 +36,49 @@
                     {{ form.subtitle }}
                 </div>
                 <div class="col-md-4">
+                    <label class="form-label" for="{{ form.size.id_for_label }}">Размер в вёрстке</label>
+                    {{ form.size }}
+                    <div class="form-text">Самый крупный материал первой полосы задаёт заголовок анонса на главной.</div>
+                </div>
+                <div class="col-md-4">
                     <label class="form-label" for="{{ form.author_name.id_for_label }}">Автор материала</label>
                     {{ form.author_name }}
                 </div>
-                <div class="col-12">
-                    <label class="form-label" for="{{ form.content.id_for_label }}">Текст (каждый абзац — с новой строки)</label>
-                    {{ form.content }}
-                </div>
-                <div class="col-md-5">
-                    <label class="form-label" for="{{ form.photo.id_for_label }}">Фотография</label>
-                    {{ form.photo }}
-                    {% if block.photo %}<small class="text-muted">Текущее: {{ block.photo.name }}</small>{% endif %}
-                </div>
-                <div class="col-md-5">
-                    <label class="form-label" for="{{ form.photo_caption.id_for_label }}">Подпись к фото</label>
-                    {{ form.photo_caption }}
-                </div>
-                <div class="col-md-2">
-                    <label class="form-label" for="{{ form.order.id_for_label }}">Порядок</label>
+                <div class="col-md-6">
+                    <label class="form-label" for="{{ form.order.id_for_label }}">Порядок (полоса)</label>
                     {{ form.order }}
+                </div>
+                <div class="col-md-2 d-flex align-items-end pb-2">
+                    <div class="form-check">
+                        {{ form.is_front_page }}
+                        <label class="form-check-label" for="{{ form.is_front_page.id_for_label }}">Первая полоса</label>
+                    </div>
+                </div>
+                <div class="col-12">
+                    <label class="form-label" for="{{ form.content.id_for_label }}">Текст статьи</label>
+                    {{ form.content }}
+                    <div class="form-text">
+                        Каждый абзац — с новой строки. Разметка: <code>##</code>/<code>###</code> — заголовки секций,
+                        <code>&gt;</code> — цитата-врезка, <code>---</code> — разделитель; допускается безопасная inline-разметка
+                        <code>&lt;b&gt;</code>, <code>&lt;i&gt;</code>, <code>&lt;a href&gt;</code>.
+                    </div>
+                </div>
+                <div class="col-md-5">
+                    <label class="form-label" for="{{ form.photo.id_for_label }}">Главное фото</label>
+                    {{ form.photo }}
+                    {% if block.photo %}
+                    <div class="mt-2 d-flex align-items-center gap-2">
+                        <img src="{{ block.photo.url }}" alt="" class="block-thumb rounded-2">
+                        <small class="text-muted">{{ block.photo.name }}</small>
+                    </div>
+                    {% endif %}
+                </div>
+                <div class="col-md-7">
+                    <label class="form-label" for="{{ form.photo_caption.id_for_label }}">Подпись к главному фото</label>
+                    {{ form.photo_caption }}
+                    <label class="form-label mt-3" for="{{ form.extra_photos.id_for_label }}">{{ form.extra_photos.label }}</label>
+                    {{ form.extra_photos }}
+                    <div class="form-text">{{ form.extra_photos.help_text }}</div>
                 </div>
             </div>
             <div class="mt-4 d-flex gap-2">
@@ -63,4 +88,109 @@
         </form>
     </div>
 </div>
+
+<!-- Галерея фотографий материала -->
+<div class="card border-0 shadow-sm mt-4">
+    <div class="card-header bg-white d-flex align-items-center justify-content-between py-3">
+        <h2 class="h5 mb-0"><i class="far fa-images me-2 text-dark opacity-50"></i>Фотографии материала (галерея)</h2>
+        <span class="badge text-bg-light border">{{ gallery_items|length }}</span>
+    </div>
+    <div class="card-body">
+        <div class="row g-3" id="gallery-grid">
+            {% for item in gallery_items %}
+            <div class="col-6 col-md-3 gallery-item position-relative" data-path="{{ item.path }}">
+                <img src="{{ item.url }}" alt="{{ item.caption }}" class="w-100 rounded-3 border border-sand-200 gallery-thumb">
+                <div class="small text-muted mt-1">{{ item.caption|default:'без подписи' }}</div>
+                <button type="button" class="btn btn-sm btn-outline-danger gallery-remove position-absolute top-0 end-0 m-1"
+                        title="Удалить фото"><i class="fas fa-times"></i></button>
+            </div>
+            {% empty %}
+            <p class="text-muted mb-3">Дополнительных фото пока нет. Загрузите их через форму выше или прямо здесь.</p>
+            {% endfor %}
+        </div>
+
+        <!-- Быстрая AJAX-загрузка фото в галерею -->
+        <form id="gallery-upload-form" class="row g-2 align-items-end mt-4" enctype="multipart/form-data">
+            {% csrf_token %}
+            <div class="col-md-5">
+                <label class="form-label" for="gallery-image-input">Файл изображения</label>
+                <input type="file" id="gallery-image-input" accept="image/*" class="form-control" required>
+            </div>
+            <div class="col-md-5">
+                <label class="form-label" for="gallery-caption-input">Подпись к фото</label>
+                <input type="text" id="gallery-caption-input" class="form-control" placeholder="Например: Ифтар в мечети, май 2026">
+            </div>
+            <div class="col-md-2">
+                <button type="submit" class="btn btn-primary w-100"><i class="fas fa-upload me-1"></i>Загрузить</button>
+            </div>
+        </form>
+        <div id="gallery-feedback" class="mt-2 small d-none"></div>
+    </div>
+</div>
+
+<script>
+(function () {
+    const BLOCK_ID = "{{ block.pk }}";
+    const ADD_URL = "{% url 'newspaper_editor_gallery_add' block.pk %}";
+    const REMOVE_URL = "{% url 'newspaper_editor_gallery_remove' block.pk %}";
+    const grid = document.getElementById('gallery-grid');
+    const feedback = document.getElementById('gallery-feedback');
+    const csrftoken = document.querySelector('#gallery-upload-form [name=csrfmiddlewaretoken]').value;
+
+    function say(text, cls) {
+        feedback.className = 'mt-2 small ' + (cls || '');
+        feedback.textContent = text;
+        feedback.classList.remove('d-none');
+        setTimeout(function () { feedback.classList.add('d-none'); }, 4000);
+    }
+
+    const uploadForm = document.getElementById('gallery-upload-form');
+    uploadForm.addEventListener('submit', function (ev) {
+        ev.preventDefault();
+        const fileInput = document.getElementById('gallery-image-input');
+        if (!fileInput.files.length) { say('Выберите файл изображения.', 'text-danger'); return; }
+        const fd = new FormData();
+        fd.append('image', fileInput.files[0]);
+        fd.append('caption', document.getElementById('gallery-caption-input').value);
+        fetch(ADD_URL, { method: 'POST', body: fd, headers: { 'X-CSRFToken': csrftoken } })
+            .then(function (r) { return r.json(); })
+            .then(function (data) {
+                if (data.ok) {
+                    const empty = grid.querySelector('p.text-muted');
+                    if (empty) empty.remove();
+                    const col = document.createElement('div');
+                    col.className = 'col-6 col-md-3 gallery-item position-relative';
+                    col.dataset.path = data.image;
+                    col.innerHTML = '<img src="' + data.url + '" alt="" class="w-100 rounded-3 border border-sand-200 gallery-thumb">'
+                        + '<div class="small text-muted mt-1"></div>'
+                        + '<button type="button" class="btn btn-sm btn-outline-danger gallery-remove position-absolute top-0 end-0 m-1" title="Удалить фото"><i class="fas fa-times"></i></button>';
+                    col.querySelector('.small').textContent = data.caption || 'без подписи';
+                    grid.appendChild(col);
+                    fileInput.value = '';
+                    document.getElementById('gallery-caption-input').value = '';
+                    say('Фото добавлено в галерею.', 'text-success');
+                } else {
+                    say(data.error || 'Не удалось загрузить фото.', 'text-danger');
+                }
+            })
+            .catch(function () { say('Ошибка сети при загрузке фото.', 'text-danger'); });
+    });
+
+    grid.addEventListener('click', function (ev) {
+        const btn = ev.target.closest('.gallery-remove');
+        if (!btn) return;
+        if (!confirm('Удалить это фото из галереи?')) return;
+        const item = btn.closest('.gallery-item');
+        const fd = new FormData();
+        fd.append('image', item.dataset.path || '');
+        fetch(REMOVE_URL, { method: 'POST', body: fd, headers: { 'X-CSRFToken': csrftoken } })
+            .then(function (r) { return r.json(); })
+            .then(function (data) {
+                if (data.ok) { item.remove(); say('Фото удалено.', 'text-success'); }
+                else { say('Не удалось удалить фото.', 'text-danger'); }
+            })
+            .catch(function () { say('Ошибка сети при удалении фото.', 'text-danger'); });
+    });
+})();
+</script>
 {% endblock %}

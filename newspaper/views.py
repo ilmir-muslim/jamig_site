@@ -34,6 +34,12 @@ def issue_detail(request, slug):
     issue.save(update_fields=["views_count"])
     # related_name="blocks" обратная связь ForeignKey — Pylance не видит её статически
     blocks = issue.blocks.all().order_by("order", "id")  # type: ignore[attr-defined]
+    # Главная тема номера: самый крупный материал первой полосы (для шапки-мачты)
+    front_blocks = [b for b in blocks if b.is_front_page] or list(blocks[:1])
+    lead_block = None
+    for b in front_blocks:
+        if lead_block is None or b.size_weight > lead_block.size_weight:
+            lead_block = b
     previous = (
         NewspaperIssue.objects.filter(
             status="published", issue_date__lt=issue.issue_date
@@ -51,6 +57,7 @@ def issue_detail(request, slug):
     context = {
         "issue": issue,
         "blocks": blocks,
+        "lead_block": lead_block,
         "previous_issue": previous,
         "next_issue": newer,
     }

@@ -171,3 +171,232 @@
     letter-spacing: 0.08em;
     text-transform: uppercase;
 }
+
+/* ---------- Размеры материалов в газетной вёрстке ---------- */
+.news-size-lead .news-headline {
+    font-size: clamp(1.9rem, 3.4vw, 2.6rem);
+}
+
+.news-size-large .news-headline {
+    font-size: clamp(1.5rem, 2.6vw, 2rem);
+}
+
+.news-size-small .news-headline {
+    font-size: 1.05rem;
+}
+
+.news-size-small .news-body p {
+    font-size: 0.86rem;
+}
+
+.news-size-small .news-block-inner {
+    padding: 1.1rem 1.15rem 1rem;
+}
+
+/* ---------- Разметка текста материала ---------- */
+.news-section-title {
+    font-family: "Cormorant Garamond", Georgia, serif;
+    font-size: 1.35rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    border-bottom: 2px solid rgba(23, 21, 18, 0.18);
+    padding-bottom: 0.3rem;
+    margin: 1.4rem 0 0.8rem;
+    color: #171512;
+}
+
+.news-section-sub {
+    font-family: "Cormorant Garamond", Georgia, serif;
+    font-size: 1.12rem;
+    font-weight: 700;
+    font-style: italic;
+    margin: 1.1rem 0 0.5rem;
+    color: #3a352c;
+}
+
+.news-quote {
+    margin: 1.2rem 0.5rem;
+    padding: 0.6rem 1rem 0.6rem 1.4rem;
+    border-left: 4px solid #b08a3e;
+    background: rgba(176, 138, 62, 0.07);
+    font-family: "Cormorant Garamond", Georgia, serif;
+    font-size: 1.18rem;
+    font-style: italic;
+    color: #2c2822;
+}
+
+.news-rule {
+    border: 0;
+    border-top: 1px solid rgba(23, 21, 18, 0.25);
+    margin: 1.2rem auto;
+    width: 60%;
+}
+
+/* ---------- Дополнительные фото (галерея) ---------- */
+.news-photo-extra img {
+    max-height: 18rem;
+}
+
+/* ============================================================
+   Конструктор редактора: предпросмотр газеты и карточки полос
+   ============================================================ */
+.news-preview-wrap {
+    background: #f4efe6;
+    border-radius: 1rem;
+    padding: 1.25rem;
+}
+
+.news-preview-frame {
+    background: #fffdf8;
+    border: 1px solid rgba(23, 21, 18, 0.15);
+    border-radius: 0.8rem;
+    padding: 1.5rem;
+    box-shadow: 0 12px 30px -24px rgba(23, 21, 18, 0.4);
+}
+
+.news-preview-masthead {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 1rem;
+    border-bottom: 3px double rgba(23, 21, 18, 0.3);
+    padding-bottom: 0.6rem;
+    margin-bottom: 1.2rem;
+    font-size: 0.78rem;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: #6d6252;
+}
+
+.news-preview-masthead strong {
+    font-family: "Cormorant Garamond", Georgia, serif;
+    font-size: 1.3rem;
+    text-transform: none;
+    letter-spacing: 0.03em;
+    color: #171512;
+}
+
+.news-preview-grid {
+    columns: 2;
+    column-gap: 1.5rem;
+}
+
+@media (max-width: 768px) {
+    .news-preview-grid {
+        columns: 1;
+    }
+}
+
+.pv-block {
+    break-inside: avoid;
+    margin-bottom: 1.5rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid rgba(23, 21, 18, 0.12);
+}
+
+.pv-kicker {
+    display: inline-block;
+    font-size: 0.62rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.16em;
+    color: #b08a3e;
+    margin-bottom: 0.3rem;
+}
+
+.pv-headline {
+    font-family: "Cormorant Garamond", Georgia, serif;
+    font-weight: 700;
+    font-size: 1.3rem;
+    line-height: 1.15;
+    margin: 0 0 0.35rem;
+    color: #171512;
+}
+
+.pv-size-lead .pv-headline { font-size: 1.9rem; }
+.pv-size-large .pv-headline { font-size: 1.55rem; }
+.pv-size-small .pv-headline { font-size: 1rem; }
+
+.pv-sub {
+    font-style: italic;
+    font-size: 0.95rem;
+    color: #55493a;
+    margin: 0 0 0.6rem;
+}
+
+.pv-block figure {
+    margin: 0 0 0.7rem;
+}
+
+.pv-block img {
+    width: 100%;
+    border-radius: 0.5rem;
+    border: 1px solid rgba(23, 21, 18, 0.12);
+}
+
+.pv-block figcaption {
+    font-size: 0.72rem;
+    color: #8a7d68;
+    font-style: italic;
+    margin-top: 0.3rem;
+}
+
+.pv-extra img {
+    max-height: 9rem;
+    object-fit: cover;
+}
+
+.pv-byline {
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: #6d6252;
+    margin-bottom: 0.4rem;
+}
+
+.pv-body {
+    font-family: Georgia, "Times New Roman", serif;
+    font-size: 0.85rem;
+    line-height: 1.5;
+    color: #2c2822;
+}
+
+.pv-body .news-section-title { font-size: 1rem; }
+.pv-body .news-quote { font-size: 0.95rem; margin: 0.8rem 0; }
+
+/* Карточка материала в списке конструктора */
+.block-card .block-thumb {
+    width: 74px;
+    height: 56px;
+    object-fit: cover;
+    border-radius: 0.5rem;
+    flex-shrink: 0;
+}
+
+.block-type-badge {
+    font-size: 0.68rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+}
+
+/* Миниатюры галереи в редакторе */
+.gallery-thumb {
+    max-height: 130px;
+    object-fit: cover;
+}
+
+/* Превью анонса на главной (в конструкторе выпуска) */
+.announce-preview-image img {
+    object-fit: cover;
+    border-radius: 0.5rem;
+}
+
+.text-truncate-2 {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}

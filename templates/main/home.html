@@ -79,8 +79,8 @@
             {% if latest_newspaper_issue %}
             <section class="bg-white rounded-[1.6rem] shadow-soft border border-sand-200 overflow-hidden flex flex-col md:flex-row">
                 <a href="{% url 'newspaper_issue_detail' latest_newspaper_issue.slug %}" class="md:w-2/5 bg-sand-950 relative group cursor-pointer flex items-center justify-center min-h-62.5 overflow-hidden no-underline">
-                    {% if latest_newspaper_issue.cover_image %}
-                        <img src="{{ latest_newspaper_issue.cover_image.url }}" alt="Обложка выпуска № {{ latest_newspaper_issue.number }}" class="absolute inset-0 w-full h-full object-cover opacity-90 group-hover:scale-[1.03] transition-transform duration-500">
+                    {% if latest_newspaper_issue.announce_image %}
+                        <img src="{{ latest_newspaper_issue.announce_image.url }}" alt="Фото первой полосы выпуска № {{ latest_newspaper_issue.number }}" class="absolute inset-0 w-full h-full object-cover opacity-90 group-hover:scale-[1.03] transition-transform duration-500">
                     {% else %}
                         <div class="absolute inset-0 bg-linear-to-br from-brand-800 to-deep-950"></div>
                         <i class="far fa-newspaper text-white/70 text-6xl relative z-10 group-hover:scale-110 transition-transform" aria-hidden="true"></i>
@@ -96,11 +96,11 @@
                     </div>
                     <a href="{% url 'newspaper_issue_detail' latest_newspaper_issue.slug %}" style="text-decoration:none;">
                         <h2 class="font-display text-2xl md:text-3xl font-bold text-sand-950 mb-3 hover:text-brand-700 transition-colors">
-                            {{ latest_newspaper_issue.title }}
+                            {{ latest_newspaper_issue.announce_headline }}
                         </h2>
                     </a>
-                    {% if latest_newspaper_issue.description %}
-                    <p class="text-sand-600 line-clamp-3 mb-5 leading-relaxed">{{ latest_newspaper_issue.description }}</p>
+                    {% if latest_newspaper_issue.announce_text %}
+                    <p class="text-sand-600 line-clamp-3 mb-5 leading-relaxed">{{ latest_newspaper_issue.announce_text }}</p>
                     {% endif %}
                     <div class="flex flex-wrap items-center gap-3 mt-auto">
                         <a href="{% url 'newspaper_issue_detail' latest_newspaper_issue.slug %}" class="btn btn-primary btn-sm shadow-lift">

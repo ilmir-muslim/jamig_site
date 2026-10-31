@@ -21,28 +21,26 @@
             {{ issue.title }}
         </h1>
         <div class="newspaper-masthead-rule-bottom ornament text-brand-500 text-xl mb-4" aria-hidden="true">&#10022; &#10022; &#10022;</div>
-        {% if blocks %}
+        {% if lead_block %}
         <!-- Главная тема номера (первая полоса) — как в классической газете -->
-        {% with lead=blocks.0 %}
         <div class="news-lead-maxillo mx-auto max-w-3xl mt-6 text-left">
-            <a href="#block-{{ lead.pk }}" class="no-underline group block">
-                {% if lead.photo %}
+            <a href="#block-{{ lead_block.pk }}" class="no-underline group block">
+                {% if lead_block.photo %}
                 <figure class="mb-4">
-                    <img src="{{ lead.photo.url }}" alt="{{ lead.title }}" class="w-full max-h-105 object-cover rounded-[1rem] border border-sand-200">
-                    {% if lead.photo_caption %}<figcaption class="text-xs text-sand-500 italic mt-2">{{ lead.photo_caption }}</figcaption>{% endif %}
+                    <img src="{{ lead_block.photo.url }}" alt="{{ lead_block.title }}" class="w-full max-h-105 object-cover rounded-[1rem] border border-sand-200">
+                    {% if lead_block.photo_caption %}<figcaption class="text-xs text-sand-500 italic mt-2">{{ lead_block.photo_caption }}</figcaption>{% endif %}
                 </figure>
                 {% endif %}
-                <span class="news-kicker">{{ lead.get_block_type_display }} · первая полоса</span>
-                <h2 class="news-headline news-headline-hero group-hover:text-brand-700 transition-colors">{{ lead.title }}</h2>
-                {% if lead.subtitle %}<h3 class="news-subheadline">{{ lead.subtitle }}</h3>{% endif %}
-                {% if lead.get_lead_paragraph %}
-                <p class="text-sand-700 leading-relaxed mt-2">{{ lead.get_lead_paragraph }}</p>
+                <span class="news-kicker">{{ lead_block.get_block_type_display }} · первая полоса</span>
+                <h2 class="news-headline news-headline-hero group-hover:text-brand-700 transition-colors">{{ lead_block.title }}</h2>
+                {% if lead_block.subtitle %}<h3 class="news-subheadline">{{ lead_block.subtitle }}</h3>{% endif %}
+                {% if lead_block.get_lead_paragraph %}
+                <p class="text-sand-700 leading-relaxed mt-2">{{ lead_block.get_lead_paragraph }}</p>
                 {% endif %}
             </a>
         </div>
-        {% endwith %}
-        {% elif issue.description %}
-        <p class="text-sand-600 max-w-2xl mx-auto italic leading-relaxed">{{ issue.description }}</p>
+        {% elif issue.announce_text %}
+        <p class="text-sand-600 max-w-2xl mx-auto italic leading-relaxed">{{ issue.announce_text }}</p>
         {% endif %}
         {% if issue.pdf_file %}
         <div class="mt-6">
