@@ -2,94 +2,111 @@
 <html lang="ru">
 <head>
 <meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <title>{{ issue.number }} — {{ issue.publication_name }} (печатная версия)</title>
 <style>
     /* ============================================================
-       Печатная газета — рендерится WeasyPrint.
-       Формат: A3 альбомный (классический газетный разворот).
+       Печатная газета — обычный HTML + CSS.
+       Печать: кнопка «Печать / Скачать PDF» → диалог браузера →
+       «Сохранить как PDF» или принтер. Двусторонняя печать листов,
+       страницы A3 альбомные задаются через @page size.
 
-       ПОРЯДОК ПОЛОС ДЛЯ ПЕЧАТИ (двусторонняя печать, листы вкладываются
-       друг в друга и сшиваются степлером — как книга):
-         PDF-страница 1  = полоса 1 (титульная)   + полоса N (задняя обложка)
-         PDF-страница 2  = полоса N-1             + полоса 2
-         PDF-страница 3  = полоса N-2             + полоса 3 ...
-       Число полос кратно 4, поэтому пустых страниц не остаётся.
+       ПОРЯДОК ПОЛОС (spread-фольга, листы вкладываются и сшиваются):
+         PDF-страница 1  = полоса 1 (титул) | полоса N (задняя обложка)
+         PDF-страница 2  = полоса N-1       | полоса 2 ...
        ============================================================ */
     @page {
-        size: A3 landscape;
-        margin: 14mm 12mm 16mm 12mm;
-
-        @top-left {
-            content: "«{{ issue.publication_name }}»";
-            font-family: Tahoma, "PT Sans", sans-serif;
-            font-size: 7.5pt;
-            color: #6b6258;
-            letter-spacing: 0.08em;
-            text-transform: uppercase;
-        }
-        @top-right {
-            content: "{{ issue.number }} · {{ issue.issue_date|date:'d.m.Y' }}";
-            font-family: Tahoma, "PT Sans", sans-serif;
-            font-size: 7.5pt;
-            color: #6b6258;
-        }
-        @bottom-center {
-            content: counter(page) " / " counter(pages);
-            font-family: Tahoma, "PT Sans", sans-serif;
-            font-size: 7.5pt;
-            color: #6b6258;
-        }
+        size: 420mm 297mm;           /* A3 landscape */
+        margin: 12mm;
     }
 
     * { box-sizing: border-box; }
 
-    html {
-        /* WeasyPrint понимает только @page size (без width/height на div'ах),
-           поэтому весь макет листа A3 описываем здесь и в .sheet-body. */
+    html, body {
         margin: 0;
         padding: 0;
-    }
-
-    body {
-        font-family: "Times New Roman", Tahoma, "Liberation Serif", Georgia, serif;
-        font-size: 9.6pt;
-        line-height: 1.42;
+        background: #e8e4dc;
+        font-family: "Times New Roman", "Liberation Serif", Georgia, serif;
         color: #171512;
-        margin: 0;
     }
 
-    /* Каждый физический лист = одна PDF-страница. Обрезов между «полови-
-       нами» разворота быть не должно — они всегда ровно по половине поля. */
-    .print-sheet { page-break-after: always; break-after: page; }
-    .print-sheet:last-child { page-break-after: auto; break-after: auto; }
+    body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+
+    /* ---------- Панель редактора (не печатается) ---------- */
+    .print-toolbar {
+        position: sticky; top: 0; z-index: 50;
+        display: flex; gap: 12px; align-items: center; flex-wrap: wrap;
+        padding: 10px 18px;
+        background: #2b2620; color: #f5efe2;
+        font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+        font-size: 14px;
+    }
+    .print-toolbar a, .print-toolbar button {
+        color: #fff; background: #8a6d2f; border: none; cursor: pointer;
+        padding: 7px 14px; border-radius: 6px; font-size: 14px; text-decoration: none;
+    }
+    .print-toolbar .ghost { background: transparent; border: 1px solid #8a8272; }
+    @media print { .print-toolbar { display: none !important; } }
+
+    /* ---------- Экран: одна PDF-страница = один физический лист A3 ---------- */
+    .sheet-scroll { padding: 18px 10px 60px; }
+    .print-sheet {
+        width: 420mm; height: 297mm;
+        margin: 0 auto 24px;
+        background: #fff;
+        box-shadow: 0 4px 24px rgba(0,0,0,.25);
+        padding: 12mm;
+        overflow: hidden;
+    }
+    @media print {
+        html, body { background: #fff; }
+        .sheet-scroll { padding: 0; }
+        .print-sheet {
+            width: 396mm; height: 273mm;   /* A3 минус поля @page */
+            margin: 0; box-shadow: none; padding: 0;
+            page-break-after: always; break-after: page;
+        }
+        .print-sheet:last-child { page-break-after: auto; break-after: auto; }
+    }
 
     .sheet-body {
-        display: flex;
-        flex-direction: row;
-        align-items: stretch;
-        gap: 8mm;
-        /* 420mm − 12mm×2 (поля @page) = 396mm на разворот */
-        height: 265mm;
+        display: flex; flex-direction: row; gap: 10mm;
+        height: 100%;
     }
 
-    /* Одна печатная полоса (половина разворота): ~194mm ширины. */
+    /* Одна печатная полоса = ровно половина разворота (симметрично). */
     .sheet-half {
         flex: 1 1 0;
         min-width: 0;
+        max-width: calc((100% - 10mm) / 2);
+        height: 100%;
         overflow: hidden;
         position: relative;
     }
 
-    /* Полоса льётся строго внутри своей половины разворота: 3 колонки. */
+    /* Колонтитул полосы внизу */
+    .half-footer {
+        position: absolute; left: 0; right: 0; bottom: 0;
+        font-family: system-ui, sans-serif;
+        font-size: 7pt; color: #6b6258;
+        border-top: 0.5pt solid #cfc7ba;
+        padding-top: 1mm;
+        display: flex; justify-content: space-between;
+    }
+
+    /* Полоса льётся строго внутри своей половины: РОВНО 2 КОЛОНКИ
+       шириной по 100% — заполняют всю ширину полосы без «узовких» колонок. */
     .news-columns {
-        column-count: 3;
+        column-count: 2;
         column-gap: 6mm;
         column-rule: 0.4pt solid #cfc7ba;
         column-fill: auto;
-        height: 265mm;
+        height: calc(100% - 8mm);   /* место под колонтитул */
+        font-size: 9.6pt;
+        line-height: 1.42;
     }
 
-    /* ---------- Мачта (шапка только на первой полосе) ---------- */
+    /* ---------- Мачта: ТОЛЬКО на первой полосе, над контентом ---------- */
     .print-masthead {
         column-span: all;
         text-align: center;
@@ -98,176 +115,104 @@
         border-bottom: 2.5pt solid #171512;
     }
     .print-masthead .brand {
-        font-size: 24pt;
-        font-weight: 700;
-        letter-spacing: 0.03em;
-        margin: 0 0 1.5mm;
-        text-transform: uppercase;
+        font-size: 26pt; font-weight: 700; letter-spacing: .03em;
+        margin: 0 0 1.5mm; text-transform: uppercase;
     }
     .print-masthead .tagline {
-        font-style: italic;
-        font-size: 10.5pt;
-        color: #4c463d;
-        margin-bottom: 2mm;
+        font-style: italic; font-size: 10.5pt; color: #4c463d; margin-bottom: 2mm;
     }
     .print-masthead .meta {
-        font-family: Tahoma, "PT Sans", sans-serif;
-        font-size: 9pt;
-        color: #4c463d;
-        border-top: 0.6pt solid #171512;
-        border-bottom: 0.6pt solid #171512;
-        padding: 1.2mm 0;
-        display: block;
+        font-family: system-ui, sans-serif;
+        font-size: 9pt; color: #4c463d;
+        border-top: 0.6pt solid #171512; border-bottom: 0.6pt solid #171512;
+        padding: 1.2mm 0; display: block;
     }
     .print-masthead .meta span { margin: 0 4mm; }
 
     .print-page-label {
         column-span: all;
-        font-family: Tahoma, "PT Sans", sans-serif;
-        font-size: 7pt;
-        letter-spacing: 0.12em;
-        text-transform: uppercase;
-        color: #8a6d2f;
-        margin-bottom: 2mm;
+        font-family: system-ui, sans-serif;
+        font-size: 7pt; letter-spacing: .12em; text-transform: uppercase;
+        color: #8a6d2f; margin-bottom: 2mm;
     }
 
-    /* ---------- Материал (блок конструктора) ---------- */
-    .print-block {
-        break-inside: avoid-column;
-        margin: 0 0 5mm;
-    }
+    /* ---------- Материал конструктора ---------- */
+    .print-block { margin: 0 0 5mm; break-inside: avoid-column; }
     .print-kicker {
-        font-family: Tahoma, "PT Sans", sans-serif;
-        font-size: 6.8pt;
-        font-weight: 700;
-        text-transform: uppercase;
-        letter-spacing: 0.14em;
-        color: #8a6d2f;
-        margin-bottom: 1mm;
+        font-family: system-ui, sans-serif;
+        font-size: 6.8pt; font-weight: 700; text-transform: uppercase;
+        letter-spacing: .14em; color: #8a6d2f; margin-bottom: 1mm;
     }
-    .print-headline {
-        font-size: 17pt;
-        font-weight: 700;
-        line-height: 1.12;
-        margin: 0 0 1.5mm;
-    }
-    .print-block.size-lead   .print-headline { font-size: 23pt; }
-    .print-block.size-large  .print-headline { font-size: 19pt; }
-    .print-block.size-small  .print-headline { font-size: 12.5pt; }
-    .print-subheadline {
-        font-style: italic;
-        font-size: 10.5pt;
-        color: #4c463d;
-        margin: 0 0 2mm;
-    }
+    .print-headline { font-size: 17pt; font-weight: 700; line-height: 1.12; margin: 0 0 1.5mm; }
+    .print-block.size-lead  .print-headline { font-size: 23pt; }
+    .print-block.size-large .print-headline { font-size: 19pt; }
+    .print-block.size-small .print-headline { font-size: 12.5pt; }
+    .print-subheadline { font-style: italic; font-size: 10.5pt; color: #4c463d; margin: 0 0 2mm; }
     .print-byline {
-        font-family: Tahoma, "PT Sans", sans-serif;
-        font-size: 7.6pt;
-        text-transform: uppercase;
-        letter-spacing: 0.08em;
-        color: #6b6258;
-        margin-bottom: 2mm;
+        font-family: system-ui, sans-serif;
+        font-size: 7.6pt; text-transform: uppercase; letter-spacing: .08em;
+        color: #6b6258; margin-bottom: 2mm;
     }
-    .print-photo {
-        margin: 0 0 2.5mm;
-        page-break-inside: avoid;
-    }
+
+    /* Фото: ширина управляется редактором; узкое фото обтекается текстом */
+    .print-photo { margin: 0 0 2.5mm; break-inside: avoid; }
     .print-photo img {
-        width: 100%;
-        max-height: 92mm;
-        object-fit: cover;
-        border: 0.5pt solid #b9b0a2;
+        width: 100%; object-fit: cover; border: 0.5pt solid #b9b0a2; display: block;
     }
     .print-photo figcaption {
-        font-family: Tahoma, "PT Sans", sans-serif;
-        font-size: 7.2pt;
-        color: #55503f;
-        padding-top: 1mm;
-        border-bottom: 0.4pt dotted #b9b0a2;
+        font-family: system-ui, sans-serif; font-size: 7.2pt; color: #55503f;
+        padding-top: 1mm; border-bottom: 0.4pt dotted #b9b0a2;
     }
-    .print-text p {
-        margin: 0 0 1.6mm;
-        text-align: justify;
-        text-indent: 4mm;
-    }
+    .print-photo.pw-half  { float: left; width: 50%; margin: 0 4mm 2.5mm 0; }
+    .print-photo.pw-third { float: left; width: 33%; margin: 0 4mm 2.5mm 0; }
+    .print-photo.pw-half::after,
+    .print-photo.pw-third::after { content: ""; display: block; clear: both; }
+    .text-wrap-fix { break-before: column; }
+
+    .print-text p { margin: 0 0 1.6mm; text-align: justify; text-indent: 4mm; }
     .print-text p:first-of-type { text-indent: 0; }
-    .print-section-title {
-        font-size: 11.5pt;
-        font-weight: 700;
-        margin: 3mm 0 1.5mm;
-        break-after: avoid;
-    }
-    .print-section-sub {
-        font-size: 10pt;
-        font-weight: 700;
-        font-style: italic;
-        margin: 2.5mm 0 1.2mm;
-        break-after: avoid;
-    }
+    .print-section-title { font-size: 11.5pt; font-weight: 700; margin: 3mm 0 1.5mm; break-after: avoid; }
+    .print-section-sub { font-size: 10pt; font-weight: 700; font-style: italic; margin: 2.5mm 0 1.2mm; break-after: avoid; }
     .print-quote {
-        font-style: italic;
-        font-size: 10.2pt;
-        border-left: 2pt solid #8a6d2f;
-        padding: 1mm 0 1mm 3mm;
-        margin: 2.5mm 0;
+        font-style: italic; font-size: 10.2pt;
+        border-left: 2pt solid #8a6d2f; padding: 1mm 0 1mm 3mm; margin: 2.5mm 0;
         background: #f4efe4;
     }
-    .print-rule {
-        border: none;
-        border-top: 0.8pt solid #171512;
-        margin: 3mm auto;
-        width: 40%;
-    }
-    .print-gallery { margin: 2mm 0 0; }
-    .print-gallery .g-item {
-        margin-bottom: 2.5mm;
-        page-break-inside: avoid;
-    }
-    .print-gallery img { width: 100%; border: 0.5pt solid #b9b0a2; }
-    .print-gallery .g-cap {
-        font-family: Tahoma, "PT Sans", sans-serif;
-        font-size: 7pt;
-        color: #55503f;
-    }
+    .print-rule { border: none; border-top: 0.8pt solid #171512; margin: 3mm auto; width: 40%; }
 
-    /* ---------- Реклама: объявление в рамку ---------- */
-    .print-block.is-ad {
-        border: 1.2pt solid #171512;
-        padding: 2.5mm;
-        background: #faf7ef;
-    }
+    .print-gallery { margin: 2mm 0 0; }
+    .print-gallery .g-item { margin-bottom: 2.5mm; break-inside: avoid; }
+    .print-gallery img { width: 100%; border: 0.5pt solid #b9b0a2; }
+    .print-gallery .g-cap { font-family: system-ui, sans-serif; font-size: 7pt; color: #55503f; }
+
+    /* ---------- Реклама ---------- */
+    .print-block.is-ad { border: 1.2pt solid #171512; padding: 2.5mm; background: #faf7ef; }
     .print-block.is-ad .print-kicker { color: #171512; }
     .advertiser {
-        font-family: Tahoma, "PT Sans", sans-serif;
-        font-weight: 700;
-        font-size: 9pt;
-        margin-top: 2mm;
-        padding-top: 1.5mm;
-        border-top: 0.5pt solid #171512;
+        font-family: system-ui, sans-serif; font-weight: 700; font-size: 9pt;
+        margin-top: 2mm; padding-top: 1.5mm; border-top: 0.5pt solid #171512;
     }
-    .ad-contacts {
-        font-family: Tahoma, "PT Sans", sans-serif;
-        font-size: 8pt;
-        color: #3d3830;
-    }
+    .ad-contacts { font-family: system-ui, sans-serif; font-size: 8pt; color: #3d3830; }
 
     /* ---------- Выходные данные (последняя полоса) ---------- */
     .print-colophon {
         column-span: all;
-        border-top: 1.5pt solid #171512;
-        margin-top: 6mm;
-        padding-top: 2.5mm;
-        font-family: Tahoma, "PT Sans", sans-serif;
-        font-size: 7.8pt;
-        color: #4c463d;
+        border-top: 1.5pt solid #171512; margin-top: 6mm; padding-top: 2.5mm;
+        font-family: system-ui, sans-serif; font-size: 7.8pt; color: #4c463d;
         text-align: center;
     }
     .print-colophon div { margin-bottom: 0.8mm; }
 </style>
 </head>
 <body>
-{# sheets — список физических листов A3. Каждый лист = одна PDF-страница:  #}
-{# left/right половины разворота в spread-порядке (1+N, N-1+2, ...).       #}
+<div class="print-toolbar no-print">
+    <strong>🖨 Печатная версия — {{ total_pages }} полос(ы), {{ sheets|length }} сторон(а/ов) листа A3</strong>
+    <button onclick="window.print()">Печать / Скачать PDF</button>
+    <a href="{% url 'newspaper_editor_issue_edit' issue.pk %}" class="ghost">← Вернуться в конструктор</a>
+    <span style="opacity:.75;">В диалоге печати выберите «Сохранить как PDF», двустороннюю печать и формат A3.</span>
+</div>
+
+<div class="sheet-scroll">
 {% for sheet in sheets %}
 <div class="print-sheet">
     <div class="sheet-body">
@@ -286,20 +231,18 @@
                     </span>
                 </header>
                 {% else %}
-                <div class="print-page-label">
-                    {% if half.page_no %}Стр. {{ half.page_no }} · № {{ issue.number }} · {{ issue.issue_date|date:"d.m.Y" }}{% endif %}
-                </div>
+                <div class="print-page-label">Стр. {{ half.page_no }} · № {{ issue.number }}</div>
                 {% endif %}
 
                 {% for block in half.blocks %}
                 <article class="print-block size-{{ block.size }}{% if block.is_ad %} is-ad{% endif %}">
-                    <div class="print-kicker">{{ block.get_block_type_display }}{% if half.is_front and block.is_front_page %} · первая полоса{% endif %}</div>
+                    <div class="print-kicker">{{ block.get_block_type_display }}</div>
                     <h2 class="print-headline">{{ block.title }}</h2>
                     {% if block.subtitle %}<div class="print-subheadline">{{ block.subtitle }}</div>{% endif %}
                     {% if block.author_name %}<div class="print-byline">{{ block.author_name }}</div>{% endif %}
 
                     {% if block.photo %}
-                    <figure class="print-photo">
+                    <figure class="print-photo pw-{{ block.photo_width|default:'full' }}">
                         <img src="{{ block.print_photo_url }}" alt="{{ block.photo_caption|default:block.title }}">
                         {% if block.photo_caption %}<figcaption>{{ block.photo_caption }}</figcaption>{% endif %}
                     </figure>
@@ -334,14 +277,18 @@
                 {% if half.is_last %}
                 <footer class="print-colophon">
                     {% for line in colophon %}<div>{{ line }}</div>{% endfor %}
-                    <div>Макет собран в электронном конструкторе · выгрузка {{ generated_at|date:"d.m.Y H:i" }} · печать A3 двусторонно, полосы 1–{{ total_pages }}</div>
                 </footer>
                 {% endif %}
+            </div>
+            <div class="half-footer">
+                <span>{{ issue.publication_name }} · № {{ issue.number }}</span>
+                <span>Полоса {{ half.page_no }} из {{ total_pages }}</span>
             </div>
         </section>
         {% endfor %}
     </div>
 </div>
 {% endfor %}
+</div>
 </body>
 </html>

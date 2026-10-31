@@ -168,24 +168,62 @@ def issue_delete(request, pk):
 
 
 @login_required
-@require_POST
+@user_passes_test(is_newspaper_editor, login_url="login")
+def issue_print_view(request, pk):
+    """Печатная версия выпуска: HTML-макет A3 для печати/сохранения в PDF.
+
+    Открывается в новой вкладке; кнопка «Печать / Скачать PDF» вызывает
+    системный диалог браузера (в нём можно и напечатать в типографии, и
+    сохранить как PDF). WeasyPrint не используется — макет чистый HTML+CSS,
+    поэтому русскоязычная типографика не «плывёт».
+    """
+    issue = _get_editor_issue(request, pk)
+    try:
+        settings_obj = NewspaperSettings.load()
+    except Exception:
+        settings_obj = None
+    sheets = issue.build_print_sheets()
+    return render(
+        request,
+        "newspaper/issue_print.html",
+        {
+            "issue": issue,
+            "sheets": sheets,
+            "total_pages": len(issue.build_print_pages()),
+            "colophon": issue.colophon_lines(),
+            "settings_tagline": settings_obj.tagline if settings_obj else "",
+        },
+    )
+
+
+@login_required
 @user_passes_test(is_newspaper_editor, login_url="login")
 def issue_export_pdf(request, pk):
-    """Экспорт выпуска в PDF — печатная версия для типографии.
+    """Экспорт выпуска в PDF (WeasyPrint) — опционально, если библиотека установлена.
 
-    PDF собирается из материалов конструктора (не из загруженного вручную),
-    поэтому редактору не нужно верстать газету дважды: электронная и
-    печатная версии всегда соответствуют друг другу. Если выппуск уже
-    опубликован на сайте, PDF можно скачать и публично (см. issue_detail).
+    Основной способ получения печатного PDF — страница «Печатная версия»
+    и печать из браузера (issue_print_view). Этот маршрут оставлен как
+    быстрый серверный экспорт: собранный PDF также сохраняется в выпуск.
     """
-    from .pdf import export_issue_pdf
-
     issue = _get_editor_issue(request, pk)
+    try:
+        from .pdf import export_issue_pdf
+    except ImportError:
+        messages.error(
+            request,
+            "Серверный экспорт недоступен (не установлен WeasyPrint). "
+            "Используйте страницу «Печатная версия» и печать браузера.",
+        )
+        return redirect("newspaper_editor_issue_print", pk=issue.pk)
     try:
         pdf_bytes, filename = export_issue_pdf(issue, save_to_field=True)
     except Exception as exc:  # WeasyPrint может упасть на битых шрифтах/картинках
-        messages.error(request, f"Не удалось создать PDF: {exc}")
-        return redirect("newspaper_editor_issue_edit", pk=issue.pk)
+        messages.warning(
+            request,
+            f"Серверный PDF не получился ({exc}). Откройте «Печатную версию» "
+            "и сохраните PDF через печать браузера.",
+        )
+        return redirect("newspaper_editor_issue_print", pk=issue.pk)
     response = HttpResponse(pdf_bytes, content_type="application/pdf")
     response["Content-Disposition"] = f'attachment; filename="{filename}"'
     return response

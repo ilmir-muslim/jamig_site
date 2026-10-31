@@ -41,12 +41,7 @@
                             {% if issue.status == 'published' %}
                             <a href="{% url 'newspaper_issue_detail' issue.slug %}" target="_blank" rel="noopener" class="btn btn-sm btn-outline-primary nt-btn" title="Открыть на сайте" aria-label="На сайте"><i class="fas fa-eye"></i></a>
                             {% endif %}
-                            <form method="post" action="{% url 'newspaper_editor_issue_export_pdf' issue.pk %}" class="d-inline nt-export-form">
-                                {% csrf_token %}
-                                <button type="submit" class="btn btn-sm btn-outline-success nt-btn" title="Собрать печатную версию из материалов конструктора и скачать PDF (двусторонняя печать, листы сшиваются степлером)">
-                                    <i class="fas fa-file-pdf"></i>
-                                </button>
-                            </form>
+                            <a href="{% url 'newspaper_editor_issue_print' issue.pk %}" target="_blank" rel="noopener" class="btn btn-sm btn-outline-success nt-btn" title="Печатная версия (A3, двусторонняя печать) — печать из браузера или сохранение в PDF" aria-label="Печатная версия"><i class="fas fa-file-pdf"></i></a>
                             <a href="{% url 'newspaper_editor_issue_delete' issue.pk %}" class="btn btn-sm btn-outline-danger nt-btn" title="Удалить" aria-label="Удалить"><i class="fas fa-trash-alt"></i></a>
                         </div>
                     </td>
@@ -62,9 +57,12 @@
 </div>
 <p class="newspaper-dash-hint mt-3">
     <i class="fas fa-info-circle me-1"></i>
-    Кнопка со значком PDF собирает готовую газету прямо из материалов конструктора: A3, двусторонняя печать,
-    полосы расположены в порядке «как книга» (1+последняя, предпоследняя+2 …) — после складывания листов и
-    скрепления степлером страницы идут по порядку. Пустых полос не остаётся: материалы автоматически разливаются
-    по числу полос в <a href="{% url 'newspaper_editor_settings' %}">настройках газеты</a>. Файл можно сразу нести в типографию.
+    Кнопка со значком PDF открывает <b>печатную версию</b>, собранную прямо из материалов конструктора:
+    A3 альбомный, двусторонняя печать, полосы расположены в порядке «как книга» (1+последняя,
+    предпоследняя+2 …) — после складывания листов и скрепления степлером страницы идут по порядку.
+    На странице печатной версии нажмите «Печать / Скачать PDF» и выберите «Сохранить как PDF» —
+    файл можно сразу нести в типографию. Число полос задаётся в
+    <a href="{% url 'newspaper_editor_settings' %}">настройках газеты</a>
+    (0 — автоматически по объёму материалов, пустых полос не остаётся).
 </p>
 {% endblock %}

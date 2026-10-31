@@ -41,12 +41,13 @@ class NewspaperSettings(models.Model):
         help_text="Например: Местная религиозная организация «Мечеть Джамиг».",
     )
     print_pages = models.PositiveIntegerField(
-        default=4,
+        default=0,
         verbose_name="Полос в номере",
         help_text=(
             "Сколько сторон листа занимает газета (4, 8, 12, 16...). "
-            "Число кратно 4 — тогда при складывании листов не остаётся пустых страниц. "
-            "Материалы конструктора разливаются по полосам автоматически."
+            "0 — определять автоматически по объёму материалов. "
+            "Если число не кратно 4, оно округляется вверх — иначе при "
+            "складывании листов остаются пустые страницы."
         ),
     )
 
@@ -57,7 +58,7 @@ class NewspaperSettings(models.Model):
     def save(self, *args, **kwargs):
         """Храним ровно одну запись настроек (pk всегда = 1)."""
         self.pk = 1
-        if self.print_pages and self.print_pages % 4:
+        if self.print_pages:
             self.print_pages = max(4, (self.print_pages // 4 + 1) * 4)
         super().save(*args, **kwargs)
 
@@ -222,12 +223,22 @@ class NewspaperIssue(models.Model):
 
     @property
     def print_pages(self):
-        """Число полос (сторон) номера — кратно 4 для шитья листов степлером."""
+        """Число полос (сторон) номера — кратно 4 для шитья листов степлером.
+
+        0 в настройках = автораскладка: полос берётся ровно столько, сколько
+        нужно по объёму материалов (минимум 4). Явное значение из настроек
+        всегда respected — оно может быть и БОЛЬШЕ нужного (редактор хочет
+        номер фиксированной полосности), но никогда не меньше, чем требует
+        контент: иначе материалы «сваливаются» на одну полосу и остаются
+        пустые страницы.
+        """
         try:
-            pages = NewspaperSettings.load().print_pages or 4
+            pages = NewspaperSettings.load().print_pages or 0
         except Exception:
-            pages = 4
-        return max(4, pages if pages % 4 == 0 else (pages // 4 + 1) * 4)
+            pages = 0
+        if pages < 4:
+            return 0  # авто
+        return pages if pages % 4 == 0 else (pages // 4 + 1) * 4
 
     _PAGE_CAPACITY = {
         "lead": 2600,
@@ -238,19 +249,25 @@ class NewspaperIssue(models.Model):
     }
 
     def estimate_block_height_mm(self, block):
-        """Грубая оценка высоты материала в мм одной колонки полосы.
+        """Оценка высоты материала в мм ОДНОЙ КОЛОНКИ полосы.
 
-        Используется для автоматической раскладки печатной версии: WeasyPrint
-        сам разбивает текст по колонкам, но число полос и распределение
-        материалов по ним нужно посчитать заранее, чтобы не оставлять
-        пустых страниц.
+        Используется для автоматической раскладки печатной версии: число полос
+        и распределение материалов по ним нужно посчитать заранее, чтобы не
+        оставлять пустых страниц. Колонка печатной полосы — 2 колонки шириной
+        ~90 мм (в ~1.5 раза уже прежней), поэтому строка ≈ 85 знаков.
         """
         text = re.sub(r"<[^>]+>", " ", block.content or "")
         chars = len(text.strip())
-        # ~55 знаков в строке узкой газетной колонки, ~4.7 мм на строку
-        mm = (chars / 55.0) * 4.7
+        # ~85 знаков в строке широкой газетной колонки, ~4.7 мм на строку
+        mm = (chars / 85.0) * 4.7
         if block.photo:
-            mm += 95 if block.size in ("lead", "large") else 60
+            # Фото на всю колонку занимает много места; узкое фото (текст
+            # обтекает) добавляет к высоте только часть своей высоты.
+            full_h = 95 if block.size in ("lead", "large") else 60
+            frac = {"full": 1.0, "half": 0.5, "third": 0.34}.get(
+                block.photo_width, 1.0
+            )
+            mm += full_h * frac
         mm += len(block.print_gallery or []) * 55
         if block.subtitle:
             mm += 10
@@ -261,16 +278,14 @@ class NewspaperIssue(models.Model):
     def build_print_pages(self):
         """Разливает материалы конструктора по печатным полосам (сторонам).
 
-        Каждая полоса — ровно одна половина разворота A3: 3 колонки шириной
-        ~60 мм и высотой ~250 мм (ёмкость полосы ~750 мм колоночного текста).
-        Материал, который целиком не влезает в полосу, WeasyPrint продолжит
-        в следующей колонке той же полосы. Пустых страниц быть не должно:
-        контент распределяется РОВНО по N полосам; если материалов больше,
-        чем влезает — число полос автоматически расширяется до следующего
-        кратного 4 (для шитья степлером).
+        Каждая полоса — ровно одна половина разворота A3: 2 колонки шириной
+        ~90 мм и высотой ~250 мм (ёмкость полосы ~500 мм колоночного текста).
+        Число полос: минимум 4; если задано вручную в настройках — не меньше
+        этого числа; но всегда достаточно, чтобы ВЕСЬ контент разместился без
+        переполнения и без пустых страниц. Кратно 4 (шитьё степлером).
         """
         blocks = list(self.blocks.all().order_by("order", "id"))  # type: ignore[attr-defined]
-        page_cap = 750.0  # мм колоночной высоты на одну полосу (3 × 250)
+        page_cap = 500.0  # мм колоночной высоты на одну полосу (2 × 250)
 
         front = [b for b in blocks if b.is_front_page]
         rest = [b for b in blocks if not b.is_front_page]
@@ -280,7 +295,10 @@ class NewspaperIssue(models.Model):
         heights = {b.pk: self.estimate_block_height_mm(b) for b in blocks}
         total_h = sum(heights[b.pk] for b in blocks) or page_cap
 
-        pages_count = max(self.print_pages, -(-int(total_h) // int(page_cap)) or 1)
+        needed = -(-int(total_h) // int(page_cap)) or 1  # ceil
+        pages_count = max(4, needed)
+        if self.print_pages:  # явная полосность из настроек
+            pages_count = max(pages_count, self.print_pages)
         if pages_count % 4:
             pages_count = ((pages_count + 3) // 4) * 4
 
@@ -292,7 +310,7 @@ class NewspaperIssue(models.Model):
             h = heights[b.pk]
             # Полоса уже с контентом и следующий блок её переполнит —
             # переходим к следующей полосе. Последний блок всегда остаётся
-            # на последней полосе (там же выходные данные) — WeasyPrint
+            # на последней полосе (там же выходные данные) — браузер/принтер
             # разобьёт его по колонкам.
             if idx < pages_count - 1 and acc > 0 and acc + h > per_cap:
                 idx += 1
@@ -444,6 +462,21 @@ class NewspaperBlock(models.Model):
     )
     photo_caption = models.CharField(
         max_length=300, blank=True, verbose_name="Подпись к фото"
+    )
+    PHOTO_WIDTH_CHOICES = (
+        ("full", "На всю колонку"),
+        ("half", "Половина колонки (текст обтекает)"),
+        ("third", "Треть колонки (текст обтекает)"),
+    )
+    photo_width = models.CharField(
+        max_length=10,
+        choices=PHOTO_WIDTH_CHOICES,
+        default="full",
+        verbose_name="Ширина фото",
+        help_text=(
+            "Если выбрать «половину» или «треть» — текст будет обтекать фото, "
+            "как в печатной газете."
+        ),
     )
     gallery = models.JSONField(
         default=list,

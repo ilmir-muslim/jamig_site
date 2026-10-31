@@ -70,7 +70,7 @@
                 {% endif %}
 
                 {% if block.photo %}
-                <figure class="news-photo">
+                <figure class="news-photo pw-{{ block.photo_width|default:'full' }}">
                     <img src="{{ block.photo.url }}" alt="{{ block.title }}">
                     {% if block.photo_caption %}
                     <figcaption>{{ block.photo_caption }}</figcaption>

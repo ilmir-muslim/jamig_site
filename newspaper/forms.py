@@ -120,6 +120,7 @@ class NewspaperBlockForm(forms.ModelForm):
             "author_name",
             "photo",
             "photo_caption",
+            "photo_width",
             "is_front_page",
             "advertiser_name",
             "advertiser_contact",
@@ -155,6 +156,7 @@ class NewspaperBlockForm(forms.ModelForm):
             "photo_caption": forms.TextInput(
                 attrs={"class": "form-control", "placeholder": "Подпись к фотографии"}
             ),
+            "photo_width": forms.Select(attrs={"class": "form-select"}),
             "is_front_page": forms.CheckboxInput(attrs={"class": "form-check-input"}),
             "advertiser_name": forms.TextInput(
                 attrs={"class": "form-control", "placeholder": "Название организации или ФИО"}

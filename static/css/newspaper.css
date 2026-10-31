@@ -101,6 +101,14 @@
     margin-bottom: 0.5rem;
 }
 
+/* Ширина фото управляется редактором: узкое фото обтекается текстом */
+.news-photo.pw-half  { float: left; width: 50%; margin: 0 1.25rem 0.75rem 0; }
+.news-photo.pw-third { float: left; width: 33%; margin: 0 1.25rem 0.75rem 0; }
+.news-block .news-body::after { content: ""; display: block; clear: both; }
+@media (max-width: 575.98px) {
+    .news-photo.pw-half, .news-photo.pw-third { float: none; width: 100%; margin-right: 0; }
+}
+
 .news-byline {
     font-size: 0.78rem;
     font-weight: 700;

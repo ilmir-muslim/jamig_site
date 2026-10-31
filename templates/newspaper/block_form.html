@@ -158,6 +158,9 @@
                 <div class="col-md-7">
                     <label class="form-label" for="{{ form.photo_caption.id_for_label }}">Подпись к главному фото</label>
                     {{ form.photo_caption }}
+                    <label class="form-label mt-3" for="{{ form.photo_width.id_for_label }}">Ширина фото</label>
+                    {{ form.photo_width }}
+                    <div class="form-text">{{ form.photo_width.help_text }}</div>
                     <label class="form-label mt-3" for="{{ form.extra_photos.id_for_label }}">{{ form.extra_photos.label }}</label>
                     {{ form.extra_photos }}
                     <div class="form-text">{{ form.extra_photos.help_text }}</div>

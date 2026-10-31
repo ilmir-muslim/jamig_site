@@ -23,6 +23,11 @@ urlpatterns = [
         name="newspaper_editor_issue_delete",
     ),
     path(
+        "issue/<int:pk>/print/",
+        views.issue_print_view,
+        name="newspaper_editor_issue_print",
+    ),
+    path(
         "issue/<int:pk>/export-pdf/",
         views.issue_export_pdf,
         name="newspaper_editor_issue_export_pdf",
