@@ -302,6 +302,8 @@ class NewspaperBlock(models.Model):
             "h2", "h3", "blockquote", "p", "hr", "ul", "ol", "li",
         }
         cleaned = self._strip_unsafe_tags(self.content, allowed_tags)
+        # Пустые строки-маркеры ("### " / "> ") после strip() превращаются в
+        # "###"/">" — считаем их обычным текстом, а не заголовком/цитатой.
         parts = []
         for line in cleaned.split("\n"):
             line = line.strip()

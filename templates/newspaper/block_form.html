@@ -1,5 +1,21 @@
 {% extends 'newspaper/base_editor.html' %}
 
+{# Панель кнопок и живой предпросмотр текста статьи (без ручной разметки) #}
+{% block editor_styles %}
+{{ block.super }}
+<style>
+.np-toolbar { display: flex; flex-wrap: wrap; gap: .35rem; }
+.np-toolbar .btn { min-height: 42px; }
+.np-toolbar .np-sep { width: 1px; background: var(--bs-border-color, #dee2e6); margin: .25rem .25rem; }
+.np-preview-card { border: 1px dashed #b9a98c; background: #fffdf7; }
+.np-preview-body p { font-family: Georgia, 'Times New Roman', serif; line-height: 1.55; }
+.np-preview-body .news-section-title { font-weight: 700; font-size: 1.25rem; margin: .8rem 0 .4rem; }
+.np-preview-body .news-section-sub { font-weight: 600; font-size: 1.05rem; margin: .7rem 0 .3rem; }
+.np-preview-body .news-quote { border-left: 4px solid #b9a98c; padding: .35rem .8rem; font-style: italic; background: #f6f1e4; margin: .6rem 0; }
+.np-preview-body .news-rule { border-top: 2px solid #b9a98c; opacity: 1; margin: .8rem 0; }
+</style>
+{% endblock %}
+
 {% block editor_title %}Материал: {{ block.title|truncatechars:60 }}{% endblock %}
 {% block editor_subtitle %}<p class="studio-page-subtitle">Полоса выпуска № {{ issue.number }} — «{{ issue.title }}»</p>{% endblock %}
 {% block editor_actions %}
@@ -56,11 +72,38 @@
                 </div>
                 <div class="col-12">
                     <label class="form-label" for="{{ form.content.id_for_label }}">Текст статьи</label>
-                    {{ form.content }}
-                    <div class="form-text">
-                        Каждый абзац — с новой строки. Разметка: <code>##</code>/<code>###</code> — заголовки секций,
-                        <code>&gt;</code> — цитата-врезка, <code>---</code> — разделитель; допускается безопасная inline-разметка
-                        <code>&lt;b&gt;</code>, <code>&lt;i&gt;</code>, <code>&lt;a href&gt;</code>.
+
+                    {# Визуальный редактор: всё форматирование делается кнопками, разметку вводить руками не нужно #}
+                    <div class="np-text-editor">
+                        <div class="np-toolbar btn-group-sm mb-2" role="group" aria-label="Форматирование текста">
+                            <button type="button" class="btn btn-light border fw-bold" data-action="bold" title="Выделить жирным (Ctrl+B)">Жирный</button>
+                            <button type="button" class="btn btn-light border fst-italic" data-action="italic" title="Курсив (Ctrl+I)">Курсив</button>
+                            <button type="button" class="btn btn-light border text-decoration-underline" data-action="link" title="Вставить ссылку (Ctrl+K)">Ссылка</button>
+                            <span class="np-sep"></span>
+                            <button type="button" class="btn btn-light border" data-action="h2" title="Крупный подзаголовок внутри статьи"><i class="fas fa-heading me-1"></i>Заголовок</button>
+                            <button type="button" class="btn btn-light border" data-action="h3" title="Небольшой подзаголовок"><i class="fas fa-text-height me-1"></i>Поменьше</button>
+                            <button type="button" class="btn btn-light border" data-action="quote" title="Выделить слова цитаты цветной врезкой"><i class="fas fa-quote-left me-1"></i>Цитата</button>
+                            <button type="button" class="btn btn-light border" data-action="rule" title="Горизонтальная линия между частями статьи"><i class="fas fa-minus me-1"></i>Линия</button>
+                            <span class="np-sep"></span>
+                            <button type="button" class="btn btn-light border text-danger" data-action="clear" title="Убрать форматирование с выделенного текста"><i class="fas fa-eraser me-1"></i>Убрать формат</button>
+                        </div>
+                        {{ form.content }}
+                        <div class="form-text">
+                            Просто печатайте текст: каждый новый абзац начинайте с новой строки (пустая строка между абзацами —
+                            как в обычной газете). Чтобы выделить слово <b>жирным</b> или <i>курсивом</i> — выделите его мышкой и
+                            нажмите нужную кнопку сверху. Пугаться значков вроде «##» или «&gt;» не нужно — это не текст статьи,
+                            газета сама их не показывает: они лишь отмечают, где заголовок или цитата. А ниже вы сразу видите,
+                            как материал будет выглядеть на странице.
+                        </div>
+
+                        <div class="np-preview-card rounded-3 p-3 mt-3">
+                            <div class="d-flex align-items-center justify-content-between mb-2">
+                                <span class="fw-semibold small text-uppercase text-muted"><i class="far fa-eye me-1"></i>Так статья будет выглядеть на сайте</span>
+                            </div>
+                            <div class="np-preview-body news-content">
+                                <p class="text-muted mb-0">Текст статьи появится здесь, когда вы начнёте печатать.</p>
+                            </div>
+                        </div>
                     </div>
                 </div>
                 <div class="col-md-5">

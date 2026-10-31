@@ -61,4 +61,9 @@
 {% block extra_css %}
 <link rel="stylesheet" href="{% static 'css/studio.css' %}">
 <link rel="stylesheet" href="{% static 'css/newspaper.css' %}">
+{% block editor_styles %}{% endblock %}
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/newspaper_text_editor.js' %}" defer></script>
 {% endblock %}

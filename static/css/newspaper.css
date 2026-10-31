@@ -400,3 +400,14 @@
     -webkit-box-orient: vertical;
     overflow: hidden;
 }
+
+/* ---------- Панель визуального редактирования текста статьи ---------- */
+.np-toolbar { display: flex; flex-wrap: wrap; gap: .35rem; }
+.np-toolbar .btn { min-height: 42px; }
+.np-toolbar .np-sep { width: 1px; background: var(--bs-border-color, #dee2e6); margin: .25rem .25rem; }
+.np-preview-card { border: 1px dashed #b9a98c; background: #fffdf7; }
+.np-preview-body p { font-family: Georgia, 'Times New Roman', serif; line-height: 1.55; }
+.np-preview-body .news-section-title { font-weight: 700; font-size: 1.25rem; margin: .8rem 0 .4rem; }
+.np-preview-body .news-section-sub { font-weight: 600; font-size: 1.05rem; margin: .7rem 0 .3rem; }
+.np-preview-body .news-quote { border-left: 4px solid #b9a98c; padding: .35rem .8rem; font-style: italic; background: #f6f1e4; margin: .6rem 0; }
+.np-preview-body .news-rule { border-top: 2px solid #b9a98c; opacity: 1; margin: .8rem 0; }

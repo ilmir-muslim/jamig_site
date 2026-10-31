@@ -115,11 +115,10 @@ class NewspaperBlockForm(forms.ModelForm):
             "size": forms.Select(attrs={"class": "form-select"}),
             "content": forms.Textarea(
                 attrs={
-                    "class": "form-control font-monospace",
+                    "class": "form-control",
                     "placeholder": (
-                        "Текст материала. Каждый абзац — с новой строки.\n"
-                        "## Заголовок секции\n### Подзаголовок\n"
-                        "> Цитата-врезка\n--- разделитель"
+                        "Начните печатать статью. Первый абзац станет анонсом на главной.\n\n"
+                        "Новый абзац — просто с новой строки."
                     ),
                     "rows": 14,
                 }
