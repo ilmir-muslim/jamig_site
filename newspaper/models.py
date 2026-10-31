@@ -50,6 +50,29 @@ class NewspaperSettings(models.Model):
             "складывании листов остаются пустые страницы."
         ),
     )
+    photo_widths = models.JSONField(
+        default=dict,
+        blank=True,
+        verbose_name="Ширина фото на полосах (печать)",
+        help_text=(
+            "Служебное поле: сохраняется автоматически со страницы печатной "
+            "версии после перетаскивания ползунков ширины фотографий."
+        ),
+    )
+
+    def get_photo_width(self, block_pk, default="full"):
+        """Сохранённая ширина фото материала для печати (или default)."""
+        try:
+            return self.photo_widths.get(str(block_pk)) or default
+        except AttributeError:
+            return default
+
+    def set_photo_width(self, block_pk, value):
+        """Запомнить ширину фото материала (для типографской вёрстки)."""
+        if not isinstance(self.photo_widths, dict):
+            self.photo_widths = {}
+        self.photo_widths[str(block_pk)] = value
+        self.save(update_fields=["photo_widths"])
 
     class Meta:
         verbose_name = "Настройки газеты"
@@ -671,22 +694,19 @@ class NewspaperBlock(models.Model):
 
     @property
     def print_photo_url(self):
-        """Путь фото для WeasyPrint: base_url = MEDIA_ROOT, поэтому без /media/."""
+        """Полный URL фото (/media/...) — работает и в браузере, и у WeasyPrint
+        (WeasyPrint резолвит его через base_url = SITE_URL при экспорте)."""
         if not self.photo:
             return ""
-        url = self.photo.url
-        return url.removeprefix(settings.MEDIA_URL).lstrip("/")
+        return self.photo.url
 
     @property
     def print_gallery(self):
-        """Галерея фото с относительными путями — WeasyPrint резолвит их от MEDIA_ROOT."""
-        items = []
-        for item in self.get_gallery_images():
-            url = item["url"]
-            if url.startswith("/media/"):
-                url = url[len("/media/"):]
-            items.append({"url": url, "caption": item["caption"]})
-        return items
+        """Галерея фото с полными URL (/media/...) — корректно и в браузере, и в PDF."""
+        return [
+            {"url": item["url"], "caption": item["caption"]}
+            for item in self.get_gallery_images()
+        ]
 
     @property
     def is_ad(self):

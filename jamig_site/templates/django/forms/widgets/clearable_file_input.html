@@ -1,0 +1,9 @@
+{% if widget.is_initial %}<div class="nf-current-file mb-1">
+    <span class="small text-muted">Текущий файл:</span>
+    <a href="{{ widget.value.url }}" target="_blank" rel="noopener" class="small">{{ widget.value }}</a>
+</div>
+{% if not widget.required %}<div class="form-check mb-1">
+    <input type="checkbox" name="{{ widget.checkbox_name }}" id="{{ widget.checkbox_id }}" class="form-check-input"{% if widget.attrs.disabled %} disabled{% endif %}>
+    <label class="form-check-label small" for="{{ widget.checkbox_id }}">Очистить (удалить файл)</label>
+</div>{% endif %}{% endif %}
+<input type="{{ widget.type }}" name="{{ widget.name }}"{% include "django/forms/widgets/attrs.html" %} class="nf-file-input">

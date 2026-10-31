@@ -182,6 +182,14 @@ def issue_print_view(request, pk):
         settings_obj = NewspaperSettings.load()
     except Exception:
         settings_obj = None
+    # Ширина фото для печати: сохранённая из настроек газеты (ползунки на
+    # этой же странице) либо по умолчанию из материала.
+    for page in issue.blocks.all():  # type: ignore[attr-defined]
+        page.print_width = (
+            settings_obj.get_photo_width(page.pk, page.photo_width)
+            if settings_obj
+            else page.photo_width
+        )
     sheets = issue.build_print_sheets()
     return render(
         request,

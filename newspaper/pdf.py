@@ -42,9 +42,19 @@ def build_issue_pdf(issue) -> bytes:
             "generated_at": timezone.localtime(),
         },
     )
-    # base_url — MEDIA_ROOT: относительные пути /media/... резолвятся в файлы,
-    # а /static/... — через StaticFilesResolver ниже (Django finders).
-    document = HTML(string=html, base_url=str(django_settings.MEDIA_ROOT))
+    # base_url = MEDIA_ROOT. WeasyPrint резолвит "/media/..." в
+    # MEDIA_ROOT + "/media/...", чего по умолчанию нет, поэтому на лету
+    # создаём симлинк MEDIA_ROOT/media -> MEDIA_ROOT (нужно только для
+    # серверного PDF; печать из браузера использует юрку /media/ напрямую).
+    media_root_path = django_settings.MEDIA_ROOT
+    media_root = str(media_root_path)
+    link = media_root_path / "media"
+    try:
+        if not link.exists():
+            link.symlink_to(media_root_path)
+    except OSError:
+        pass  # например, на Windows без прав — картинки в PDF просто не подтянутся
+    document = HTML(string=html, base_url=media_root)
     return document.write_pdf()
 
 

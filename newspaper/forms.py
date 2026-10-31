@@ -36,6 +36,23 @@ class NewspaperIssueForm(forms.ModelForm):
         label="Сбросить ручной анонс",
         help_text="Отметьте, чтобы анонс снова формировался автоматически из первой полосы.",
     )
+    # Отдельные чекбоксы вместо встроенного «clear» у ClearableFileInput:
+    # Django не даёт одновременно отметить «очистить» и приложить новый файл,
+    # а обычному пользователю это и не нужно — загрузка нового файла сама
+    # заменяет старый. Ошибки вида "submit a file or check the clear checkbox"
+    # больше не появится.
+    clear_cover_image = forms.BooleanField(
+        required=False,
+        initial=False,
+        label="Удалить обложку",
+        help_text="Отметьте, чтобы убрать текущую обложку выпуска.",
+    )
+    clear_pdf_file = forms.BooleanField(
+        required=False,
+        initial=False,
+        label="Удалить PDF-файл",
+        help_text="Отметьте, чтобы убрать загруженный PDF (например, перед загрузкой нового).",
+    )
 
     class Meta:
         model = NewspaperIssue
@@ -58,7 +75,7 @@ class NewspaperIssueForm(forms.ModelForm):
             "issue_date": forms.DateInput(
                 attrs={"class": "form-control", "type": "date"}, format="%Y-%m-%d"
             ),
-            "cover_image": forms.ClearableFileInput(attrs={"class": "form-control"}),
+            "cover_image": forms.FileInput(attrs={"class": "form-control", "accept": "image/*"}),
             "description": forms.Textarea(
                 attrs={
                     "class": "form-control",
@@ -68,7 +85,7 @@ class NewspaperIssueForm(forms.ModelForm):
                     "rows": 3,
                 }
             ),
-            "pdf_file": forms.ClearableFileInput(attrs={"class": "form-control"}),
+            "pdf_file": forms.FileInput(attrs={"class": "form-control", "accept": "application/pdf"}),
             "status": forms.Select(attrs={"class": "form-select"}),
         }
 
@@ -85,13 +102,24 @@ class NewspaperIssueForm(forms.ModelForm):
         if pdf:
             name = getattr(pdf, "name", "") or ""
             if not name.lower().endswith(".pdf"):
-                raise forms.ValidationError("Можно загружать только файлы в формате PDF.")
+                raise forms.ValidationError(
+                    "Можно загружать только файлы в формате PDF. "
+                    "Выберите файл с расширением .pdf или оставьте поле пустым."
+                )
         return pdf
 
     def save(self, commit=True):
         issue = super().save(commit=False)
         if self.cleaned_data.get("clear_announce"):
             issue.description = ""
+        # Чекбоксы «удалить» применяются только когда новый файл не приложен —
+        # иначе новая загрузка автоматически заменяет старый файл.
+        if self.cleaned_data.get("clear_cover_image") and not self.files.get("cover_image"):
+            if issue.cover_image:
+                issue.cover_image.delete(save=False)
+        if self.cleaned_data.get("clear_pdf_file") and not self.files.get("pdf_file"):
+            if issue.pdf_file:
+                issue.pdf_file.delete(save=False)
         if commit:
             issue.save()
         return issue
@@ -152,7 +180,7 @@ class NewspaperBlockForm(forms.ModelForm):
             "author_name": forms.TextInput(
                 attrs={"class": "form-control", "placeholder": "ФИО автора"}
             ),
-            "photo": forms.ClearableFileInput(attrs={"class": "form-control"}),
+            "photo": forms.FileInput(attrs={"class": "form-control", "accept": "image/*"}),
             "photo_caption": forms.TextInput(
                 attrs={"class": "form-control", "placeholder": "Подпись к фотографии"}
             ),
