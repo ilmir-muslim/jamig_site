@@ -413,11 +413,12 @@
 .np-preview-body .news-rule { border-top: 2px solid #b9a98c; opacity: 1; margin: .8rem 0; }
 
 /* ============================================================
-   Дашборд конструктора: таблица выпусков целиком видна без
-   горизонтальной прокрутки — колонки сжаты, действия в столбик
+   Дашборд конструктора: таблица выпусков целиком помещается в
+   карточку без горизонтальной прокрутки; кнопки — только иконки,
+   подсказки выводятся при наведении (title)
    ============================================================ */
-.studio-wrapper .newspaper-dash-card { overflow: visible; }
-.studio-wrapper .newspaper-table-wrap { overflow-x: auto; }
+.studio-wrapper .newspaper-dash-card { overflow: hidden; }
+.newspaper-table-wrap { width: 100%; }
 
 .newspaper-table {
     table-layout: fixed;
@@ -425,18 +426,29 @@
 }
 .newspaper-table th,
 .newspaper-table td {
-    padding-left: 0.55rem !important;
-    padding-right: 0.55rem !important;
-    font-size: 0.9rem;
+    padding-left: 0.5rem !important;
+    padding-right: 0.5rem !important;
+    font-size: 0.88rem;
+    vertical-align: middle;
 }
-.newspaper-table .nt-col-num     { width: 74px; }
+/* Шапка таблицы: каждая колонка — строго в одну строку */
+.newspaper-table thead th {
+    white-space: nowrap;
+    font-size: 0.78rem;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    color: #6f675b;
+}
+.newspaper-table .nt-col-num     { width: 64px; }
 .newspaper-table .nt-col-title   { width: auto; }
-.newspaper-table .nt-col-date    { width: 96px; white-space: nowrap; }
-.newspaper-table .nt-col-count   { width: 92px; text-align: center; }
-.newspaper-table .nt-col-status  { width: 130px; }
-.newspaper-table .nt-col-views   { width: 96px; text-align: center; }
-.newspaper-table .nt-col-actions { width: 250px; }
+.newspaper-table .nt-col-date    { width: 92px; white-space: nowrap; }
+.newspaper-table .nt-col-count   { width: 60px; text-align: center; }
+.newspaper-table .nt-col-status  { width: 118px; }
+.newspaper-table .nt-col-views   { width: 74px; text-align: center; }
+.newspaper-table .nt-col-actions { width: 172px; }
 
+.newspaper-table td.nt-col-num,
+.newspaper-table td.nt-col-status { overflow: hidden; }
 .newspaper-table td.nt-col-title a {
     display: block;
     overflow: hidden;
@@ -444,30 +456,23 @@
     white-space: nowrap;
 }
 
-/* Кнопки действий: иконка + подпись, компактные, не вылезают за ячейку */
+/* Кнопки действий: только иконки, подпись — во всплывающей подсказке */
 .nt-actions {
     display: flex;
     align-items: center;
     justify-content: flex-end;
-    flex-wrap: wrap;
-    gap: 0.3rem;
+    gap: 0.28rem;
 }
 .nt-actions .nt-export-form { margin: 0; }
 .nt-btn {
-    --bs-btn-padding-y: 0.22rem;
-    --bs-btn-padding-x: 0.45rem;
-    --bs-btn-font-size: 0.74rem;
+    --bs-btn-padding-y: 0.24rem;
+    --bs-btn-padding-x: 0.42rem;
+    --bs-btn-font-size: 0.85rem;
     border-radius: 8px;
-    white-space: nowrap;
-    line-height: 1.25;
+    line-height: 1.2;
+    flex: 0 0 auto;
 }
-.nt-btn .nt-btn-label { margin-left: 0.3rem; }
-
-@media (max-width: 1400px) {
-    /* На средних экранах подписи скрываем — остаются понятные иконки с title */
-    .nt-btn .nt-btn-label { display: none; }
-    .newspaper-table .nt-col-actions { width: 170px; }
-}
+.nt-btn .nt-btn-label { display: none; } /* подписи больше не нужны — только иконки */
 
 @media (max-width: 991px) {
     .newspaper-table .nt-col-views,

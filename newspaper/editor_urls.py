@@ -10,6 +10,7 @@ from . import views
 
 urlpatterns = [
     path("", views.editor_dashboard, name="newspaper_editor_dashboard"),
+    path("settings/", views.editor_settings, name="newspaper_editor_settings"),
     path("issue/create/", views.issue_create, name="newspaper_editor_issue_create"),
     path(
         "issue/<int:pk>/",

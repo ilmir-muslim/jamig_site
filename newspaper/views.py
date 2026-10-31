@@ -4,8 +4,8 @@ from django.http import HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views.decorators.http import require_POST
 
-from .forms import NewspaperBlockForm, NewspaperIssueForm
-from .models import NewspaperBlock, NewspaperIssue
+from .forms import NewspaperBlockForm, NewspaperIssueForm, NewspaperSettingsForm
+from .models import NewspaperBlock, NewspaperIssue, NewspaperSettings
 
 
 def is_newspaper_editor(user):
@@ -189,6 +189,26 @@ def issue_export_pdf(request, pk):
     response = HttpResponse(pdf_bytes, content_type="application/pdf")
     response["Content-Disposition"] = f'attachment; filename="{filename}"'
     return response
+
+
+@login_required
+@user_passes_test(is_newspaper_editor, login_url="login")
+def editor_settings(request):
+    """Настройки газеты: название издания (мачта), выходные данные, полосность."""
+    settings_obj = NewspaperSettings.load()
+    if request.method == "POST":
+        form = NewspaperSettingsForm(request.POST, instance=settings_obj)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Настройки газеты сохранены.")
+            return redirect("newspaper_editor_settings")
+    else:
+        form = NewspaperSettingsForm(instance=settings_obj)
+    return render(
+        request,
+        "newspaper/editor_settings.html",
+        {"form": form, "settings_obj": settings_obj},
+    )
 
 
 @login_required

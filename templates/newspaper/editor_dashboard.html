@@ -2,20 +2,23 @@
 
 {% block editor_title %}Конструктор газеты{% endblock %}
 {% block editor_subtitle %}<p class="studio-page-subtitle">{{ user.get_full_name|default:user.email }}, управление выпусками электронной газеты</p>{% endblock %}
-{% block editor_actions %}<a href="{% url 'newspaper_editor_issue_create' %}" class="btn btn-primary"><i class="fas fa-plus me-1"></i>Новый выпуск</a>{% endblock %}
+{% block editor_actions %}
+<a href="{% url 'newspaper_editor_settings' %}" class="btn btn-outline-secondary me-2" title="Настройки газеты: название, выходные данные, полосность"><i class="fas fa-cog"></i></a>
+<a href="{% url 'newspaper_editor_issue_create' %}" class="btn btn-primary"><i class="fas fa-plus me-1"></i>Новый выпуск</a>
+{% endblock %}
 
 {% block editor_content %}
 <div class="card border-0 shadow-sm newspaper-dash-card">
-    <div class="table-responsive newspaper-table-wrap">
+    <div class="newspaper-table-wrap">
         <table class="table table-studio mb-0 newspaper-table">
             <thead class="table-light">
                 <tr>
                     <th class="nt-col-num">№</th>
-                    <th class="nt-col-title">Название выпуска</th>
+                    <th class="nt-col-title">Выпуск</th>
                     <th class="nt-col-date">Дата</th>
-                    <th class="nt-col-count">Материалов</th>
+                    <th class="nt-col-count">Мат.</th>
                     <th class="nt-col-status">Статус</th>
-                    <th class="nt-col-views">Просмотры</th>
+                    <th class="nt-col-views">Просм.</th>
                     <th class="nt-col-actions">Действия</th>
                 </tr>
             </thead>
@@ -34,17 +37,17 @@
                     <td class="nt-col-views">{{ issue.views_count }}</td>
                     <td class="nt-col-actions">
                         <div class="nt-actions">
-                            <a href="{% url 'newspaper_editor_issue_edit' issue.pk %}" class="btn btn-sm btn-outline-secondary nt-btn" title="Редактировать в конструкторе"><i class="fas fa-pen"></i><span class="nt-btn-label">Конструктор</span></a>
+                            <a href="{% url 'newspaper_editor_issue_edit' issue.pk %}" class="btn btn-sm btn-outline-secondary nt-btn" title="Редактировать в конструкторе" aria-label="Конструктор"><i class="fas fa-pen"></i></a>
                             {% if issue.status == 'published' %}
-                            <a href="{% url 'newspaper_issue_detail' issue.slug %}" target="_blank" rel="noopener" class="btn btn-sm btn-outline-primary nt-btn" title="Открыть на сайте"><i class="fas fa-eye"></i><span class="nt-btn-label">На сайте</span></a>
+                            <a href="{% url 'newspaper_issue_detail' issue.slug %}" target="_blank" rel="noopener" class="btn btn-sm btn-outline-primary nt-btn" title="Открыть на сайте" aria-label="На сайте"><i class="fas fa-eye"></i></a>
                             {% endif %}
                             <form method="post" action="{% url 'newspaper_editor_issue_export_pdf' issue.pk %}" class="d-inline nt-export-form">
                                 {% csrf_token %}
-                                <button type="submit" class="btn btn-sm btn-outline-success nt-btn" title="Собрать печатную версию из материалов конструктора и скачать PDF">
-                                    <i class="fas fa-file-pdf"></i><span class="nt-btn-label">PDF&nbsp;для печати</span>
+                                <button type="submit" class="btn btn-sm btn-outline-success nt-btn" title="Собрать печатную версию из материалов конструктора и скачать PDF (двусторонняя печать, листы сшиваются степлером)">
+                                    <i class="fas fa-file-pdf"></i>
                                 </button>
                             </form>
-                            <a href="{% url 'newspaper_editor_issue_delete' issue.pk %}" class="btn btn-sm btn-outline-danger nt-btn" title="Удалить"><i class="fas fa-trash-alt"></i><span class="nt-btn-label">Удалить</span></a>
+                            <a href="{% url 'newspaper_editor_issue_delete' issue.pk %}" class="btn btn-sm btn-outline-danger nt-btn" title="Удалить" aria-label="Удалить"><i class="fas fa-trash-alt"></i></a>
                         </div>
                     </td>
                 </tr>
@@ -59,7 +62,9 @@
 </div>
 <p class="newspaper-dash-hint mt-3">
     <i class="fas fa-info-circle me-1"></i>
-    Кнопка «PDF для печати» собирает готовый макет газеты (формат A3, классическая колонковая вёрстка)
-    прямо из материалов конструктора — выпуск не нужно верстать дважды, файл можно отнести в типографию.
+    Кнопка со значком PDF собирает готовую газету прямо из материалов конструктора: A3, двусторонняя печать,
+    полосы расположены в порядке «как книга» (1+последняя, предпоследняя+2 …) — после складывания листов и
+    скрепления степлером страницы идут по порядку. Пустых полос не остаётся: материалы автоматически разливаются
+    по числу полос в <a href="{% url 'newspaper_editor_settings' %}">настройках газеты</a>. Файл можно сразу нести в типографию.
 </p>
 {% endblock %}

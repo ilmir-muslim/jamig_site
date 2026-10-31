@@ -1,3 +1,4 @@
+import json
 import os
 import re
 
@@ -9,6 +10,66 @@ from django.urls import reverse
 from django.utils.text import slugify
 
 
+class NewspaperSettings(models.Model):
+    """Глобальные настройки газеты (одна запись). Название издания редакторы
+    могут менять прямо в конструкторе — оно подставляется в мачту печатной
+    версии и на страницы сайта."""
+
+    publication_name = models.CharField(
+        max_length=200,
+        default="Газета мечети Джамиг",
+        verbose_name="Название газеты",
+        help_text="Выводится крупно в шапке-мачте каждого номера (сайт и печать).",
+    )
+    tagline = models.CharField(
+        max_length=300,
+        blank=True,
+        default="Весть мечети Джамиг",
+        verbose_name="Девиз / подзаголовок",
+        help_text="Небольшая строка под названием газеты (необязательно).",
+    )
+    address = models.CharField(
+        max_length=300,
+        blank=True,
+        verbose_name="Адрес и контакты",
+        help_text="Например: г. Казань, ул. ..., тел. ... — печатается в выходных данных.",
+    )
+    founder = models.CharField(
+        max_length=300,
+        blank=True,
+        verbose_name="Учредитель",
+        help_text="Например: Местная религиозная организация «Мечеть Джамиг».",
+    )
+    print_pages = models.PositiveIntegerField(
+        default=4,
+        verbose_name="Полос в номере",
+        help_text=(
+            "Сколько сторон листа занимает газета (4, 8, 12, 16...). "
+            "Число кратно 4 — тогда при складывании листов не остаётся пустых страниц. "
+            "Материалы конструктора разливаются по полосам автоматически."
+        ),
+    )
+
+    class Meta:
+        verbose_name = "Настройки газеты"
+        verbose_name_plural = "Настройки газеты"
+
+    def save(self, *args, **kwargs):
+        """Храним ровно одну запись настроек (pk всегда = 1)."""
+        self.pk = 1
+        if self.print_pages and self.print_pages % 4:
+            self.print_pages = max(4, (self.print_pages // 4 + 1) * 4)
+        super().save(*args, **kwargs)
+
+    @classmethod
+    def load(cls):
+        obj, _created = cls.objects.get_or_create(pk=1)
+        return obj
+
+    def __str__(self):
+        return self.publication_name
+
+
 class NewspaperIssue(models.Model):
     """Выпуск газеты мечети (электронная версия печатной газеты)"""
 
@@ -18,7 +79,11 @@ class NewspaperIssue(models.Model):
         ("archived", "В архиве"),
     )
 
-    title = models.CharField(max_length=200, verbose_name="Название выпуска")
+    title = models.CharField(
+        max_length=200,
+        verbose_name="Тема номера",
+        help_text="Краткое название этого выпуска (например: «Рамадан 1447»).",
+    )
     slug = models.SlugField(
         max_length=220, unique=True, blank=True, verbose_name="URL-адрес"
     )
@@ -145,6 +210,102 @@ class NewspaperIssue(models.Model):
             if content_type and content_type not in ("application/pdf",):
                 raise ValidationError({"pdf_file": "Можно загружать только файлы в формате PDF."})
 
+    # ---------- ПЕЧАТНАЯ ВЁРСТКА (полосы для типографии) ----------
+
+    @property
+    def publication_name(self):
+        """Название газеты из общих настроек (редактируется редакторами)."""
+        try:
+            return NewspaperSettings.load().publication_name
+        except Exception:
+            return "Газета мечети Джамиг"
+
+    @property
+    def print_pages(self):
+        """Число полос (сторон) номера — кратно 4 для шитья листов степлером."""
+        try:
+            pages = NewspaperSettings.load().print_pages or 4
+        except Exception:
+            pages = 4
+        return max(4, pages if pages % 4 == 0 else (pages // 4 + 1) * 4)
+
+    _PAGE_CAPACITY = {
+        "lead": 2600,
+        "large": 1800,
+        "normal": 1300,
+        "small": 900,
+        "ad": 1000,
+    }
+
+    def build_print_pages(self):
+        """Разливает материалы конструктора по печатным полосам.
+
+        Полоса 1 — первая страница (материалы с флагом «первая полоса»),
+        последняя полоса — обложка с выходными данными; остальные заполняются
+        материалами по порядку. Если материалов больше, чем полос, лишние
+        доливаются на последнюю текстовую полосу (WeasyPrint разобьёт их по
+        колонкам), поэтому пустых страниц не остаётся.
+        """
+        blocks = list(self.blocks.all().order_by("order", "id"))  # type: ignore[attr-defined]
+        pages_count = self.print_pages
+        front = [b for b in blocks if b.is_front_page]
+        rest = [b for b in blocks if not b.is_front_page]
+        page1 = front or rest[:1]
+        pool = rest[1:] if (not front and page1) else rest
+
+        pages = []
+        used_capacity = 0
+        capacity1 = sum(self._PAGE_CAPACITY.get(b.size, 1300) for b in page1) or 1
+        remaining = []
+        for b in pool:
+            weight = self._PAGE_CAPACITY.get(b.size, 1300)
+            if used_capacity + weight <= capacity1 * 1.6:
+                page1.append(b)
+                used_capacity += weight
+            else:
+                remaining.append(b)
+        pages.append(page1)
+
+        inner_count = pages_count - 2
+        if inner_count > 0:
+            per_page = max(1, -(-len(remaining) // inner_count)) if remaining else 1
+            for i in range(inner_count):
+                pages.append(remaining[i * per_page:(i + 1) * per_page])
+            overflow = remaining[inner_count * per_page:]
+        else:
+            overflow = remaining
+        # Последняя полоса: оставшиеся материалы + выходные данные
+        pages.append(overflow)
+        return pages
+
+    def colophon_lines(self):
+        """Выходные данные для последней полосы печатной версии."""
+        lines = [f"«{self.publication_name}»"]
+        if self.founder_from_settings:
+            lines.append(f"Учредитель: {self.founder_from_settings}")
+        editor_name = self.editor.get_full_name() if self.editor else ""
+        if editor_name:
+            lines.append(f"Редактор: {editor_name}")
+        if self.address_from_settings:
+            lines.append(self.address_from_settings)
+        lines.append(f"№ {self.number} от {self.issue_date.strftime('%d.%m.%Y')}")
+        lines.append("Подготовлено в электронном конструкторе газеты.")
+        return lines
+
+    @property
+    def founder_from_settings(self):
+        try:
+            return NewspaperSettings.load().founder
+        except Exception:
+            return ""
+
+    @property
+    def address_from_settings(self):
+        try:
+            return NewspaperSettings.load().address
+        except Exception:
+            return ""
+
     def __str__(self):
         """Строковое представление выпуска: номер и название."""
         return f"{self.number} — {self.title}"
@@ -156,6 +317,7 @@ BLOCK_TYPES = (
     ("news", "Заметка"),
     ("photo", "Фоторепортаж"),
     ("announcement", "Объявление"),
+    ("ad", "Реклама"),
 )
 
 BLOCK_SIZES = (
@@ -233,6 +395,44 @@ class NewspaperBlock(models.Model):
         verbose_name="Первая полоса",
         help_text="Материал участвует в формировании анонса на главной странице.",
     )
+
+    # ---------- РЕКЛАМА ----------
+    advertiser_name = models.CharField(
+        max_length=200,
+        blank=True,
+        verbose_name="Рекламодатель",
+        help_text="Название организации или ФИО (для рекламных материалов).",
+    )
+    advertiser_contact = models.CharField(
+        max_length=300,
+        blank=True,
+        verbose_name="Контакты рекламодателя",
+        help_text="Телефон, адрес, сайт — печатаются под объявлением.",
+    )
+    ad_price = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        null=True,
+        blank=True,
+        verbose_name="Стоимость размещения, ₽",
+    )
+    ad_paid = models.BooleanField(
+        default=False,
+        verbose_name="Оплачено",
+        help_text="Отметьте, когда реклама оплачена — неоплаченные объявления в печать не попадают.",
+    )
+    ad_discount = models.PositiveSmallIntegerField(
+        null=True,
+        blank=True,
+        verbose_name="Скидка, %",
+    )
+    ad_volume = models.CharField(
+        max_length=50,
+        blank=True,
+        verbose_name="Объём объявления",
+        help_text="Например: 1/8 полосы, 1/4 полосы, строка.",
+    )
+
     issue = models.ForeignKey(
         NewspaperIssue,
         on_delete=models.CASCADE,
@@ -393,6 +593,20 @@ class NewspaperBlock(models.Model):
                 url = url[len("/media/"):]
             items.append({"url": url, "caption": item["caption"]})
         return items
+
+    @property
+    def is_ad(self):
+        """Материал является рекламным объявлением."""
+        return self.block_type == "ad"
+
+    @property
+    def ad_final_price(self):
+        """Итоговая стоимость рекламы со скидкой (для учёта в конструкторе)."""
+        if self.ad_price is None:
+            return None
+        if self.ad_discount:
+            return self.ad_price * (100 - self.ad_discount) / 100
+        return self.ad_price
 
     def __str__(self):
         """Строковое представление блока: его заголовок."""

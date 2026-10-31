@@ -9,28 +9,42 @@
 на доступный serif-шрифт (DejaVu Serif и т.п.), поэтому верстка не сломается.
 """
 
-from django.conf import settings
+from django.conf import settings as django_settings
 from django.core.files.base import ContentFile
 from django.template.loader import render_to_string
 from django.utils import timezone
 
+from .models import NewspaperSettings
+
 
 def build_issue_pdf(issue) -> bytes:
-    """Рендерит выпуск газеты в PDF и возвращает байты документа."""
+    """Рендерит выпуск газеты в PDF и возвращает байты документа.
+
+    Полосы формируются в spread-порядке для двусторонней печати с креплением
+    листов степлером («вложенные листы», как книга): на одном физическом листе
+    A3 с двух сторон печатаются полосы [1, N], [N-1, 2], [N-2, 3] и т.д. —
+    после складывания и шитья страницы идут по порядку 1..N без пустых мест.
+    """
     from weasyprint import HTML  # импорт здесь: модуль опционален для окружения
 
-    blocks = list(issue.blocks.all().order_by("order", "id"))
+    pages = issue.build_print_pages()
+    try:
+        settings_obj = NewspaperSettings.load()
+    except Exception:
+        settings_obj = None
     html = render_to_string(
         "newspaper/issue_print.html",
         {
             "issue": issue,
-            "blocks": blocks,
+            "pages": pages,
+            "colophon": issue.colophon_lines(),
+            "settings_tagline": settings_obj.tagline if settings_obj else "",
             "generated_at": timezone.localtime(),
         },
     )
     # base_url — MEDIA_ROOT: относительные пути /media/... резолвятся в файлы,
     # а /static/... — через StaticFilesResolver ниже (Django finders).
-    document = HTML(string=html, base_url=str(settings.MEDIA_ROOT))
+    document = HTML(string=html, base_url=str(django_settings.MEDIA_ROOT))
     return document.write_pdf()
 
 

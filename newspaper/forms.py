@@ -1,12 +1,31 @@
 from django import forms
 
-from .models import NewspaperBlock, NewspaperIssue
+from .models import NewspaperBlock, NewspaperIssue, NewspaperSettings
 
 
 class MultipleFileInput(forms.FileInput):
     """Виджет загрузки нескольких файлов (Django >= 4.2 требует явный флаг)."""
 
     allow_multiple_selected = True
+
+
+class NewspaperSettingsForm(forms.ModelForm):
+    """Настройки газеты: название издания, выходные данные, полосность."""
+
+    class Meta:
+        model = NewspaperSettings
+        fields = ("publication_name", "tagline", "founder", "address", "print_pages")
+        widgets = {  # noqa: RUF012 - словарь виджетов, стандартный паттерн Django
+            "publication_name": forms.TextInput(
+                attrs={"class": "form-control", "placeholder": "Газета мечети Джамиг"}
+            ),
+            "tagline": forms.TextInput(attrs={"class": "form-control"}),
+            "founder": forms.TextInput(attrs={"class": "form-control"}),
+            "address": forms.TextInput(attrs={"class": "form-control"}),
+            "print_pages": forms.NumberInput(
+                attrs={"class": "form-control", "min": 4, "step": 4}
+            ),
+        }
 
 
 class NewspaperIssueForm(forms.ModelForm):
@@ -102,6 +121,12 @@ class NewspaperBlockForm(forms.ModelForm):
             "photo",
             "photo_caption",
             "is_front_page",
+            "advertiser_name",
+            "advertiser_contact",
+            "ad_price",
+            "ad_discount",
+            "ad_volume",
+            "ad_paid",
             "order",
         )
         widgets = {  # noqa: RUF012 - словарь виджетов, стандартный паттерн Django
@@ -131,6 +156,22 @@ class NewspaperBlockForm(forms.ModelForm):
                 attrs={"class": "form-control", "placeholder": "Подпись к фотографии"}
             ),
             "is_front_page": forms.CheckboxInput(attrs={"class": "form-check-input"}),
+            "advertiser_name": forms.TextInput(
+                attrs={"class": "form-control", "placeholder": "Название организации или ФИО"}
+            ),
+            "advertiser_contact": forms.TextInput(
+                attrs={"class": "form-control", "placeholder": "Телефон, адрес, сайт"}
+            ),
+            "ad_price": forms.NumberInput(
+                attrs={"class": "form-control", "min": 0, "step": "0.01"}
+            ),
+            "ad_discount": forms.NumberInput(
+                attrs={"class": "form-control", "min": 0, "max": 100, "step": 1}
+            ),
+            "ad_volume": forms.TextInput(
+                attrs={"class": "form-control", "placeholder": "Например: 1/4 полосы"}
+            ),
+            "ad_paid": forms.CheckboxInput(attrs={"class": "form-check-input"}),
             "order": forms.NumberInput(
                 attrs={
                     "class": "form-control",
@@ -145,6 +186,26 @@ class NewspaperBlockForm(forms.ModelForm):
         # NewspaperBlock.save() сам рассчитает его (блок встанет в конец выпуска).
         if self.instance.pk is None:
             self.fields.pop("order", None)
+        block_type = (
+            self.data.get("block_type") if self.is_bound else self.instance.block_type
+        ) or "article"
+        # Рекламные поля нужны только для объявлений — скрываем остальные,
+        # чтобы не путать редактора.
+        for name in (
+            "advertiser_name",
+            "advertiser_contact",
+            "ad_price",
+            "ad_discount",
+            "ad_volume",
+            "ad_paid",
+        ):
+            self.fields[name].required = False
+            widget_attrs = self.fields[name].widget.attrs
+            widget_attrs.setdefault("data-ad-field", name)
+            if block_type != "ad":
+                widget_attrs["hidden"] = "hidden"
+        if block_type == "ad":
+            self.fields["author_name"].label = "Автор объявления (необязательно)"
 
     def get_all_extra_photos(self):
         """Возвращает ВСЕ файлы, загруженные в поле extra_photos (multiple=True)."""

@@ -70,6 +70,45 @@
                         <label class="form-check-label" for="{{ form.is_front_page.id_for_label }}">Первая полоса</label>
                     </div>
                 </div>
+
+                {# Блок рекламных полей: показывается только при типе «Реклама» #}
+                <div class="col-12 np-ad-fields{% if block.block_type != 'ad' %} d-none{% endif %}">
+                    <div class="card bg-light border-0 p-3 mt-1">
+                        <h3 class="h6 mb-3"><i class="fas fa-bullhorn me-2 text-dark opacity-50"></i>Данные рекламы</h3>
+                        <div class="row g-3">
+                            <div class="col-md-4">
+                                <label class="form-label" for="{{ form.advertiser_name.id_for_label }}">Рекламодатель</label>
+                                {{ form.advertiser_name }}
+                                <div class="form-text">Чьё это объявление: организация или ФИО.</div>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label" for="{{ form.advertiser_contact.id_for_label }}">Контакты рекламодателя</label>
+                                {{ form.advertiser_contact }}
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label" for="{{ form.ad_volume.id_for_label }}">Объём объявления</label>
+                                {{ form.ad_volume }}
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label" for="{{ form.ad_price.id_for_label }}">Стоимость размещения, ₽</label>
+                                {{ form.ad_price }}
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label" for="{{ form.ad_discount.id_for_label }}">Скидка, %</label>
+                                {{ form.ad_discount }}
+                            </div>
+                            <div class="col-md-3 d-flex align-items-center pt-4">
+                                <div class="form-check form-switch ms-3">
+                                    {{ form.ad_paid }}
+                                    <label class="form-check-label" for="{{ form.ad_paid.id_for_label }}">Оплачено</label>
+                                </div>
+                            </div>
+                            <div class="col-md-3 small text-muted pt-4">
+                                Неоплаченные объявления редактор снимает с печати до выхода номера.
+                            </div>
+                        </div>
+                    </div>
+                </div>
                 <div class="col-12">
                     <label class="form-label" for="{{ form.content.id_for_label }}">Текст статьи</label>
 
@@ -234,6 +273,16 @@
             })
             .catch(function () { say('Ошибка сети при удалении фото.', 'text-danger'); });
     });
+    // Показываем блок «Данные рекламы» только при типе материала «Реклама»
+    const typeSelect = document.getElementById('{{ form.block_type.id_for_label }}');
+    const adPanel = document.querySelector('.np-ad-fields');
+    if (typeSelect && adPanel) {
+        function syncAdFields() {
+            adPanel.classList.toggle('d-none', typeSelect.value !== 'ad');
+        }
+        typeSelect.addEventListener('change', syncAdFields);
+        syncAdFields();
+    }
 })();
 </script>
 {% endblock %}
