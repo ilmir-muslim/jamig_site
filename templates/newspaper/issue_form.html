@@ -6,6 +6,14 @@
     {% if action == 'edit' and issue.status == 'published' %}
     <a href="{% url 'newspaper_issue_detail' issue.slug %}" target="_blank" rel="noopener" class="btn btn-outline-primary"><i class="fas fa-eye me-1"></i>Открыть на сайте</a>
     {% endif %}
+    {% if action == 'edit' %}
+    <form method="post" action="{% url 'newspaper_editor_issue_export_pdf' issue.pk %}" class="d-inline">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-success" title="Собрать печатную версию из материалов конструктора и скачать PDF для типографии">
+            <i class="fas fa-file-pdf me-1"></i>PDF для печати
+        </button>
+    </form>
+    {% endif %}
 {% endblock %}
 
 {% block editor_content %}

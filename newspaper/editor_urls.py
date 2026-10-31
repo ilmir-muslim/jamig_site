@@ -22,6 +22,11 @@ urlpatterns = [
         name="newspaper_editor_issue_delete",
     ),
     path(
+        "issue/<int:pk>/export-pdf/",
+        views.issue_export_pdf,
+        name="newspaper_editor_issue_export_pdf",
+    ),
+    path(
         "issue/<int:issue_pk>/block/add/",
         views.block_create,
         name="newspaper_editor_block_create",

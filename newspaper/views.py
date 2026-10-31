@@ -1,6 +1,6 @@
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required, user_passes_test
-from django.http import JsonResponse
+from django.http import HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views.decorators.http import require_POST
 
@@ -165,6 +165,30 @@ def issue_delete(request, pk):
     return render(
         request, "studio/confirm_delete.html", {"object": issue, "type": "выпуск газеты"}
     )
+
+
+@login_required
+@require_POST
+@user_passes_test(is_newspaper_editor, login_url="login")
+def issue_export_pdf(request, pk):
+    """Экспорт выпуска в PDF — печатная версия для типографии.
+
+    PDF собирается из материалов конструктора (не из загруженного вручную),
+    поэтому редактору не нужно верстать газету дважды: электронная и
+    печатная версии всегда соответствуют друг другу. Если выппуск уже
+    опубликован на сайте, PDF можно скачать и публично (см. issue_detail).
+    """
+    from .pdf import export_issue_pdf
+
+    issue = _get_editor_issue(request, pk)
+    try:
+        pdf_bytes, filename = export_issue_pdf(issue, save_to_field=True)
+    except Exception as exc:  # WeasyPrint может упасть на битых шрифтах/картинках
+        messages.error(request, f"Не удалось создать PDF: {exc}")
+        return redirect("newspaper_editor_issue_edit", pk=issue.pk)
+    response = HttpResponse(pdf_bytes, content_type="application/pdf")
+    response["Content-Disposition"] = f'attachment; filename="{filename}"'
+    return response
 
 
 @login_required

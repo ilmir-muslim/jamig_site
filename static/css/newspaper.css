@@ -411,3 +411,75 @@
 .np-preview-body .news-section-sub { font-weight: 600; font-size: 1.05rem; margin: .7rem 0 .3rem; }
 .np-preview-body .news-quote { border-left: 4px solid #b9a98c; padding: .35rem .8rem; font-style: italic; background: #f6f1e4; margin: .6rem 0; }
 .np-preview-body .news-rule { border-top: 2px solid #b9a98c; opacity: 1; margin: .8rem 0; }
+
+/* ============================================================
+   Дашборд конструктора: таблица выпусков целиком видна без
+   горизонтальной прокрутки — колонки сжаты, действия в столбик
+   ============================================================ */
+.studio-wrapper .newspaper-dash-card { overflow: visible; }
+.studio-wrapper .newspaper-table-wrap { overflow-x: auto; }
+
+.newspaper-table {
+    table-layout: fixed;
+    width: 100%;
+}
+.newspaper-table th,
+.newspaper-table td {
+    padding-left: 0.55rem !important;
+    padding-right: 0.55rem !important;
+    font-size: 0.9rem;
+}
+.newspaper-table .nt-col-num     { width: 74px; }
+.newspaper-table .nt-col-title   { width: auto; }
+.newspaper-table .nt-col-date    { width: 96px; white-space: nowrap; }
+.newspaper-table .nt-col-count   { width: 92px; text-align: center; }
+.newspaper-table .nt-col-status  { width: 130px; }
+.newspaper-table .nt-col-views   { width: 96px; text-align: center; }
+.newspaper-table .nt-col-actions { width: 250px; }
+
+.newspaper-table td.nt-col-title a {
+    display: block;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* Кнопки действий: иконка + подпись, компактные, не вылезают за ячейку */
+.nt-actions {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    flex-wrap: wrap;
+    gap: 0.3rem;
+}
+.nt-actions .nt-export-form { margin: 0; }
+.nt-btn {
+    --bs-btn-padding-y: 0.22rem;
+    --bs-btn-padding-x: 0.45rem;
+    --bs-btn-font-size: 0.74rem;
+    border-radius: 8px;
+    white-space: nowrap;
+    line-height: 1.25;
+}
+.nt-btn .nt-btn-label { margin-left: 0.3rem; }
+
+@media (max-width: 1400px) {
+    /* На средних экранах подписи скрываем — остаются понятные иконки с title */
+    .nt-btn .nt-btn-label { display: none; }
+    .newspaper-table .nt-col-actions { width: 170px; }
+}
+
+@media (max-width: 991px) {
+    .newspaper-table .nt-col-views,
+    .newspaper-table th.nt-col-views { display: none; }
+    .newspaper-table .nt-col-actions { width: 150px; }
+}
+
+.newspaper-dash-hint {
+    font-size: 0.85rem;
+    color: #6f675b;
+    background: #fffdf6;
+    border: 1px dashed rgba(176, 138, 62, 0.45);
+    border-radius: 0.6rem;
+    padding: 0.7rem 1rem;
+}

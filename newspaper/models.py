@@ -358,6 +358,42 @@ class NewspaperBlock(models.Model):
             return plain
         return ""
 
+    # ---------- ПЕЧАТНАЯ ВЕРСИЯ (PDF для типографии) ----------
+
+    _PRINT_CLASS_MAP = {
+        "news-section-title": "print-section-title",
+        "news-section-sub": "print-section-sub",
+        "news-quote": "print-quote",
+        "news-rule": "print-rule",
+    }
+
+    @property
+    def print_content_parts(self):
+        """HTML текста материала с классами печатного шаблона (для WeasyPrint)."""
+        html = self.get_content_html()
+        for old_cls, new_cls in self._PRINT_CLASS_MAP.items():
+            html = html.replace(f"class='{old_cls}'", f'class="{new_cls}"')
+        return html
+
+    @property
+    def print_photo_url(self):
+        """Путь фото для WeasyPrint: base_url = MEDIA_ROOT, поэтому без /media/."""
+        if not self.photo:
+            return ""
+        url = self.photo.url
+        return url.removeprefix(settings.MEDIA_URL).lstrip("/")
+
+    @property
+    def print_gallery(self):
+        """Галерея фото с относительными путями — WeasyPrint резолвит их от MEDIA_ROOT."""
+        items = []
+        for item in self.get_gallery_images():
+            url = item["url"]
+            if url.startswith("/media/"):
+                url = url[len("/media/"):]
+            items.append({"url": url, "caption": item["caption"]})
+        return items
+
     def __str__(self):
         """Строковое представление блока: его заголовок."""
         return self.title

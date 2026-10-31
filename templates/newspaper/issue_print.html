@@ -1,0 +1,252 @@
+{% load static %}<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<title>{{ issue.number }} — {{ issue.title }} (печатная версия)</title>
+<style>
+    /* ============================================================
+       Печатная газета мечети «Джамиг» — рендерится WeasyPrint.
+       Формат: A3 альбомный (классический газетный разворот),
+       поля под резы типографии, многостраничная колонковая сетка.
+       ============================================================ */
+    @page {
+        size: A3 landscape;
+        margin: 14mm 12mm 16mm 12mm;
+
+        @top-left {
+            content: "«{{ issue.publication_name|default:'Газета мечети Джамиг' }}»";
+            font-family: Tahoma, "PT Sans", sans-serif;
+            font-size: 7.5pt;
+            color: #6b6258;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+        }
+        @top-right {
+            content: "{{ issue.number }} · {{ issue.issue_date|date:'d.m.Y' }}";
+            font-family: Tahoma, "PT Sans", sans-serif;
+            font-size: 7.5pt;
+            color: #6b6258;
+        }
+        @bottom-center {
+            content: "Страница " counter(page) " из " counter(pages);
+            font-family: Tahoma, "PT Sans", sans-serif;
+            font-size: 7.5pt;
+            color: #6b6258;
+        }
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+        /* Tahoma — если установлен в системе (типография на Windows);
+           дальше идёт цепочка запасных засечных шрифтов для Linux/macOS. */
+        font-family: "Times New Roman", Tahoma, "Liberation Serif", Georgia, serif;
+        font-size: 9.6pt;
+        line-height: 1.42;
+        color: #171512;
+        margin: 0;
+    }
+
+    .print-sheet { }
+
+    /* ---------- Колонки: весь выпуск льётся в 4 колонки как полоса газеты ---------- */
+    .news-columns {
+        column-count: 4;
+        column-gap: 7mm;
+        column-rule: 0.4pt solid #cfc7ba;
+        column-fill: auto;
+    }
+
+    /* ---------- Мачта (шапка первого разворота) ---------- */
+    .print-masthead {
+        column-span: all;
+        text-align: center;
+        padding-bottom: 4mm;
+        margin-bottom: 5mm;
+        border-bottom: 2.5pt solid #171512;
+    }
+    .print-masthead .brand {
+        font-size: 34pt;
+        font-weight: 700;
+        letter-spacing: 0.03em;
+        margin: 0 0 1.5mm;
+        text-transform: uppercase;
+    }
+    .print-masthead .meta {
+        font-family: Tahoma, "PT Sans", sans-serif;
+        font-size: 9pt;
+        color: #4c463d;
+        border-top: 0.6pt solid #171512;
+        border-bottom: 0.6pt solid #171512;
+        padding: 1.2mm 0;
+        display: block;
+    }
+    .print-masthead .meta span { margin: 0 4mm; }
+
+    /* ---------- Материал (блок конструктора) ---------- */
+    .print-block {
+        break-inside: avoid-column;
+        margin: 0 0 5mm;
+    }
+    .print-kicker {
+        font-family: Tahoma, "PT Sans", sans-serif;
+        font-size: 6.8pt;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.14em;
+        color: #8a6d2f;
+        margin-bottom: 1mm;
+    }
+    .print-headline {
+        font-size: 17pt;
+        font-weight: 700;
+        line-height: 1.12;
+        margin: 0 0 1.5mm;
+    }
+    .print-block.size-lead   .print-headline { font-size: 24pt; }
+    .print-block.size-large  .print-headline { font-size: 19pt; }
+    .print-block.size-small  .print-headline { font-size: 12.5pt; }
+    .print-subheadline {
+        font-style: italic;
+        font-size: 10.5pt;
+        color: #4c463d;
+        margin: 0 0 2mm;
+    }
+    .print-byline {
+        font-family: Tahoma, "PT Sans", sans-serif;
+        font-size: 7.6pt;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        color: #6b6258;
+        margin-bottom: 2mm;
+    }
+    .print-photo {
+        margin: 0 0 2.5mm;
+        page-break-inside: avoid;
+    }
+    .print-photo img {
+        width: 100%;
+        max-height: 92mm;
+        object-fit: cover;
+        border: 0.5pt solid #b9b0a2;
+    }
+    .print-photo figcaption {
+        font-family: Tahoma, "PT Sans", sans-serif;
+        font-size: 7.2pt;
+        color: #55503f;
+        padding-top: 1mm;
+        border-bottom: 0.4pt dotted #b9b0a2;
+    }
+    .print-text p {
+        margin: 0 0 1.6mm;
+        text-align: justify;
+        text-indent: 4mm;
+    }
+    .print-text p:first-of-type { text-indent: 0; }
+    .print-section-title {
+        font-size: 11.5pt;
+        font-weight: 700;
+        margin: 3mm 0 1.5mm;
+        break-after: avoid;
+    }
+    .print-section-sub {
+        font-size: 10pt;
+        font-weight: 700;
+        font-style: italic;
+        margin: 2.5mm 0 1.2mm;
+        break-after: avoid;
+    }
+    .print-quote {
+        font-style: italic;
+        font-size: 10.2pt;
+        border-left: 2pt solid #8a6d2f;
+        padding: 1mm 0 1mm 3mm;
+        margin: 2.5mm 0;
+        background: #f4efe4;
+    }
+    .print-rule {
+        border: none;
+        border-top: 0.8pt solid #171512;
+        margin: 3mm auto;
+        width: 40%;
+    }
+    .print-gallery {
+        margin: 2mm 0 0;
+    }
+    .print-gallery .g-item {
+        margin-bottom: 2.5mm;
+        page-break-inside: avoid;
+    }
+    .print-gallery img {
+        width: 100%;
+        border: 0.5pt solid #b9b0a2;
+    }
+    .print-gallery .g-cap {
+        font-family: Tahoma, "PT Sans", sans-serif;
+        font-size: 7pt;
+        color: #55503f;
+    }
+    .print-footer-note {
+        column-span: all;
+        border-top: 1.5pt solid #171512;
+        margin-top: 6mm;
+        padding-top: 2mm;
+        font-family: Tahoma, "PT Sans", sans-serif;
+        font-size: 7.5pt;
+        color: #6b6258;
+        text-align: center;
+    }
+</style>
+</head>
+<body>
+<div class="print-sheet">
+
+    <header class="print-masthead">
+        <h1 class="brand">{{ issue.publication_name|default:"Газета мечети Джамиг" }}</h1>
+        <span class="meta">
+            <span>№ {{ issue.number }}</span>
+            <span>{{ issue.issue_date|date:"j F Y" }}</span>
+            {% if issue.editor.get_full_name %}<span>Ред.: {{ issue.editor.get_full_name }}</span>{% endif %}
+        </span>
+    </header>
+
+    <div class="news-columns">
+        {% for block in blocks %}
+        <article class="print-block size-{{ block.size }}">
+            <div class="print-kicker">{{ block.get_block_type_display }}{% if block.is_front_page %} · первая полоса{% endif %}</div>
+            <h2 class="print-headline">{{ block.title }}</h2>
+            {% if block.subtitle %}<div class="print-subheadline">{{ block.subtitle }}</div>{% endif %}
+            {% if block.author_name %}<div class="print-byline">{{ block.author_name }}</div>{% endif %}
+
+            {% if block.photo %}
+            <figure class="print-photo">
+                <img src="{{ block.print_photo_url }}" alt="{{ block.photo_caption|default:block.title }}">
+                {% if block.photo_caption %}<figcaption>{{ block.photo_caption }}</figcaption>{% endif %}
+            </figure>
+            {% endif %}
+
+            <div class="print-text">{{ block.print_content_parts|safe }}</div>
+
+            {% if block.print_gallery %}
+            <div class="print-gallery">
+                {% for item in block.print_gallery %}
+                <div class="g-item">
+                    <img src="{{ item.url }}" alt="{{ item.caption }}">
+                    {% if item.caption %}<div class="g-cap">{{ item.caption }}</div>{% endif %}
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+        </article>
+        {% empty %}
+        <p style="column-span: all; text-align:center;">В выпуске пока нет материалов.</p>
+        {% endfor %}
+    </div>
+
+    <footer class="print-footer-note">
+        Подготовлено в электронном конструкторе газеты · выгрузка от {{ generated_at|date:"d.m.Y H:i" }} ·
+        макет готов к печати в типографии (A3, без полей на дорез)
+    </footer>
+</div>
+</body>
+</html>
