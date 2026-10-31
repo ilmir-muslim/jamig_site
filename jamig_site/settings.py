@@ -45,6 +45,7 @@ INSTALLED_APPS = [
     "courses",
     "corsheaders",
     "studio",
+    "newspaper",
 ]
 
 MIDDLEWARE = [
@@ -72,6 +73,7 @@ TEMPLATES = [
                 "django.contrib.messages.context_processors.messages",
                 "django.template.context_processors.media",
                 "materials.context_processors.categories_processor",
+                "newspaper.context_processors.latest_newspaper_issue",
             ],
         },
     },

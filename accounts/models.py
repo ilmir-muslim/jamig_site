@@ -48,6 +48,7 @@ class User(AbstractUser):
         ("user", "Обычный пользователь"),
         ("employee", "Сотрудник"),
         ("author", "Автор"),
+        ("newspaper_editor", "Редактор газеты"),
     )
 
     user_type = models.CharField(
@@ -135,6 +136,11 @@ class User(AbstractUser):
     def is_regular_user(self):
         """True, если пользователь относится к обычному типу «user»."""
         return self.user_type == "user"
+
+    @property
+    def is_newspaper_editor(self):
+        """True, если пользователь является редактором газеты."""
+        return self.user_type == "newspaper_editor"
 
     class Meta:
         verbose_name = "Пользователь"

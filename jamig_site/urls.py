@@ -11,6 +11,9 @@ urlpatterns = [
     path("studio/", include("studio.urls")),
     path("api/", api.urls),
     path("courses/", include("courses.urls")),
+    # Сначала редакторские маршруты (/newspaper/editor/...), затем публичные.
+    path("newspaper/editor/", include("newspaper.editor_urls")),
+    path("newspaper/", include("newspaper.urls")),
     path("", include("materials.urls")),
     path("", include("main.urls")),
 ]

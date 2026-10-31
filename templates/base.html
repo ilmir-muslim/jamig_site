@@ -65,6 +65,7 @@
                 <a href="{% url 'home' %}" class="nav-pill {% if request.resolver_match.url_name == 'home' %}is-active{% endif %}">Главная</a>
                 <a href="{% url 'text_list' %}" class="nav-pill {% if request.resolver_match.url_name == 'text_list' %}is-active{% endif %}">Статьи</a>
                 <a href="{% url 'course_list' %}" class="nav-pill {% if 'course' in request.resolver_match.url_name %}is-active{% endif %}">Курсы</a>
+                <a href="{% url 'newspaper_home' %}" class="nav-pill {% if request.path|slice:':11' == '/newspaper/' or 'newspaper' in request.resolver_match.url_name %}is-active{% endif %}"><i class="far fa-newspaper me-1.5 opacity-70"></i>Газета</a>
 
                 <!-- Выпадающее меню категорий (Bootstrap JS + собственные стили) -->
                 <div class="dropdown">
@@ -99,6 +100,9 @@
                             <li><a href="{% url 'profile' %}" class="dropdown-item"><i class="fas fa-id-card me-2 text-brand-600 opacity-70"></i>Мой профиль</a></li>
                             {% if user.user_type == 'author' %}
                             <li><a href="{% url 'studio_dashboard' %}" class="dropdown-item"><i class="fas fa-feather-pointed me-2 text-brand-600 opacity-70"></i>Студия</a></li>
+                            {% endif %}
+                            {% if user.is_newspaper_editor or user.is_superuser %}
+                            <li><a href="{% url 'newspaper_editor_dashboard' %}" class="dropdown-item"><i class="far fa-newspaper me-2 text-brand-600 opacity-70"></i>Конструктор газеты</a></li>
                             {% endif %}
                             <li><hr class="dropdown-divider border-sand-200"></li>
                             <li>
@@ -142,6 +146,7 @@
                 <nav class="flex items-center gap-5">
                     <a href="{% url 'text_list' %}" class="hover:text-brand-700 no-underline">Статьи</a>
                     <a href="{% url 'course_list' %}" class="hover:text-brand-700 no-underline">Курсы</a>
+                    <a href="{% url 'newspaper_home' %}" class="hover:text-brand-700 no-underline">Газета</a>
                     <a href="{% url 'author_list' %}" class="hover:text-brand-700 no-underline">Авторы</a>
                 </nav>
             </div>
